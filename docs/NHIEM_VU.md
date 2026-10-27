@@ -40,7 +40,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: 4 vai; quản lý kho và thủ kho gán theo kho; quyền kiểm tra ở máy chủ (401, 403); khóa tài khoản thì mất quyền ngay; luôn còn ít nhất một quản trị viên; sai mật khẩu 5 lần liên tiếp thì khóa tạm 15 phút; test phân quyền cho cả 4 vai đều đạt.
 - [x] Cổng ghi tồn (NFR01, S2-02) — 489445e
   - Xong khi: một service duy nhất cập nhật `TonKho` và ghi `SoBienDong` trong một transaction; `Idempotency-Key` trùng thì không ghi lần hai; không cho tồn âm; test tổng biến động bằng tồn.
-- [ ] Danh mục: nhóm hàng, thuộc tính, sản phẩm, biến thể, nhà cung cấp, nơi nhận (FR10, NFR06, S2-03)
+- [x] Danh mục: nhóm hàng, thuộc tính, sản phẩm, biến thể, nhà cung cấp, nơi nhận (FR10, NFR06, S2-03) — a72c3b1
   - Xong khi: thêm ngành hàng mới với thuộc tính mới trên giao diện, sinh biến thể từ tổ hợp thuộc tính, khai báo kích thước, khối lượng, cờ hạn dùng, điều kiện bảo quản; không xóa cứng thứ đã có chứng từ.
 - [ ] Đơn mua (FR01, S2-04)
   - Xong khi: lập, duyệt đơn mua theo nhà cung cấp và kho; số chưa nhận tự cập nhật; trạng thái theo Bảng 2.14 do hệ thống tính.
