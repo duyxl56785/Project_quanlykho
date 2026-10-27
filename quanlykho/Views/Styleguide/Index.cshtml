@@ -1,0 +1,146 @@
+@{
+    ViewData["Title"] = "Styleguide";
+    var khoMau = new List<LuaChon> { new("K01", "Kho Hà Nội"), new("K02", "Kho Bắc Ninh") };
+    string[] bienMau = ["--mau-chinh", "--mau-chinh-dam", "--mau-nen", "--mau-vien", "--mau-chu", "--mau-chu-phu", "--mau-menu", "--tt-luc", "--tt-vang", "--tt-do"];
+    Enum[] trangThai = [TrangThaiDonMua.Nhap, TrangThaiDonMua.ChuaThucHien, TrangThaiDonMua.DangThucHien, TrangThaiDonMua.HoanThanh, TrangThaiDonMua.DaHuy,
+        TrangThaiPhieu.LuuTam, TrangThaiPhieu.HoanTat, TrangThaiTaiKhoan.DangHoatDong, TrangThaiTaiKhoan.DaKhoa, ChatLuong.Dat, ChatLuong.Loi];
+}
+
+<div class="tieu-de-trang">
+    <h1>Styleguide</h1>
+    <div class="thanh-nut">
+        <a class="btn btn-outline-primary" asp-action="DanhSach">Mẫu danh sách</a>
+        <a class="btn btn-outline-primary" asp-action="BieuMau">Mẫu biểu mẫu</a>
+        <a class="btn btn-outline-primary" asp-action="Phieu">Mẫu phiếu có dòng hàng</a>
+        <a class="btn btn-outline-primary" asp-action="Quet">Mẫu màn hình quét</a>
+    </div>
+</div>
+
+<div class="the">
+    <h2>Quy tắc</h2>
+    <ul class="mb-0">
+        <li>Mọi màn hình ghép từ thành phần trên trang này; thiếu thành phần thì thêm vào đây trước.</li>
+        <li>Không viết CSS riêng cho từng trang, không gán <code>style</code> trong thẻ; màu, cỡ chữ, khoảng cách lấy từ biến trong <code>site.css</code>. (Riêng ô màu dưới đây dùng <code>style</code> để hiện giá trị biến.)</li>
+        <li>Màn hình mới sao chép từ trang mẫu gần nhất rồi sửa nội dung; có đủ trạng thái rỗng, lỗi, đang tải; chạy được ở khổ máy tính bảng (768 × 1024).</li>
+        <li>Ngày <code>dd/MM/yyyy</code>, số và tiền kiểu Việt Nam: dùng <code>@@So()</code>, <code>@@Tien()</code>, <code>@@Ngay()</code>, <code>@@NgayGio()</code>.</li>
+    </ul>
+</div>
+
+<div class="the">
+    <h2>Màu</h2>
+    <div class="row g-3">
+        @foreach (var bien in bienMau)
+        {
+            <div class="col-6 col-md-4 col-xl-3 o-mau"><span style="background: var(@bien)"></span><code>@bien</code></div>
+        }
+    </div>
+</div>
+
+<div class="the">
+    <h2>Chữ và định dạng</h2>
+    <p class="fs-4 fw-semibold mb-1">Tiêu đề trang (h1 trong .tieu-de-trang)</p>
+    <p class="mb-1">Chữ thường. <span class="text-secondary">Chữ phụ.</span> <small>Chữ nhỏ.</small></p>
+    <table class="table table-sm w-auto mb-0">
+        <tbody>
+            <tr><td><code>So(1234.5m)</code></td><td>@So(1234.5m)</td></tr>
+            <tr><td><code>So(240m)</code></td><td>@So(240m)</td></tr>
+            <tr><td><code>Tien(1234500m)</code></td><td>@Tien(1234500m)</td></tr>
+            <tr><td><code>Ngay(new DateOnly(2026, 11, 5))</code></td><td>@Ngay(new DateOnly(2026, 11, 5))</td></tr>
+            <tr><td><code>NgayGio(DateTimeOffset.UtcNow)</code></td><td>@NgayGio(DateTimeOffset.UtcNow) (giờ Việt Nam)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="the">
+    <h2>Nút</h2>
+    <div class="thanh-nut">
+        <button type="button" class="btn btn-primary">Lưu</button>
+        <button type="button" class="btn btn-outline-primary">Thêm dòng</button>
+        <button type="button" class="btn btn-outline-secondary">Hủy bỏ</button>
+        <button type="button" class="btn btn-danger">Hủy phiếu</button>
+        <button type="button" class="btn btn-primary" disabled>Đang lưu…</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary">Nút nhỏ trong bảng</button>
+    </div>
+</div>
+
+<div class="the">
+    <h2>Huy hiệu trạng thái <small class="text-secondary fw-normal">(_HuyHieuTrangThai)</small></h2>
+    <div class="thanh-nut">
+        @foreach (var tt in trangThai)
+        {
+            <partial name="_HuyHieuTrangThai" model="tt" />
+        }
+    </div>
+</div>
+
+<div class="the">
+    <h2>Thông báo <small class="text-secondary fw-normal">(_ThongBao từ TempData, lỗi ModelState trong biểu mẫu)</small></h2>
+    <div class="alert alert-success" role="status">Đã lưu hóa đơn nhập PN000012.</div>
+    <div class="alert alert-danger" role="alert">Cần 10, còn 4.</div>
+    <div class="alert alert-warning mb-0" role="alert">Vị trí đang có hàng giữ cho lệnh chưa lấy.</div>
+</div>
+
+<div class="the">
+    <h2>Ô nhập</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label bat-buoc" for="vdMa">Mã hàng</label>
+            <input class="form-control" id="vdMa" value="AOTHUN" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="vdSoLuong">Số lượng</label>
+            <input class="form-control input-validation-error" id="vdSoLuong" type="number" value="-1" />
+            <span class="field-validation-error">Số lượng phải lớn hơn 0.</span>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="maKho">Kho <small class="text-secondary">(OChonKho)</small></label>
+            @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = "K01", danhSach = khoMau })
+        </div>
+    </div>
+</div>
+
+<div class="the">
+    <h2>Ô quét mã <small class="text-secondary fw-normal">(_OQuetMa)</small></h2>
+    <partial name="_OQuetMa" model='new OQuetMa("vdQuet", "Quét mã hàng")' />
+    <p class="text-secondary small mb-0">Gõ một mã rồi nhấn Enter: mã bắt đầu bằng 893 báo thành công, mã khác báo lỗi.</p>
+</div>
+
+<div class="the">
+    <h2>Trạng thái rỗng, đang tải <small class="text-secondary fw-normal">(_TrangRong, _DangTai)</small></h2>
+    <div class="row">
+        <div class="col-md-6"><partial name="_TrangRong" model='"Chưa có hóa đơn nhập nào."' /></div>
+        <div class="col-md-6"><partial name="_DangTai" model='"Đang tính gợi ý lấy hàng…"' /></div>
+    </div>
+</div>
+
+<div class="the">
+    <h2>Hộp xác nhận <small class="text-secondary fw-normal">(data-xac-nhan)</small></h2>
+    <a class="btn btn-outline-danger" href="#" data-xac-nhan="Hủy phiếu PN000012? Thao tác này ghi bút toán đảo và không hoàn tác được.">Hủy phiếu</a>
+</div>
+
+<div class="the">
+    <h2>Thuật ngữ</h2>
+    <table class="table table-sm mb-0">
+        <thead><tr><th>Dùng</th><th>Không dùng</th><th>Nghĩa</th></tr></thead>
+        <tbody>
+            <tr><td>Hóa đơn nhập</td><td>Phiếu nhập mua hàng, hóa đơn mua</td><td>Phiếu nhập kho từ đơn mua, có đơn giá, thành tiền</td></tr>
+            <tr><td>Đơn mua</td><td>Lệnh nhập, PO</td><td>Kế hoạch nhận hàng từ nhà cung cấp cho một kho</td></tr>
+            <tr><td>Đơn đặt hàng</td><td>Phiếu yêu cầu xuất</td><td>Yêu cầu xuất do nhân viên bán hàng tạo</td></tr>
+            <tr><td>Lô</td><td>Batch, đợt hàng</td><td>Một dòng hàng của một lần nhập: mã lô, hạn dùng</td></tr>
+            <tr><td>Vị trí</td><td>Địa điểm</td><td>Một nút trong cây 7 cấp, từ kho đến ô</td></tr>
+            <tr><td>Ô</td><td>Ngăn, bin</td><td>Vị trí cấp 7, nơi duy nhất chứa hàng</td></tr>
+            <tr><td>Khu tiếp nhận</td><td>Khu nhận hàng</td><td>Hàng mới về, chưa xếp, chưa tính vào tồn khả dụng</td></tr>
+            <tr><td>Khu cách ly</td><td>Khu hàng lỗi</td><td>Hàng lỗi, hư hỏng, hết hạn</td></tr>
+            <tr><td>Tồn khả dụng</td><td>Tồn thực, tồn có thể bán</td><td>Tồn ở khu lưu trữ, chưa giữ, chưa hết hạn, không khóa kiểm kê</td></tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("vdQuet").addEventListener("quet-ma", (e) => {
+            const dung = e.detail.startsWith("893");
+            QuanLyKho.baoQuet(e.target, dung ? `Đã nhận mã ${e.detail}` : `Không tìm thấy mã ${e.detail}`, dung);
+        });
+    </script>
+}

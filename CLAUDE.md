@@ -113,6 +113,14 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 - Tiếng Việt, ít bước, dùng được trên máy tính bảng; trang tải dưới 3 giây.
 - Dựa trên Bootstrap có sẵn. Một file CSS dùng chung (biến màu, cỡ chữ, khoảng cách), một `_Layout`; không CSS riêng từng trang, không style inline.
 - Thành phần dùng lại bằng partial view hoặc View Component: bảng dữ liệu có lọc và phân trang, ô quét mã (tự nhận con trỏ), huy hiệu trạng thái (mỗi trạng thái một màu cố định), hộp xác nhận, thông báo, ô chọn kho, ô chọn đơn vị. Có trang `/Styleguide` hiện mọi thành phần.
+- Thành phần đã có (xem `/Styleguide`, chỉ mở ở Development):
+  - Bảng: `<bang-du-lieu trang="Model" thong-bao-rong="...">` với model `TrangDuLieu<T>` (`TrangDuLieu<T>.TaoAsync(query, trang)`); thanh lọc là `<form class="thanh-loc" method="get">`.
+  - Partial: `_HuyHieuTrangThai` (model enum; tên, màu khai ở `Common/GiaoDien/TrangThaiHienThi`, enum trạng thái mới phải thêm vào đó), `_OQuetMa` (model `OQuetMa`; JS nghe sự kiện `quet-ma`, báo bằng `QuanLyKho.baoQuet`), `_TrangRong`, `_DangTai`, `_ThongBao` (TempData `ThongBao`, `Loi`), `_HopXacNhan` (thuộc tính `data-xac-nhan` trên form, nút, liên kết).
+  - View Component `OChonKho`: `@await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = ... })`.
+  - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
+  - Gọi API từ JS: `QuanLyKho.goiApi(url, { method, body, khoaChongLap })` tự gửi `Idempotency-Key` và token chống CSRF, trả `{ ok, status, duLieu, loi }`.
+  - Menu bên trái khai ở `Common/GiaoDien/Menu.cs`; làm xong màn hình nào thì điền `Url` cho mục đó.
+- Mọi POST, PUT, DELETE (cả API) kiểm token chống CSRF (`AutoValidateAntiforgeryToken`); form Razor có sẵn token, fetch dùng `goiApi`.
 - Ngày `dd/MM/yyyy`; số và tiền theo kiểu Việt Nam. Thuật ngữ thống nhất: Hóa đơn nhập, Lô, Vị trí, Ô, Khu tiếp nhận.
 - Màn hình nào cũng có trạng thái rỗng, lỗi và đang tải.
 

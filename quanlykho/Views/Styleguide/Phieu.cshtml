@@ -1,0 +1,92 @@
+@{
+    ViewData["Title"] = "Mẫu phiếu có dòng hàng";
+    var khoMau = new List<LuaChon> { new("K01", "Kho Hà Nội"), new("K02", "Kho Bắc Ninh") };
+    string[] bienThe = ["AOTHUN-01 – Áo thun S Trắng", "AOTHUN-02 – Áo thun S Đen", "SUATUOI-01 – Sữa tươi 180ml Không đường", "GIAYA4-01 – Giấy A4 70gsm"];
+}
+
+<div class="tieu-de-trang">
+    <h1>Lập đơn mua <small class="text-secondary fs-6">(mẫu phiếu có dòng hàng)</small></h1>
+</div>
+
+<form id="phieuMau" method="get" onsubmit="return false">
+    <div class="the">
+        <h2>Thông tin chung</h2>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label bat-buoc" for="nhaCungCap">Nhà cung cấp</label>
+                <select class="form-select" id="nhaCungCap" name="MaNhaCungCap">
+                    <option>NCC01 – Công ty May mặc Việt Tiến Phát</option>
+                    <option>NCC03 – Công ty Thực phẩm và Văn phòng phẩm Xanh</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label bat-buoc" for="MaKho">Kho nhập</label>
+                @await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = "K01", danhSach = khoMau })
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="ngayTao">Ngày</label>
+                <input class="form-control" id="ngayTao" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+    </div>
+
+    <div class="the">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="mb-0 me-auto">Dòng hàng</h2>
+            <button type="button" class="btn btn-outline-primary" data-them-dong="#dongHang">+ Thêm dòng</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table bang-dong-hang mb-0">
+                <thead>
+                    <tr><th>#</th><th>Biến thể</th><th class="so">Số lượng</th><th class="so">Đơn giá</th><th class="so">Thành tiền</th><th></th></tr>
+                </thead>
+                <tbody id="dongHang" data-dong-hang>
+                </tbody>
+                <tfoot>
+                    <tr><td colspan="4" class="text-end">Tổng tiền</td><td class="so tong-cong" data-tong-tien>0 ₫</td><td></td></tr>
+                </tfoot>
+                <template>
+                    <tr>
+                        <td data-stt></td>
+                        <td>
+                            <select class="form-select" name="Dong[__i__].MaBienThe" aria-label="Biến thể">
+                                @foreach (var b in bienThe)
+                                {
+                                    <option>@b</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input class="form-control text-end" name="Dong[__i__].SoLuong" type="number" min="0.001" step="any" value="1" aria-label="Số lượng" data-so-luong /></td>
+                        <td><input class="form-control text-end" name="Dong[__i__].DonGia" type="number" min="0" step="any" value="0" aria-label="Đơn giá" data-don-gia /></td>
+                        <td class="so" data-thanh-tien>0 ₫</td>
+                        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong aria-label="Xóa dòng">✕</button></td>
+                    </tr>
+                </template>
+            </table>
+        </div>
+    </div>
+
+    <div class="thanh-nut">
+        <button type="button" class="btn btn-primary" data-xac-nhan="Lưu đơn mua? (trang mẫu, không lưu thật)">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Thành tiền hiển thị tạm trên trình duyệt; máy chủ luôn tính lại khi lưu.
+        const phieu = document.getElementById("phieuMau");
+        function tinhTong() {
+            let tong = 0;
+            phieu.querySelectorAll("#dongHang tr").forEach((tr) => {
+                const thanhTien = (+tr.querySelector("[data-so-luong]").value || 0) * (+tr.querySelector("[data-don-gia]").value || 0);
+                tr.querySelector("[data-thanh-tien]").textContent = QuanLyKho.dinhDangTien.format(thanhTien);
+                tong += thanhTien;
+            });
+            phieu.querySelector("[data-tong-tien]").textContent = QuanLyKho.dinhDangTien.format(tong);
+        }
+        phieu.addEventListener("input", tinhTong);
+        phieu.addEventListener("dong-hang-doi", tinhTong);
+        phieu.querySelector("[data-them-dong]").click();
+    </script>
+}

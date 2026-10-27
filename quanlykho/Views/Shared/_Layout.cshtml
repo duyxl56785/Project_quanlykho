@@ -1,47 +1,64 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var duongDan = Context.Request.Path.Value ?? "/";
+    bool DangMo(string url) => url == "/" ? duongDan == "/" : duongDan.StartsWith(url, StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - quanlykho</title>
-    <script type="importmap"></script>
+    @* fetch tới API gửi kèm token này ở header RequestVerificationToken (site.js). *@
+    <meta name="xsrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <title>@ViewData["Title"] - Quản lý kho</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/quanlykho.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">quanlykho</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="khung">
+        <aside class="thanh-menu offcanvas-lg offcanvas-start" tabindex="-1" id="thanhMenu" aria-label="Menu chính">
+            <div class="d-flex align-items-center">
+                <a class="ten-he-thong" href="/">Quản lý kho</a>
+                <button type="button" class="btn-close btn-close-white ms-auto me-3 d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#thanhMenu" aria-label="Đóng menu"></button>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            <nav class="pb-3">
+                @foreach (var nhom in Menu.TatCa)
+                {
+                    <div class="nhom">@nhom.Ten</div>
+                    <ul class="nav flex-column">
+                        @foreach (var muc in nhom.Muc)
+                        {
+                            <li class="nav-item">
+                                @if (muc.Url is null)
+                                {
+                                    <span class="nav-link disabled" aria-disabled="true">@muc.Ten</span>
+                                }
+                                else
+                                {
+                                    <a class="nav-link @(DangMo(muc.Url) ? "active" : "")" href="@muc.Url" aria-current="@(DangMo(muc.Url) ? "page" : null)">@muc.Ten</a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </nav>
+        </aside>
+
+        <div class="noi-dung">
+            <header class="thanh-tren">
+                <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#thanhMenu" aria-controls="thanhMenu" aria-label="Mở menu">☰</button>
+                <p class="tieu-de">@ViewData["Title"]</p>
+                <span class="nguoi-dung">Chưa đăng nhập</span>
+            </header>
+            <main role="main">
+                <partial name="_ThongBao" />
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - quanlykho - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    <partial name="_HopXacNhan" />
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

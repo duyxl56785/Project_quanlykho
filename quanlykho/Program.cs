@@ -1,6 +1,10 @@
 using System.Globalization;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using Microsoft.Extensions.WebEncoders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using quanlykho.Common;
 using quanlykho.Common.Loi;
@@ -11,9 +15,16 @@ using quanlykho.Domain;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options => options.Filters.Add<XuLyLoiFilter>());
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<XuLyLoiFilter>();
+    // Chống CSRF cho mọi POST, PUT, DELETE: form có token sẵn, fetch gửi header RequestVerificationToken (site.js).
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
+// Giữ nguyên chữ tiếng Việt trong HTML thay vì mã hóa thành &#x...; (vẫn mã hóa ký tự nguy hiểm như < > " &).
+builder.Services.Configure<WebEncoderOptions>(o => o.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MaChungTu>();
 builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();

@@ -1,0 +1,6 @@
+@model string?
+@* Đang tải: hiện trong vùng chờ fetch trả về; JS ẩn đi khi xong. *@
+<div class="dang-tai" role="status">
+    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+    <span>@(Model ?? "Đang tải…")</span>
+</div>

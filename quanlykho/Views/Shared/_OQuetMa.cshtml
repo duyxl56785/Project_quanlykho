@@ -1,0 +1,11 @@
+@model OQuetMa
+@*
+    Ô quét mã: máy quét USB gõ mã rồi Enter. site.js bắt Enter, phát sự kiện "quet-ma" (event.detail = mã) trên ô,
+    xóa ô và giữ con trỏ trong ô. Báo kết quả: QuanLyKho.baoQuet(o, "Thông báo", true/false).
+*@
+<div class="o-quet-ma">
+    <label class="form-label fw-semibold" for="@Model.Id">@Model.Nhan</label>
+    <input id="@Model.Id" class="form-control" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+           autofocus data-quet-ma placeholder="@Model.GoiY" aria-describedby="@(Model.Id)-thong-bao" />
+    <div id="@(Model.Id)-thong-bao" class="thong-bao-quet" role="status" aria-live="polite"></div>
+</div>
