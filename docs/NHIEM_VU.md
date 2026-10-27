@@ -59,7 +59,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: thêm kho thứ hai, gán thủ kho và quản lý kho; người dùng chỉ thấy kho được giao.
 - [x] Dịch vụ kiểm tra sức chứa, API ô phù hợp (FR12, S3-02) — 897fda9
   - Xong khi: đạt các ca biên ở mục 2.16.3 (ví dụ ô 1 m³, 50 kg, thùng 12 kg cho q_max = 4; thanh 1,2 m bị chặn; kiện 0,4 × 1 × 0,5 m ra 4 chứ không phải 5); chỉ trả ô đúng bảo quản, không khóa, còn chỗ.
-- [ ] Xếp hàng vào vị trí (FR12, S3-04)
+- [x] Xếp hàng vào vị trí (FR12, S3-04) — f815599
   - Xong khi: quét lô, quét ô, hiện chỗ còn lại; khóa dòng ô và ghi qua cổng trong một transaction; hai người xếp cùng ô thì người sau nhận 409; đi trọn luồng Hình 2.10.
 
 ## Giai đoạn 3. Xuất kho
