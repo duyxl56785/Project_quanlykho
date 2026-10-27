@@ -1,0 +1,49 @@
+@model quanlykho.Features.DanhMuc.NhomForm
+@{
+    ViewData["Title"] = $"Nhóm {Model.Ma}";
+    var nhom = Model.DanhSachNhom.SingleOrDefault(n => n.Ma == Model.Ma);
+}
+
+<div class="tieu-de-trang">
+    <h1>Nhóm @Model.Ma – @Model.Ten</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại</a>
+</div>
+
+<form class="the bieu-mau" method="post" asp-action="Sua" asp-route-ma="@Model.Ma">
+    <h2>Thông tin nhóm</h2>
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut mt-4"><button type="submit" class="btn btn-primary">Lưu</button></div>
+</form>
+
+<div class="the bieu-mau">
+    <h2>Thuộc tính của nhóm</h2>
+    <p class="form-text">Sản phẩm trong nhóm sinh biến thể từ tổ hợp các thuộc tính này. Giá trị gợi ý cách nhau bởi dấu phẩy.</p>
+    @foreach (var t in nhom?.ThuocTinh ?? [])
+    {
+        <div class="row g-2 align-items-end mb-2">
+            <form class="col-md-10 row g-2 align-items-end" method="post" asp-action="LuuThuocTinh" asp-route-ma="@Model.Ma">
+                <input type="hidden" name="ten" value="@t.Ten" />
+                <div class="col-md-3"><label class="form-label">Thuộc tính</label><input class="form-control" value="@t.Ten" readonly /></div>
+                <div class="col-md-7"><label class="form-label">Giá trị gợi ý</label><input class="form-control" name="giaTriGoiY" value="@string.Join(", ", t.GiaTriGoiY)" /></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Lưu</button></div>
+            </form>
+            <form class="col-md-2" method="post" asp-action="XoaThuocTinh" asp-route-ma="@Model.Ma" data-xac-nhan="Xóa thuộc tính @t.Ten?">
+                <input type="hidden" name="ten" value="@t.Ten" />
+                <button type="submit" class="btn btn-outline-danger w-100">Xóa</button>
+            </form>
+        </div>
+    }
+    <form class="row g-2 align-items-end mt-3" method="post" asp-action="LuuThuocTinh" asp-route-ma="@Model.Ma">
+        <div class="col-md-3"><label class="form-label bat-buoc" for="tenMoi">Thuộc tính mới</label><input class="form-control" id="tenMoi" name="ten" placeholder="Công suất" /></div>
+        <div class="col-md-7"><label class="form-label" for="goiYMoi">Giá trị gợi ý</label><input class="form-control" id="goiYMoi" name="giaTriGoiY" placeholder="500W, 1000W" /></div>
+        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Thêm</button></div>
+    </form>
+</div>
+
+<div class="the bieu-mau">
+    <h2>Xóa nhóm</h2>
+    <form method="post" asp-action="Xoa" asp-route-ma="@Model.Ma" data-xac-nhan="Xóa nhóm @Model.Ma?">
+        <p>Chỉ xóa được khi nhóm chưa có sản phẩm và không có nhóm con.</p>
+        <button type="submit" class="btn btn-outline-danger">Xóa nhóm</button>
+    </form>
+</div>

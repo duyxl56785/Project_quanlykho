@@ -171,3 +171,12 @@ main { padding: var(--khoang-4) var(--khoang-3); }
 
 .o-mau { display: flex; align-items: center; gap: var(--khoang-2); }
 .o-mau span:first-child { width: 2.5rem; height: 2.5rem; border-radius: var(--bo-goc); border: 1px solid var(--mau-vien); flex-shrink: 0; }
+
+/* ---------- Cây (thụt lề theo độ sâu) ---------- */
+
+.cap-1 { padding-left: 1.5rem !important; }
+.cap-2 { padding-left: 3rem !important; }
+.cap-3 { padding-left: 4.5rem !important; }
+.cap-4 { padding-left: 6rem !important; }
+.cap-5 { padding-left: 7.5rem !important; }
+.cap-6 { padding-left: 9rem !important; }

@@ -1,0 +1,67 @@
+@using quanlykho.Common.PhanQuyen
+@model TrangDuLieu<quanlykho.Features.DanhMuc.SanPhamDong>
+@{
+    ViewData["Title"] = "Hàng hóa";
+    var cay = (List<quanlykho.Features.DanhMuc.NhomCay>)ViewData["Cay"]!;
+    var trangThaiChon = ViewData["TrangThai"] as TrangThaiSuDung?;
+}
+
+<div class="tieu-de-trang">
+    <h1>Hàng hóa</h1>
+    @if (User.IsInRole(Vai.QuanTri))
+    {
+        <a class="btn btn-primary" asp-action="Them">Thêm sản phẩm</a>
+    }
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Tìm kiếm</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@ViewData["TuKhoa"]" placeholder="Mã, tên, mã biến thể, mã vạch" />
+    </div>
+    <div>
+        <label class="form-label" for="maNhom">Nhóm hàng</label>
+        <select class="form-select" id="maNhom" name="maNhom">
+            <option value="">Tất cả</option>
+            @foreach (var n in cay)
+            {
+                <option value="@n.Ma" selected="@(n.Ma == (string?)ViewData["MaNhom"])">@(new string('—', n.DoSau)) @n.Ten</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+            {
+                <option value="@t" selected="@(t == trangThaiChon)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có sản phẩm nào khớp bộ lọc.">
+    <thead>
+        <tr><th>Mã hàng</th><th>Tên hàng</th><th>Đơn vị tính</th><th>Nhóm</th><th class="so">Biến thể</th><th class="so">Tồn</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@s.Ma</td>
+                <td>@s.Ten</td>
+                <td>@s.DonViTinh</td>
+                <td>@s.TenNhom</td>
+                <td class="so">@s.SoBienThe</td>
+                <td class="so">@So(s.TonTong)</td>
+                <td><partial name="_HuyHieuTrangThai" model="s.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="Sua" asp-route-ma="@s.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

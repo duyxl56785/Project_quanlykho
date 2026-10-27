@@ -1,0 +1,14 @@
+@model quanlykho.Features.DanhMuc.SanPhamForm
+@{ ViewData["Title"] = "Thêm sản phẩm"; }
+
+<div class="tieu-de-trang"><h1>Thêm sản phẩm</h1></div>
+
+<form class="the bieu-mau" method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut mt-4">
+        <button type="submit" class="btn btn-primary">Lưu và sinh biến thể</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

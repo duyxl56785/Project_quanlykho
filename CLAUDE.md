@@ -123,6 +123,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
   - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
   - Gọi API từ JS: `QuanLyKho.goiApi(url, { method, body, khoaChongLap })` tự gửi `Idempotency-Key` và token chống CSRF, trả `{ ok, status, duLieu, loi }`.
   - Menu bên trái khai ở `Common/GiaoDien/Menu.cs`; làm xong màn hình nào thì điền `Url` cho mục đó.
+- Form cần dữ liệu phụ (danh sách để chọn) đặt dữ liệu đó trong model (ví dụ `DanhSachNhom`, `DanhSachKho`) và nạp trước khi gọi Service, để `XuLyLoiFilter` hiện lại view khi lỗi nghiệp vụ. View phải trùng tên action (`Them`, `Sua`), phần chung đặt ở partial `_Form`.
 - Mọi POST, PUT, DELETE (cả API) kiểm token chống CSRF (`AutoValidateAntiforgeryToken`); form Razor có sẵn token, fetch dùng `goiApi`.
 - Ngày `dd/MM/yyyy`; số và tiền theo kiểu Việt Nam. Thuật ngữ thống nhất: Hóa đơn nhập, Lô, Vị trí, Ô, Khu tiếp nhận.
 - Màn hình nào cũng có trạng thái rỗng, lỗi và đang tải.

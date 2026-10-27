@@ -4,6 +4,7 @@ public class Lo
 {
     public string MaLo { get; set; } = "";
     public string MaBienThe { get; set; } = "";
+    public BienThe BienThe { get; set; } = null!;
     public DateOnly? HanDung { get; set; }
     public DateTimeOffset NgayNhap { get; set; }
 }

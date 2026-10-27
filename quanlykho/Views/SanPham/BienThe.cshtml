@@ -1,0 +1,68 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.DanhMuc
+@model BienTheForm
+@{
+    ViewData["Title"] = $"Biến thể {Model.Ma}";
+    var laQuanTri = User.IsInRole(Vai.QuanTri);
+}
+
+<div class="tieu-de-trang">
+    <h1>@Model.Ma – @Model.TenSanPham</h1>
+    <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+    <a class="btn btn-outline-secondary" asp-action="Sua" asp-route-ma="@Model.MaSanPham">Về sản phẩm</a>
+</div>
+
+<form method="post" asp-action="BienThe" asp-route-ma="@Model.Ma">
+    <fieldset disabled="@(!laQuanTri)">
+        <div class="the bieu-mau">
+            <h2>Thông tin biến thể</h2>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <p><span class="text-secondary">Thuộc tính:</span> @SinhBienThe.MoTa(Model.ThuocTinh)</p>
+            <div class="row g-3">
+                <div class="col-6 col-md-3"><label asp-for="DaiDongGoi" class="form-label bat-buoc"></label><input asp-for="DaiDongGoi" class="form-control" type="number" step="any" /><span asp-validation-for="DaiDongGoi"></span></div>
+                <div class="col-6 col-md-3"><label asp-for="RongDongGoi" class="form-label bat-buoc"></label><input asp-for="RongDongGoi" class="form-control" type="number" step="any" /><span asp-validation-for="RongDongGoi"></span></div>
+                <div class="col-6 col-md-3"><label asp-for="CaoDongGoi" class="form-label bat-buoc"></label><input asp-for="CaoDongGoi" class="form-control" type="number" step="any" /><span asp-validation-for="CaoDongGoi"></span></div>
+                <div class="col-6 col-md-3"><label asp-for="KhoiLuong" class="form-label bat-buoc"></label><input asp-for="KhoiLuong" class="form-control" type="number" step="any" /><span asp-validation-for="KhoiLuong"></span></div>
+                <div class="col-md-6"><label asp-for="MaVach" class="form-label"></label><input asp-for="MaVach" class="form-control" /><span asp-validation-for="MaVach"></span></div>
+                <div class="col-md-6">
+                    <label asp-for="TrangThai" class="form-label"></label>
+                    <select asp-for="TrangThai" class="form-select">
+                        @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+                        {
+                            <option value="@t" selected="@(t == Model.TrangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <p class="form-text mt-2 mb-0">Kích thước và khối lượng của một @Model.DonViTinh, dùng để kiểm sức chứa ô khi xếp hàng.</p>
+        </div>
+
+        <div class="the bieu-mau">
+            <h2>Mức tồn theo kho</h2>
+            <p class="form-text">Để trống tối thiểu và tối đa nếu không theo dõi ở kho đó. Thời gian chờ hàng dùng cho đề xuất nhập bổ sung.</p>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Kho</th><th>Tồn tối thiểu</th><th>Tồn tối đa</th><th>Chờ hàng (ngày)</th></tr></thead>
+                    <tbody>
+                        @for (var i = 0; i < Model.MucTon.Count; i++)
+                        {
+                            <tr>
+                                <td><input type="hidden" asp-for="MucTon[i].MaKho" />@Model.MucTon[i].MaKho – @Model.MucTon[i].TenKho</td>
+                                <td><input asp-for="MucTon[i].ToiThieu" class="form-control" type="number" step="any" min="0" aria-label="Tồn tối thiểu" /></td>
+                                <td><input asp-for="MucTon[i].ToiDa" class="form-control" type="number" step="any" min="0" aria-label="Tồn tối đa" /></td>
+                                <td><input asp-for="MucTon[i].ThoiGianChoHang" class="form-control" type="number" min="0" aria-label="Thời gian chờ hàng" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (laQuanTri)
+        {
+            <div class="thanh-nut"><button type="submit" class="btn btn-primary">Lưu</button></div>
+        }
+    </fieldset>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
