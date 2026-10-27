@@ -1,0 +1,58 @@
+@using quanlykho.Features.InNhan
+@model TrangNhan
+@{
+    ViewData["Title"] = Model.TieuDe;
+}
+
+<div class="khong-in">
+    <div class="tieu-de-trang">
+        <h1>@Model.TieuDe</h1>
+        <a class="btn btn-outline-secondary" href="@Model.QuayLai">Quay lại</a>
+    </div>
+    <form class="thanh-loc" method="get">
+        @foreach (var (ten, giaTri) in Context.Request.Query.Where(q => q.Key != "kho"))
+        {
+            foreach (var g in giaTri)
+            {
+                <input type="hidden" name="@ten" value="@g" />
+            }
+        }
+        <div>
+            <label class="form-label" for="kho">Khổ nhãn (mm)</label>
+            <select class="form-select" id="kho" name="kho">
+                @foreach (var k in TrangNhan.CacKho)
+                {
+                    <option value="@k" selected="@(k == Model.KhoNhan)">@k.Replace("x", " × ")</option>
+                }
+            </select>
+        </div>
+        <div class="thanh-loc-nut thanh-nut">
+            <button class="btn btn-primary" type="button" data-in>In @Model.Nhan.Count nhãn</button>
+        </div>
+    </form>
+    <p class="text-secondary">Khi in chọn khổ A4, tỷ lệ 100%. Mã dài (như mã ô) nên in khổ 70 × 40 trở lên để máy quét đọc chắc.</p>
+</div>
+
+@if (Model.Nhan.Count == 0)
+{
+    <partial name="_TrangRong" model='"Không có ô nào trong các vị trí đã chọn."' />
+}
+<div class="trang-nhan kho-@Model.KhoNhan">
+    @foreach (var n in Model.Nhan)
+    {
+        <div class="nhan">
+            @Html.Raw(NhanMaVach.Svg(n.Ma))
+            <div class="nhan-ma">@n.Ma</div>
+            <div class="nhan-dong">@n.Dong1</div>
+            @if (n.Dong2 is not null)
+            {
+                <div class="nhan-dong">@n.Dong2</div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    document.querySelector("[data-in]").addEventListener("click", () => window.print());
+    document.getElementById("kho").addEventListener("change", (e) => e.target.form.submit());
+</script>
