@@ -6,7 +6,7 @@ Theo dõi tiến độ từ lúc dựng khung đến khi dự án chạy đủ M
 
 ## Quy trình làm một nhiệm vụ
 
-1. Đọc mục báo cáo liên quan, viết kế hoạch ngắn (file, bước, cách kiểm tra), duyệt kế hoạch.
+1. Đọc mục cùng tên trong [KE_HOACH.md](KE_HOACH.md) và mục báo cáo liên quan. Cần làm khác kế hoạch thì sửa KE_HOACH.md và hỏi trước khi code.
 2. Tạo nhánh `feature/<ten-ngan>` từ `develop`.
 3. Viết ca kiểm thử cho điều kiện "Xong khi" trước khi code (với logic nghiệp vụ).
 4. Code: entity, migration, service, controller, API, view.
@@ -37,7 +37,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 ## Giai đoạn 1. Đăng nhập và nhập kho
 
 - [ ] Đăng nhập, tài khoản, phân quyền theo vai và kho (FR09, NFR02, S2-01)
-  - Xong khi: 4 vai; quản lý kho và thủ kho gán theo kho; quyền kiểm tra ở máy chủ (401, 403); khóa tài khoản thì mất quyền ngay; luôn còn ít nhất một quản trị viên; test phân quyền cho cả 4 vai đều đạt.
+  - Xong khi: 4 vai; quản lý kho và thủ kho gán theo kho; quyền kiểm tra ở máy chủ (401, 403); khóa tài khoản thì mất quyền ngay; luôn còn ít nhất một quản trị viên; sai mật khẩu 5 lần liên tiếp thì khóa tạm 15 phút; test phân quyền cho cả 4 vai đều đạt.
 - [ ] Cổng ghi tồn (NFR01, S2-02)
   - Xong khi: một service duy nhất cập nhật `TonKho` và ghi `SoBienDong` trong một transaction; `Idempotency-Key` trùng thì không ghi lần hai; không cho tồn âm; test tổng biến động bằng tồn.
 - [ ] Danh mục: nhóm hàng, thuộc tính, sản phẩm, biến thể, nhà cung cấp, nơi nhận (FR10, NFR06, S2-03)
@@ -53,6 +53,8 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 - [ ] Vị trí cây 7 cấp (FR11, S3-01)
   - Xong khi: tạo được mã `K01-TA02-TG03-P04-H05-KE06-O07` trên giao diện; loại khu, điều kiện bảo quản, kích thước và tải trọng ô; vị trí có hàng chỉ khóa, không xóa.
+- [ ] In nhãn mã vạch lô và ô
+  - Xong khi: in được nhãn Code 128 cho nhiều ô và cho các lô của một hóa đơn nhập; nhãn in ra quét lại bằng máy quét ra đúng mã; ô quét mã nhận cả mã lô và mã ô.
 - [ ] Danh mục kho, gán người dùng theo kho (S3-03)
   - Xong khi: thêm kho thứ hai, gán thủ kho và quản lý kho; người dùng chỉ thấy kho được giao.
 - [ ] Dịch vụ kiểm tra sức chứa, API ô phù hợp (FR12, S3-02)
@@ -64,10 +66,10 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 - [ ] Đơn đặt hàng và tồn khả dụng theo kho (FR05, FR06, S4-01)
   - Xong khi: nhân viên bán hàng xem tồn khả dụng từng kho (trừ hàng chờ kiểm, cách ly, hết hạn, đang vận chuyển, đã giữ), tạo đơn, xem trạng thái.
-- [ ] Duyệt đơn và giữ hàng (FR02, S4-01)
-  - Xong khi: hai đơn không giữ trùng một số hàng; thiếu thì báo "Cần X, còn Y" (422); chỉ giữ lô đạt chất lượng, chưa hết hạn.
 - [ ] Gợi ý lấy hàng G1 (FR20, S4-02)
   - Xong khi: không bao giờ gợi ý lô hết hạn; ưu tiên FEFO, rồi FIFO, rồi ít kệ; trả lý do; ghi lịch sử gợi ý và việc người dùng chấp nhận hay không; unit test cho các ca ràng buộc.
+- [ ] Duyệt đơn và giữ hàng (FR02, S4-01)
+  - Xong khi: hai đơn không giữ trùng một số hàng; thiếu thì báo "Cần X, còn Y" (422); chỉ giữ lô đạt chất lượng, chưa hết hạn.
 - [ ] Lệnh xuất, lấy hàng, kiểm tra, xác nhận xuất (FR03, FR04, S4-03)
   - Xong khi: quét sai hàng, lấy vượt số, lấy lô hết hạn đều bị chặn; người kiểm khác người lấy; phiếu xuất ghi qua cổng; test hai người lấy cùng lúc không làm tồn âm; đi trọn luồng Hình 2.6 trên máy tính bảng.
 
@@ -113,6 +115,8 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 ## Giai đoạn 7. Kiểm thử tổng và nghiệm thu
 
 - [ ] Dữ liệu thử đầy đủ: 3 tháng lịch sử xuất, tệp Excel mẫu khoảng 300 dòng có dòng lỗi (S7-03)
+- [ ] Sao lưu và khôi phục bằng `pg_dump` (NFR09)
+  - Xong khi: script sao lưu tạo tệp có ngày giờ và giữ 14 bản mới nhất; script khôi phục đưa DB về đúng bản sao lưu; có hướng dẫn đặt lịch chạy hằng ngày.
 - [ ] Đo thời gian tải các trang dưới 3 giây (NFR04)
 - [ ] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07)
 - [ ] Đạt tiêu chí nghiệm thu Bảng 1.6:
@@ -127,4 +131,3 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 - [ ] Bàn làm việc (FR19)
 - [ ] Xuất Excel báo cáo tồn (NFR08)
-- [ ] Sao lưu dữ liệu hằng ngày (NFR09)
