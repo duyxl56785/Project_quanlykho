@@ -1,0 +1,57 @@
+@using quanlykho.Common.PhanQuyen
+@model List<quanlykho.Features.DanhMuc.NhomCay>
+@{
+    ViewData["Title"] = "Nhóm hàng";
+    var laQuanTri = User.IsInRole(Vai.QuanTri);
+}
+
+<div class="tieu-de-trang">
+    <h1>Nhóm hàng và thuộc tính</h1>
+    @if (laQuanTri)
+    {
+        <a class="btn btn-primary" asp-action="Them">Thêm nhóm</a>
+    }
+</div>
+
+@if (Model.Count == 0)
+{
+    <partial name="_TrangRong" model='"Chưa có nhóm hàng nào."' />
+}
+else
+{
+    <div class="bang-du-lieu">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Nhóm</th><th>Mã</th><th>Thuộc tính</th><th class="so">Sản phẩm</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var n in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold cap-@n.DoSau">@n.Ten</td>
+                            <td>@n.Ma</td>
+                            <td>
+                                @if (n.ThuocTinh.Count == 0)
+                                {
+                                    <span class="text-secondary">Không có</span>
+                                }
+                                @foreach (var t in n.ThuocTinh)
+                                {
+                                    <div><span class="fw-semibold">@t.Ten</span> <span class="text-secondary small">@string.Join(", ", t.GiaTriGoiY)</span></div>
+                                }
+                            </td>
+                            <td class="so">@n.SoSanPham</td>
+                            <td class="text-end text-nowrap">
+                                @if (laQuanTri)
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Them" asp-route-maCha="@n.Ma">+ Nhóm con</a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Sua" asp-route-ma="@n.Ma">Sửa</a>
+                                }
+                                <a class="btn btn-sm btn-outline-secondary" asp-controller="SanPham" asp-action="Index" asp-route-maNhom="@n.Ma">Sản phẩm</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

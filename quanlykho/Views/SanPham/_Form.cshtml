@@ -1,0 +1,61 @@
+@model quanlykho.Features.DanhMuc.SanPhamForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Ma" class="form-label bat-buoc"></label>
+        <input asp-for="Ma" class="form-control" readonly="@Model.LaSua" />
+        <span asp-validation-for="Ma"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Ten" class="form-label bat-buoc"></label>
+        <input asp-for="Ten" class="form-control" />
+        <span asp-validation-for="Ten"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DonViTinh" class="form-label bat-buoc"></label>
+        <input asp-for="DonViTinh" class="form-control" placeholder="cái, chai, hộp" />
+        <span asp-validation-for="DonViTinh"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="MaNhom" class="form-label bat-buoc"></label>
+        <select asp-for="MaNhom" class="form-select">
+            <option value="">Chọn nhóm</option>
+            @foreach (var n in Model.DanhSachNhom)
+            {
+                <option value="@n.Ma" selected="@(n.Ma == Model.MaNhom)">@(new string('—', n.DoSau)) @n.Ten</option>
+            }
+        </select>
+        <span asp-validation-for="MaNhom"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DieuKienBaoQuan" class="form-label bat-buoc"></label>
+        <select asp-for="DieuKienBaoQuan" class="form-select">
+            <option value="Thuong">Thường</option>
+            <option value="Lanh">Lạnh</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check mt-md-4">
+            <input asp-for="TheoDoiHanDung" class="form-check-input" />
+            <label asp-for="TheoDoiHanDung" class="form-check-label"></label>
+        </div>
+        <div class="form-text">Chỉ đổi được khi sản phẩm chưa có tồn.</div>
+    </div>
+    @if (Model.LaSua)
+    {
+        <div class="col-md-4">
+            <label asp-for="TrangThai" class="form-label"></label>
+            <select asp-for="TrangThai" class="form-select">
+                @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+                {
+                    <option value="@t" selected="@(t == Model.TrangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+                }
+            </select>
+            <div class="form-text">Ngừng sử dụng: không chọn được ở chứng từ mới, vẫn xem được tồn và lịch sử.</div>
+        </div>
+    }
+    <div class="col-12">
+        <label asp-for="MoTa" class="form-label"></label>
+        <textarea asp-for="MoTa" class="form-control" rows="2"></textarea>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+@using quanlykho.Features.DanhMuc
+@model DoiTacForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Ma" class="form-label bat-buoc"></label>
+        <input asp-for="Ma" class="form-control" readonly="@Model.LaSua" />
+        <span asp-validation-for="Ma"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Ten" class="form-label bat-buoc"></label>
+        <input asp-for="Ten" class="form-control" />
+        <span asp-validation-for="Ten"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="DiaChi" class="form-label"></label>
+        <input asp-for="DiaChi" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="NguoiLienHe" class="form-label"></label>
+        <input asp-for="NguoiLienHe" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="SoDienThoai" class="form-label"></label>
+        <input asp-for="SoDienThoai" class="form-control" inputmode="tel" />
+        <span asp-validation-for="SoDienThoai"></span>
+    </div>
+    @if (Model.LaSua)
+    {
+        <div class="col-md-6">
+            <label asp-for="TrangThai" class="form-label"></label>
+            <select asp-for="TrangThai" class="form-select">
+                @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+                {
+                    <option value="@t" selected="@(t == Model.TrangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+                }
+            </select>
+            <div class="form-text">Đối tác đã có chứng từ không xóa được, chỉ ngừng sử dụng.</div>
+        </div>
+    }
+</div>
+<div class="thanh-nut mt-4">
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a class="btn btn-outline-secondary" href="/DanhMuc/@Model.Loai">Hủy bỏ</a>
+</div>
