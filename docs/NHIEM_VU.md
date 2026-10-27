@@ -23,7 +23,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 - [x] Môi trường, Git, nhánh `main` và `develop`, repo Private — a0c63d0
 - [x] Báo cáo vào `docs/`, `CLAUDE.md` — e9116ad, 8d6778f
 - [x] PostgreSQL bằng Docker, EF Core, `/health/db` — 252d004
-- [ ] Dự án test và CI (S1-09)
+- [x] Dự án test và CI (S1-09) — 7539460
   - Xong khi: có dự án xUnit trong `quanlykho.slnx`, một test mẫu chạy được bằng `dotnet test`; GitHub Actions chạy build và test trên mỗi lần push `develop`.
 - [ ] Khung kiến trúc theo mảng (S1-02)
   - Xong khi: có quy ước thư mục Controller, Service, Repository theo mảng; ghi vào `CLAUDE.md`.
