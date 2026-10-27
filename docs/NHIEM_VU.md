@@ -36,7 +36,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 ## Giai đoạn 1. Đăng nhập và nhập kho
 
-- [ ] Đăng nhập, tài khoản, phân quyền theo vai và kho (FR09, NFR02, S2-01)
+- [x] Đăng nhập, tài khoản, phân quyền theo vai và kho (FR09, NFR02, S2-01) — 22df0d7
   - Xong khi: 4 vai; quản lý kho và thủ kho gán theo kho; quyền kiểm tra ở máy chủ (401, 403); khóa tài khoản thì mất quyền ngay; luôn còn ít nhất một quản trị viên; sai mật khẩu 5 lần liên tiếp thì khóa tạm 15 phút; test phân quyền cho cả 4 vai đều đạt.
 - [ ] Cổng ghi tồn (NFR01, S2-02)
   - Xong khi: một service duy nhất cập nhật `TonKho` và ghi `SoBienDong` trong một transaction; `Idempotency-Key` trùng thì không ghi lần hai; không cho tồn âm; test tổng biến động bằng tồn.
