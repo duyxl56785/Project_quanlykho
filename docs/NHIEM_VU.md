@@ -25,7 +25,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 - [x] PostgreSQL bằng Docker, EF Core, `/health/db` — 252d004
 - [x] Dự án test và CI (S1-09) — 7539460
   - Xong khi: có dự án xUnit trong `quanlykho.slnx`, một test mẫu chạy được bằng `dotnet test`; GitHub Actions chạy build và test trên mỗi lần push `develop`.
-- [ ] Khung kiến trúc theo mảng (S1-02)
+- [x] Khung kiến trúc theo mảng (S1-02) — 7b6f60a
   - Xong khi: có quy ước thư mục Controller, Service, Repository theo mảng; ghi vào `CLAUDE.md`.
 - [ ] ERD và migration đầu tiên (S1-05, S1-06)
   - Xong khi: entity và migration cho danh mục, vị trí, lô, tồn kho, sổ biến động, đơn mua, phiếu nhập, đơn vị quy đổi theo Bảng 2.32, 2.34 và Hình 2.11; `dotnet ef database update` chạy sạch trên DB trống; ràng buộc (khóa, không âm, unique) có trong CSDL.
