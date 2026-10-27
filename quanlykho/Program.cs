@@ -34,6 +34,7 @@ builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>
 builder.Services.AddScoped<DuLieuThu>();
 builder.Services.AddPhanQuyen();
 builder.Services.AddScoped<GhiNhatKy>();
+builder.Services.AddScoped<CongGhiTon>();
 builder.Services.AddScoped<TaiKhoanService>();
 builder.Services.AddScoped<NguoiDungService>();
 
