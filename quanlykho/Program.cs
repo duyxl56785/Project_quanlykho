@@ -15,6 +15,7 @@ using quanlykho.Data.Seed;
 using quanlykho.Domain;
 using quanlykho.Features.DanhMuc;
 using quanlykho.Features.Kho;
+using quanlykho.Features.XepHang;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.QuanLyNguoiDung;
 using quanlykho.Features.TaiKhoan;
@@ -36,6 +37,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MaChungTu>();
 builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();
 builder.Services.AddScoped<DuLieuThu>();
+builder.Services.AddScoped<PhieuNhapMau>();
 builder.Services.AddPhanQuyen();
 builder.Services.AddScoped<GhiNhatKy>();
 builder.Services.AddScoped<CongGhiTon>();
@@ -48,6 +50,7 @@ builder.Services.AddScoped<PhieuNhapService>();
 builder.Services.AddScoped<ViTriService>();
 builder.Services.AddScoped<KhoService>();
 builder.Services.AddScoped<OPhuHop>();
+builder.Services.AddScoped<XepHangService>();
 
 var app = builder.Build();
 
@@ -57,6 +60,7 @@ if (args.Contains("--seed"))
     using var scope = app.Services.CreateScope();
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<DuLieuThu>().NapAsync();
+    await scope.ServiceProvider.GetRequiredService<PhieuNhapMau>().NapAsync();
     app.Logger.LogInformation("Đã nạp dữ liệu thử.");
     return;
 }

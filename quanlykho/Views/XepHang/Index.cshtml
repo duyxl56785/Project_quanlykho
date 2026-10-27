@@ -1,0 +1,230 @@
+@using quanlykho.Features.XepHang
+@model List<HangChoXep>
+@{
+    ViewData["Title"] = "Xếp hàng vào vị trí";
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+    var maKho = (string?)ViewData["MaKho"];
+}
+
+<div class="tieu-de-trang"><h1>Xếp hàng vào vị trí</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = maKho, danhSach = kho })
+    </div>
+    <div class="thanh-loc-nut thanh-nut"><button class="btn btn-primary" type="submit">Xem</button></div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <partial name="_TrangRong" model='maKho is null ? "Bạn chưa được giao kho nào." : "Không còn hàng nào ở khu tiếp nhận chờ xếp."' />
+}
+else
+{
+    <div class="man-hinh-quet">
+        <div class="the">
+            <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã lô, rồi quét mã ô", "Quét hoặc gõ mã lô (L…) hay mã ô (K01-…) rồi Enter")' />
+        </div>
+
+        <div class="the" id="khungXep" hidden>
+            <h2>Đang xếp</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="text-secondary small">Lô</div>
+                    <span class="fw-semibold" data-lo-ma></span> · <span data-lo-ten></span>
+                    <div class="small text-secondary">Tại <span data-lo-o></span>, chờ xếp <span data-lo-con></span></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-secondary small">Ô đích</div>
+                    <span class="fw-semibold" data-o-ma>Chưa chọn: quét mã ô hoặc bấm Chọn trong danh sách ô phù hợp.</span>
+                    <div class="small text-secondary" data-o-qmax></div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <label class="form-label bat-buoc" for="soLuong">Số lượng xếp <span class="text-secondary" data-lo-dvt></span></label>
+                    <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" />
+                </div>
+                <div class="col-12">
+                    <div class="alert alert-danger mb-2" role="alert" id="loiXep" hidden></div>
+                    <div class="thanh-nut">
+                        <button type="button" class="btn btn-primary flex-grow-1" id="nutXep" disabled>Xếp vào ô</button>
+                        <button type="button" class="btn btn-outline-secondary" id="nutBo">Bỏ chọn</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="the" id="khungO" hidden>
+            <h2>Ô phù hợp</h2>
+            <div data-dang-tai hidden><partial name="_DangTai" model='"Đang tìm ô còn chỗ…"' /></div>
+            <div class="alert alert-danger" role="alert" data-loi-o hidden></div>
+            <p class="text-secondary" data-rong-o hidden>Không còn ô lưu trữ nào phù hợp và còn chỗ trong kho này.</p>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0" data-bang-o hidden>
+                    <thead><tr><th>Ô</th><th class="so">Xếp tối đa</th><th class="so">Thể tích còn (m³)</th><th class="so">Tải trọng còn (kg)</th><th></th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="the">
+            <h2>Hàng chờ xếp ở khu tiếp nhận</h2>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th>Ô tiếp nhận</th><th class="so">Chờ xếp</th><th></th></tr></thead>
+                    <tbody id="choXep">
+                        @foreach (var h in Model)
+                        {
+                            <tr data-lo="@h.MaLo" data-o="@h.MaViTri" data-con="@h.SoLuong" data-dvt="@h.DonViTinh" data-ten="@h.MaBienThe – @h.TenHang">
+                                <td class="fw-semibold">@h.MaLo</td>
+                                <td>@h.MaBienThe<div class="small text-secondary">@h.TenHang</div></td>
+                                <td>@Ngay(h.HanDung)</td>
+                                <td class="small">@h.MaViTri</td>
+                                <td class="so" data-hien-con>@So(h.SoLuong) @h.DonViTinh</td>
+                                <td class="text-end"><button type="button" class="btn btn-sm btn-outline-primary" data-chon-lo>Chọn</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const maKho = @Json.Serialize(maKho);
+            const oQuet = document.getElementById("oQuet");
+            const khungXep = document.getElementById("khungXep");
+            const khungO = document.getElementById("khungO");
+            const bangO = khungO.querySelector("[data-bang-o]");
+            const soLuong = document.getElementById("soLuong");
+            const nutXep = document.getElementById("nutXep");
+            const loiXep = document.getElementById("loiXep");
+            const so = (x) => QuanLyKho.dinhDangSo.format(x);
+            let lo = null, o = null, cacO = [], khoa = crypto.randomUUID();
+
+            const dat = (sel, text) => khungXep.querySelector(sel).textContent = text;
+            const capNhatNut = () => nutXep.disabled = !(lo && o);
+
+            const boChon = () => {
+                lo = o = null;
+                khungXep.hidden = khungO.hidden = true;
+                loiXep.hidden = true;
+                capNhatNut();
+                oQuet.focus();
+            };
+
+            const chonO = (ma) => {
+                o = ma;
+                const tim = cacO.find((x) => x.maViTri === ma);
+                dat("[data-o-ma]", ma);
+                dat("[data-o-qmax]", tim ? `Xếp tối đa ${so(tim.qMax)} ${lo.dvt}` : "Ô không có trong danh sách phù hợp; máy chủ sẽ kiểm tra lại.");
+                if (tim && +soLuong.value > tim.qMax) soLuong.value = tim.qMax;
+                capNhatNut();
+                QuanLyKho.baoQuet(oQuet, `Ô ${ma}: kiểm tra số lượng rồi bấm Xếp vào ô.`, true);
+            };
+
+            const taiO = async () => {
+                khungO.hidden = false;
+                bangO.hidden = true;
+                khungO.querySelector("[data-rong-o]").hidden = true;
+                khungO.querySelector("[data-loi-o]").hidden = true;
+                khungO.querySelector("[data-dang-tai]").hidden = false;
+                const kq = await QuanLyKho.goiApi(`/api/vi-tri/o-phu-hop?maLo=${encodeURIComponent(lo.ma)}&soLuong=${lo.con}&maKho=${encodeURIComponent(maKho)}`);
+                khungO.querySelector("[data-dang-tai]").hidden = true;
+                if (!kq.ok) {
+                    const loi = khungO.querySelector("[data-loi-o]");
+                    loi.textContent = kq.loi;
+                    loi.hidden = false;
+                    return;
+                }
+                cacO = kq.duLieu;
+                const tbody = bangO.querySelector("tbody");
+                tbody.replaceChildren(...cacO.map((x) => {
+                    const tr = document.createElement("tr");
+                    [x.maViTri, so(x.qMax), so(x.theTichConLai), so(x.taiTrongConLai)].forEach((t, i) => {
+                        const td = document.createElement("td");
+                        td.textContent = t;
+                        if (i > 0) td.className = "so";
+                        tr.append(td);
+                    });
+                    const td = document.createElement("td");
+                    td.className = "text-end";
+                    const b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "btn btn-sm btn-outline-primary";
+                    b.textContent = "Chọn";
+                    b.addEventListener("click", () => chonO(x.maViTri));
+                    td.append(b);
+                    tr.append(td);
+                    return tr;
+                }));
+                bangO.hidden = cacO.length === 0;
+                khungO.querySelector("[data-rong-o]").hidden = cacO.length > 0;
+            };
+
+            const chonLo = (tr) => {
+                lo = { ma: tr.dataset.lo, viTri: tr.dataset.o, con: +tr.dataset.con, dvt: tr.dataset.dvt, ten: tr.dataset.ten, tr };
+                o = null;
+                dat("[data-lo-ma]", lo.ma);
+                dat("[data-lo-ten]", lo.ten);
+                dat("[data-lo-o]", lo.viTri);
+                dat("[data-lo-con]", `${so(lo.con)} ${lo.dvt}`);
+                dat("[data-lo-dvt]", `(${lo.dvt})`);
+                dat("[data-o-ma]", "Chưa chọn: quét mã ô hoặc bấm Chọn trong danh sách ô phù hợp.");
+                dat("[data-o-qmax]", "");
+                soLuong.value = lo.con;
+                loiXep.hidden = true;
+                khungXep.hidden = false;
+                capNhatNut();
+                QuanLyKho.baoQuet(oQuet, `Lô ${lo.ma}: quét mã ô cần xếp vào.`, true);
+                taiO();
+            };
+
+            document.getElementById("choXep").addEventListener("click", (e) => {
+                if (e.target.closest("[data-chon-lo]")) chonLo(e.target.closest("tr"));
+            });
+            document.getElementById("nutBo").addEventListener("click", boChon);
+
+            oQuet.addEventListener("quet-ma", (e) => {
+                const tr = document.querySelector(`#choXep tr[data-lo="${CSS.escape(e.detail)}"]`);
+                if (tr) return chonLo(tr);
+                if (!lo) return QuanLyKho.baoQuet(oQuet, `Mã ${e.detail} không phải lô đang chờ xếp ở kho này. Quét mã lô trước.`, false);
+                chonO(e.detail);
+            });
+
+            nutXep.addEventListener("click", async () => {
+                loiXep.hidden = true;
+                const sl = +soLuong.value;
+                if (!(sl > 0)) {
+                    loiXep.textContent = "Nhập số lượng lớn hơn 0.";
+                    loiXep.hidden = false;
+                    return;
+                }
+                nutXep.disabled = true;
+                const kq = await QuanLyKho.goiApi("/api/xep-hang", {
+                    method: "POST",
+                    body: { maLo: lo.ma, maViTriDi: lo.viTri, maViTri: o, soLuong: sl },
+                    khoaChongLap: khoa,
+                });
+                if (!kq.ok) {
+                    loiXep.textContent = kq.loi;
+                    loiXep.hidden = false;
+                    capNhatNut();
+                    return;
+                }
+                khoa = crypto.randomUUID();
+                const con = lo.con - sl;
+                if (con > 0) {
+                    lo.tr.dataset.con = con;
+                    lo.tr.querySelector("[data-hien-con]").textContent = `${so(con)} ${lo.dvt}`;
+                } else {
+                    lo.tr.remove();
+                }
+                const thongBao = `Đã xếp ${so(sl)} ${lo.dvt} lô ${lo.ma} vào ô ${o} (${kq.duLieu.maChuyen}).`;
+                boChon();
+                QuanLyKho.baoQuet(oQuet, thongBao, true);
+            });
+        })();
+    </script>
+}

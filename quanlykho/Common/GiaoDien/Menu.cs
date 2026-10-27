@@ -16,7 +16,7 @@ public static class Menu
     public static readonly NhomMenu[] TatCa =
     [
         new("Chung", [new("Tổng quan", "/")]),
-        new("Nhập kho", [new("Đơn mua", "/DonMua", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Hóa đơn nhập", "/PhieuNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Xếp hàng", null)]),
+        new("Nhập kho", [new("Đơn mua", "/DonMua", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Hóa đơn nhập", "/PhieuNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Xếp hàng", "/XepHang", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho])]),
         new("Xuất kho", [new("Tồn khả dụng", null), new("Đơn đặt hàng", null), new("Lệnh xuất", null)]),
         new("Kho", [new("Chuyển kho", null), new("Kiểm kê", null), new("Báo cáo tồn", null)]),
         new("Danh mục", [new("Hàng hóa", "/DanhMuc/SanPham"), new("Nhóm hàng", "/DanhMuc/NhomHang"), new("Danh mục kho", "/Kho", QuanTri), new("Kho và vị trí", "/ViTri", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Nhà cung cấp, nơi nhận", "/DanhMuc/NhaCungCap")]),

@@ -15,7 +15,8 @@ namespace quanlykho.Tests.HaTang;
 /// </summary>
 public class CsdlFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:17-alpine").Build();
+    // Mỗi test một database, mỗi database một pool kết nối riêng: mặc định 100 kết nối không đủ.
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:17-alpine").WithCommand("-c", "max_connections=500").Build();
 
     public Task InitializeAsync() => _container.StartAsync();
 
