@@ -1,0 +1,16 @@
+@* Hộp xác nhận dùng chung. Thêm data-xac-nhan="Câu hỏi?" vào form, nút hoặc liên kết; site.js hỏi trước khi gửi. *@
+<div class="modal fade" id="hopXacNhan" tabindex="-1" aria-labelledby="hopXacNhanTieuDe" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="hopXacNhanTieuDe">Xác nhận</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" data-noi-dung></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" data-dong-y>Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>

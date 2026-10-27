@@ -1,0 +1,59 @@
+@model TrangDuLieu<quanlykho.Features.Styleguide.StyleguideController.PhieuMauDong>
+@{
+    ViewData["Title"] = "Mẫu danh sách";
+    var trangThaiChon = ViewData["TrangThai"] as TrangThaiDonMua?;
+}
+
+<div class="tieu-de-trang">
+    <h1>Đơn mua <small class="text-secondary fs-6">(mẫu danh sách)</small></h1>
+    <a class="btn btn-primary" asp-action="BieuMau">Thêm mới</a>
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Tìm kiếm</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@ViewData["TuKhoa"]" placeholder="Mã đơn, nhà cung cấp" />
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var tt in Enum.GetValues<TrangThaiDonMua>())
+            {
+                <option value="@tt" selected="@(tt == trangThaiChon)">@TrangThaiHienThi.Lay(tt).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="DanhSach">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có đơn mua nào khớp bộ lọc.">
+    <thead>
+        <tr>
+            <th>Mã đơn</th>
+            <th>Nhà cung cấp</th>
+            <th>Kho</th>
+            <th>Ngày tạo</th>
+            <th class="so">Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@p.Ma</td>
+                <td>@p.NhaCungCap</td>
+                <td>@p.Kho</td>
+                <td>@NgayGio(p.NgayTao)</td>
+                <td class="so">@Tien(p.TongTien)</td>
+                <td><partial name="_HuyHieuTrangThai" model="p.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="#">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

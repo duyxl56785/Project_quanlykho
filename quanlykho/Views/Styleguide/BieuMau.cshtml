@@ -1,0 +1,47 @@
+@model quanlykho.Features.Styleguide.StyleguideController.BieuMauMau
+@{
+    ViewData["Title"] = "Mẫu biểu mẫu";
+    var khoMau = new List<LuaChon> { new("K01", "Kho Hà Nội"), new("K02", "Kho Bắc Ninh") };
+}
+
+<div class="tieu-de-trang">
+    <h1>Thêm nhà cung cấp <small class="text-secondary fs-6">(mẫu biểu mẫu)</small></h1>
+</div>
+
+<form class="the bieu-mau" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <p class="text-secondary small">Nhập mã <code>TRUNG</code> để xem lỗi nghiệp vụ hiện lại trên biểu mẫu.</p>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Ma" class="form-label bat-buoc"></label>
+            <input asp-for="Ma" class="form-control" />
+            <span asp-validation-for="Ma"></span>
+        </div>
+        <div class="col-md-8">
+            <label asp-for="Ten" class="form-label bat-buoc"></label>
+            <input asp-for="Ten" class="form-control" />
+            <span asp-validation-for="Ten"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SoDienThoai" class="form-label"></label>
+            <input asp-for="SoDienThoai" class="form-control" inputmode="tel" />
+            <span asp-validation-for="SoDienThoai"></span>
+        </div>
+        <div class="col-md-8">
+            <label asp-for="DiaChi" class="form-label"></label>
+            <input asp-for="DiaChi" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="MaKho" class="form-label"></label>
+            @await Component.InvokeAsync("OChonKho", new { ten = nameof(Model.MaKho), chon = Model.MaKho, coTatCa = true, danhSach = khoMau })
+        </div>
+    </div>
+    <div class="thanh-nut mt-4">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="DanhSach">Hủy bỏ</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

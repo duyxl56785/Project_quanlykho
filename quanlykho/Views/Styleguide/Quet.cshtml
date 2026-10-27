@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "Mẫu màn hình quét";
+}
+
+<div class="man-hinh-quet">
+    <div class="tieu-de-trang">
+        <h1>Lấy hàng LX000007 <small class="text-secondary fs-6">(mẫu màn hình quét)</small></h1>
+        <partial name="_HuyHieuTrangThai" model="TrangThaiDonMua.DangThucHien" />
+    </div>
+
+    <div class="the">
+        <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã hàng")' />
+        <p class="text-secondary small mb-0">Thử: 8930000000001 (áo thun S trắng), 8930000000002 (áo thun S đen), mã khác báo lỗi, quét quá số yêu cầu bị chặn.</p>
+    </div>
+
+    <div class="the p-0">
+        <ul class="list-group list-group-flush danh-sach-quet" id="danhSachQuet">
+            <li class="list-group-item" data-ma-vach="8930000000001" data-yeu-cau="3">
+                <div>
+                    <div class="fw-semibold">AOTHUN-01 – Áo thun cổ tròn S Trắng</div>
+                    <div class="text-secondary small">Lô L000012 · Ô K01-TA01-TG01-P02-H01-KE01-O03</div>
+                </div>
+                <span class="so-luong-lon"><span data-da-quet>0</span> / 3</span>
+            </li>
+            <li class="list-group-item" data-ma-vach="8930000000002" data-yeu-cau="2">
+                <div>
+                    <div class="fw-semibold">AOTHUN-02 – Áo thun cổ tròn S Đen</div>
+                    <div class="text-secondary small">Lô L000013 · Ô K01-TA01-TG01-P02-H01-KE02-O01</div>
+                </div>
+                <span class="so-luong-lon"><span data-da-quet>0</span> / 2</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="thanh-nut">
+        <button type="button" class="btn btn-primary flex-grow-1" id="nutXong" disabled data-xac-nhan="Chuyển lệnh sang bước Chờ kiểm tra? (trang mẫu)">Đã lấy đủ, chuyển kiểm tra</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Thoát</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("oQuet").addEventListener("quet-ma", (e) => {
+            const dong = document.querySelector(`#danhSachQuet [data-ma-vach="${CSS.escape(e.detail)}"]`);
+            if (!dong) return QuanLyKho.baoQuet(e.target, `Mã ${e.detail} không có trong lệnh này.`, false);
+
+            const daQuet = dong.querySelector("[data-da-quet]");
+            const yeuCau = +dong.dataset.yeuCau;
+            if (+daQuet.textContent >= yeuCau) return QuanLyKho.baoQuet(e.target, `Đã lấy đủ ${yeuCau}, không lấy thêm.`, false);
+
+            daQuet.textContent = +daQuet.textContent + 1;
+            dong.classList.toggle("list-group-item-success", +daQuet.textContent === yeuCau);
+            QuanLyKho.baoQuet(e.target, `+1 ${dong.querySelector(".fw-semibold").textContent}`, true);
+            document.getElementById("nutXong").disabled =
+                [...document.querySelectorAll("#danhSachQuet [data-yeu-cau]")].some((d) => +d.querySelector("[data-da-quet]").textContent < +d.dataset.yeuCau);
+        });
+    </script>
+}

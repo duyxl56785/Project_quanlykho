@@ -1,0 +1,4 @@
+@model Enum
+@* <partial name="_HuyHieuTrangThai" model="phieu.TrangThai" /> — tên và màu lấy từ TrangThaiHienThi. *@
+@{ var (ten, mau) = TrangThaiHienThi.Lay(Model); }
+<span class="trang-thai trang-thai-@mau">@ten</span>
