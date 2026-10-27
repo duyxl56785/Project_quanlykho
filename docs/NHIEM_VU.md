@@ -46,7 +46,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: lập, duyệt đơn mua theo nhà cung cấp và kho; số chưa nhận tự cập nhật; trạng thái theo Bảng 2.14 do hệ thống tính.
 - [x] Hóa đơn nhập kho (FR01, S2-05) — dfb703d
   - Xong khi: lập từ đơn mua, quét mã, ghi số thực nhận, lô tự sinh, bắt hạn dùng, phân loại đạt hoặc lỗi; tính thành tiền, tổng tiền; chặn số nhận vượt số chưa nhận; thủ kho không thấy giá; dùng được trên máy tính bảng.
-- [ ] Xác nhận hóa đơn nhập (FR01, S2-06)
+- [x] Xác nhận hóa đơn nhập (FR01, S2-06) — e39753c
   - Xong khi: xác nhận ghi tồn qua cổng; hàng đạt vào khu tiếp nhận, hàng lỗi vào khu cách ly (Hình 2.5); bấm lặp không ghi hai lần.
 
 ## Giai đoạn 2. Vị trí và xếp hàng
