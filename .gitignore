@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local Docker overrides (e.g. PostgreSQL port 5433)
+docker-compose.override.yml
