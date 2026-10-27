@@ -36,17 +36,17 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 ## Giai đoạn 1. Đăng nhập và nhập kho
 
-- [ ] Đăng nhập, tài khoản, phân quyền theo vai và kho (FR09, NFR02, S2-01)
+- [x] Đăng nhập, tài khoản, phân quyền theo vai và kho (FR09, NFR02, S2-01) — 22df0d7
   - Xong khi: 4 vai; quản lý kho và thủ kho gán theo kho; quyền kiểm tra ở máy chủ (401, 403); khóa tài khoản thì mất quyền ngay; luôn còn ít nhất một quản trị viên; sai mật khẩu 5 lần liên tiếp thì khóa tạm 15 phút; test phân quyền cho cả 4 vai đều đạt.
-- [ ] Cổng ghi tồn (NFR01, S2-02)
+- [x] Cổng ghi tồn (NFR01, S2-02) — 489445e
   - Xong khi: một service duy nhất cập nhật `TonKho` và ghi `SoBienDong` trong một transaction; `Idempotency-Key` trùng thì không ghi lần hai; không cho tồn âm; test tổng biến động bằng tồn.
-- [ ] Danh mục: nhóm hàng, thuộc tính, sản phẩm, biến thể, nhà cung cấp, nơi nhận (FR10, NFR06, S2-03)
+- [x] Danh mục: nhóm hàng, thuộc tính, sản phẩm, biến thể, nhà cung cấp, nơi nhận (FR10, NFR06, S2-03) — a72c3b1
   - Xong khi: thêm ngành hàng mới với thuộc tính mới trên giao diện, sinh biến thể từ tổ hợp thuộc tính, khai báo kích thước, khối lượng, cờ hạn dùng, điều kiện bảo quản; không xóa cứng thứ đã có chứng từ.
-- [ ] Đơn mua (FR01, S2-04)
+- [x] Đơn mua (FR01, S2-04) — 77ba3cb
   - Xong khi: lập, duyệt đơn mua theo nhà cung cấp và kho; số chưa nhận tự cập nhật; trạng thái theo Bảng 2.14 do hệ thống tính.
-- [ ] Hóa đơn nhập kho (FR01, S2-05)
+- [x] Hóa đơn nhập kho (FR01, S2-05) — dfb703d
   - Xong khi: lập từ đơn mua, quét mã, ghi số thực nhận, lô tự sinh, bắt hạn dùng, phân loại đạt hoặc lỗi; tính thành tiền, tổng tiền; chặn số nhận vượt số chưa nhận; thủ kho không thấy giá; dùng được trên máy tính bảng.
-- [ ] Xác nhận hóa đơn nhập (FR01, S2-06)
+- [x] Xác nhận hóa đơn nhập (FR01, S2-06) — e39753c
   - Xong khi: xác nhận ghi tồn qua cổng; hàng đạt vào khu tiếp nhận, hàng lỗi vào khu cách ly (Hình 2.5); bấm lặp không ghi hai lần.
 
 ## Giai đoạn 2. Vị trí và xếp hàng

@@ -1,0 +1,117 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.DanhMuc
+@model SanPhamForm
+@{
+    ViewData["Title"] = $"Sản phẩm {Model.Ma}";
+    var laQuanTri = User.IsInRole(Vai.QuanTri);
+    var mau = Model.BienThe.FirstOrDefault();
+}
+
+<div class="tieu-de-trang">
+    <h1>@Model.Ma – @Model.Ten</h1>
+    <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại</a>
+</div>
+
+<form class="the bieu-mau" method="post" asp-action="Sua" asp-route-ma="@Model.Ma">
+    <h2>Thông tin sản phẩm</h2>
+    <fieldset disabled="@(!laQuanTri)">
+        <partial name="_Form" model="Model" />
+        @if (laQuanTri)
+        {
+            <div class="thanh-nut mt-4"><button type="submit" class="btn btn-primary">Lưu</button></div>
+        }
+    </fieldset>
+</form>
+
+<div class="the">
+    <h2>Biến thể (@Model.BienThe.Count)</h2>
+    @if (Model.BienThe.Count == 0)
+    {
+        <partial name="_TrangRong" model='"Chưa có biến thể. Sinh biến thể ở dưới để nhập, xuất được sản phẩm này."' />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Mã biến thể</th><th>Thuộc tính</th><th>Mã vạch</th><th class="so">Đóng gói (m)</th><th class="so">Khối lượng (kg)</th><th>Trạng thái</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var b in Model.BienThe)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@b.MaBienThe</td>
+                            <td>@SinhBienThe.MoTa(b.ThuocTinh)</td>
+                            <td>@b.MaVach</td>
+                            <td class="so">@So(b.DaiDongGoi) × @So(b.RongDongGoi) × @So(b.CaoDongGoi)</td>
+                            <td class="so">@So(b.KhoiLuong)</td>
+                            <td><partial name="_HuyHieuTrangThai" model="b.TrangThai" /></td>
+                            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="BienThe" asp-route-ma="@b.MaBienThe">@(laQuanTri ? "Sửa" : "Xem")</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (laQuanTri)
+{
+    <form class="the bieu-mau" method="post" asp-action="SinhBienThe" asp-route-ma="@Model.Ma" id="sinhBienThe">
+        <h2>Sinh biến thể</h2>
+        <p class="form-text">Chọn giá trị cho từng thuộc tính; hệ thống tạo mọi tổ hợp chưa có. Thuộc tính để trống thì không dùng. Có thể gõ thêm giá trị, cách nhau bởi dấu phẩy.</p>
+        @if (Model.ThuocTinhNhom.Count == 0)
+        {
+            <p>Nhóm hàng này không có thuộc tính: sản phẩm có đúng một biến thể.</p>
+        }
+        <div class="row g-3">
+            @foreach (var t in Model.ThuocTinhNhom)
+            {
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="gt-@t.ThuTu">@t.Ten</label>
+                    <div class="thanh-nut mb-1">
+                        @foreach (var g in t.GiaTriGoiY)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-them-gia-tri="gt-@t.ThuTu">@g</button>
+                        }
+                    </div>
+                    <input class="form-control" id="gt-@t.ThuTu" name="GiaTri[@t.Ten]" data-gia-tri placeholder="@string.Join(", ", t.GiaTriGoiY)" />
+                </div>
+            }
+        </div>
+        <div class="row g-3 mt-1">
+            <div class="col-6 col-md-3"><label class="form-label bat-buoc" for="Dai">Dài (m)</label><input class="form-control" id="Dai" name="Dai" type="number" step="any" min="0.001" value="@(mau?.DaiDongGoi)" required /></div>
+            <div class="col-6 col-md-3"><label class="form-label bat-buoc" for="Rong">Rộng (m)</label><input class="form-control" id="Rong" name="Rong" type="number" step="any" min="0.001" value="@(mau?.RongDongGoi)" required /></div>
+            <div class="col-6 col-md-3"><label class="form-label bat-buoc" for="Cao">Cao (m)</label><input class="form-control" id="Cao" name="Cao" type="number" step="any" min="0.001" value="@(mau?.CaoDongGoi)" required /></div>
+            <div class="col-6 col-md-3"><label class="form-label bat-buoc" for="KhoiLuong">Khối lượng (kg)</label><input class="form-control" id="KhoiLuong" name="KhoiLuong" type="number" step="any" min="0.001" value="@(mau?.KhoiLuong)" required /></div>
+        </div>
+        <p class="form-text">Kích thước đóng gói và khối lượng của một @Model.DonViTinh, áp cho các biến thể mới; sửa riêng từng biến thể sau.</p>
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+            <button type="submit" class="btn btn-primary">Tạo biến thể</button>
+            <span class="text-secondary" data-xem-truoc></span>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("sinhBienThe");
+            if (!form) return;
+            const tach = (s) => [...new Set(s.split(",").map((x) => x.trim()).filter(Boolean))];
+            const xemTruoc = () => {
+                const nhom = [...form.querySelectorAll("[data-gia-tri]")].map((o) => tach(o.value)).filter((g) => g.length);
+                const soToHop = nhom.reduce((n, g) => n * g.length, 1);
+                form.querySelector("[data-xem-truoc]").textContent = `${soToHop} tổ hợp (tổ hợp đã có sẽ được bỏ qua)`;
+            };
+            form.addEventListener("click", (e) => {
+                const nut = e.target.closest("[data-them-gia-tri]");
+                if (!nut) return;
+                const o = document.getElementById(nut.dataset.themGiaTri);
+                o.value = tach(`${o.value},${nut.textContent}`).join(", ");
+                xemTruoc();
+            });
+            form.addEventListener("input", xemTruoc);
+            xemTruoc();
+        })();
+    </script>
+}

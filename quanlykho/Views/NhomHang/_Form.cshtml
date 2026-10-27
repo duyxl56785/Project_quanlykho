@@ -1,0 +1,25 @@
+@model quanlykho.Features.DanhMuc.NhomForm
+@{ var laSua = ViewContext.RouteData.Values["action"]?.ToString() == "Sua"; }
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Ma" class="form-label bat-buoc"></label>
+        <input asp-for="Ma" class="form-control" readonly="@laSua" />
+        <span asp-validation-for="Ma"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Ten" class="form-label bat-buoc"></label>
+        <input asp-for="Ten" class="form-control" />
+        <span asp-validation-for="Ten"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="MaCha" class="form-label"></label>
+        <select asp-for="MaCha" class="form-select">
+            <option value="">(Nhóm gốc)</option>
+            @foreach (var n in Model.DanhSachNhom.Where(n => !laSua || n.Ma != Model.Ma))
+            {
+                <option value="@n.Ma" selected="@(n.Ma == Model.MaCha)">@(new string('—', n.DoSau)) @n.Ten</option>
+            }
+        </select>
+    </div>
+</div>

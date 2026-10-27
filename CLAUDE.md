@@ -38,7 +38,7 @@ Khi app đang chạy bằng `dotnet run`, thư mục `bin/Debug` bị khóa: th�
 
 Kiểm tra kết nối CSDL: `GET /health/db` (200 khi kết nối được, 503 khi không).
 
-Test nằm ở `quanlykho.Tests/` (xUnit). Test dựng app dùng `HaTang/UngDungFactory` (tắt tự migrate). Test cần CSDL đặt trong `Integration/`, gắn `[Collection(CsdlCollection.Ten)]` và gọi `CsdlFixture.TaoCsdlAsync()` để có database riêng đã migrate trên container PostgreSQL của Testcontainers. CI ở `.github/workflows/ci.yml` chạy build và test khi push `develop`, `main` và khi có pull request.
+Test nằm ở `quanlykho.Tests/` (xUnit). Test dựng app dùng `HaTang/UngDungFactory` (tắt tự migrate): mặc định đăng nhập giả theo vai qua `factory.TaoClient(Vai.QuanTri)` (không cần CSDL); test cần CSDL và cookie thật tạo `new UngDungFactory { ChuoiKetNoi = ..., DangNhapGia = false, Gio = new FakeTimeProvider(...) }` (mẫu: `Integration/PhanQuyenTests`). Test cần CSDL đặt trong `Integration/`, gắn `[Collection(CsdlCollection.Ten)]` và gọi `CsdlFixture.TaoCsdlAsync()` để có database riêng đã migrate trên container PostgreSQL của Testcontainers. CI ở `.github/workflows/ci.yml` chạy build và test khi push `develop`, `main` và khi có pull request.
 
 Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án khác dùng) qua `docker-compose.override.yml` (copy từ `docker-compose.override.example.yml`, đã nằm trong `.gitignore`). Chuỗi kết nối cổng 5434 đặt bằng `dotnet user-secrets` (khóa `ConnectionStrings:QuanLyKho`); `appsettings.Development.json` giữ cổng 5432 mặc định.
 
@@ -47,6 +47,9 @@ Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án k
 - Thư mục (KE_HOACH.md A1): `Domain/` entity và enum; `Data/` DbContext, cấu hình bảng, migration, dữ liệu thử; `Common/` phần dùng chung (lỗi, cổng ghi tồn, phân quyền, nhật ký); `Features/<Mang>/` controller trang, controller API, service, ViewModel của từng mảng; view ở `Views/<Mang>/`.
 - Controller, Service theo mảng; không có tầng Repository riêng, `AppDbContext` đóng vai trò đó. Luật nghiệp vụ chỉ nằm trong Service.
 - Lỗi: Service ném `NghiepVuException` (422), `XungDotException` (409), `KhongCoQuyenException` (403) trong `Common/Loi`. `XuLyLoiFilter` đổi thành JSON `{ loi, chiTiet }` cho controller `[ApiController]`, hoặc hiện lại view của action với lỗi trong ModelState cho trang. Không bắt các lỗi này trong controller.
+- Đăng nhập, phân quyền (`Common/PhanQuyen`): mặc định mọi trang cần đăng nhập, trang công khai đánh `[AllowAnonymous]`. Giới hạn vai bằng `[Authorize(Roles = Vai.QuanTri)]` (hằng trong `Vai`: `QuanTri`, `QuanLyKho`, `ThuKho`, `BanHang`, `QuanLy`, `TrongKho`). Service nhận mã kho phải gọi `NguoiDungHienTai.DamBaoQuyenKhoAsync(maKho)`; danh sách lọc theo `KhoDuocGiaoAsync()`. Đổi vai, kho, mật khẩu hoặc khóa tài khoản phải đổi `SecurityStamp` (phiên cũ hết hiệu lực ở request kế tiếp).
+- Nhật ký: gọi `GhiNhatKy.Ghi(...)` trước `SaveChangesAsync` của thao tác để lưu cùng transaction.
+- Ghi tồn: Service mở `db.Database.BeginTransactionAsync()`, đổi trạng thái chứng từ, gọi `CongGhiTon.GhiAsync(khoaChongLap, loaiChungTu, maChungTu, dong)` (dòng `DongGhiTon(MaLo, MaViTri, SoLuongThayDoi)`, chỉ ô cấp 7), rồi commit. Trả `KetQuaGhi.DaGhiTruocDo` khi khóa đã ghi thì không làm gì thêm. Giữ hàng: `GiuAsync`, `BoGiuAsync`. Không tự sửa `TonKho` ở chỗ khác.
 - Văn hóa request cố định là InvariantCulture (số `1.5`, ngày `yyyy-MM-dd` khi gửi lên); hiển thị kiểu Việt Nam do helper định dạng làm. Giờ hiện tại lấy qua `TimeProvider` (đã đăng ký), không gọi `DateTime.Now`.
 - API REST trả JSON dưới `/api/...`, đường dẫn tiếng Việt không dấu dạng kebab: `/api/don-mua`, `/api/phieu-nhap/{ma}/xac-nhan`, `/api/vi-tri/o-phu-hop`, `/api/xep-hang`.
 - Bảng và cột đặt tên tiếng Việt không dấu PascalCase như trong báo cáo: `ViTri`, `BienThe`, `Lo`, `TonKho`, `SoBienDong`, `DonMua`, `PhieuNhap`, `DonViQuyDoi`, `MaViTri`, `SoLuongDaGiu`...
@@ -101,7 +104,8 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 
 - Mọi API kiểm tra quyền theo vai và theo kho ở máy chủ.
 - Mã HTTP: 401 chưa đăng nhập hoặc tài khoản bị khóa; 403 không có quyền theo vai hoặc kho; 422 lỗi nghiệp vụ kèm lý do (lỗi xếp hàng kèm số tối đa còn xếp được; thiếu hàng dạng "Cần X, còn Y"); 409 xung đột ghi đồng thời, cần thử lại.
-- API không trả đơn giá, thành tiền cho thủ kho; chỉ quản lý kho và quản trị viên xem giá.
+- API không trả đơn giá, thành tiền cho thủ kho; chỉ quản lý kho và quản trị viên xem giá. Service đặt giá là null khi người xem không được thấy; API mới trả `JsonResult` với `WhenWritingNull` để bỏ hẳn trường giá (xem `PhieuNhapApiController`).
+- Enum trong JSON là chuỗi tên giá trị (`"Dat"`, `"MuaHang"`), cả chiều gửi lên (`JsonStringEnumConverter` trong `Program.cs`).
 
 ## Gợi ý AI (mục 1.2.3)
 
@@ -120,6 +124,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
   - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
   - Gọi API từ JS: `QuanLyKho.goiApi(url, { method, body, khoaChongLap })` tự gửi `Idempotency-Key` và token chống CSRF, trả `{ ok, status, duLieu, loi }`.
   - Menu bên trái khai ở `Common/GiaoDien/Menu.cs`; làm xong màn hình nào thì điền `Url` cho mục đó.
+- Form cần dữ liệu phụ (danh sách để chọn) đặt dữ liệu đó trong model (ví dụ `DanhSachNhom`, `DanhSachKho`) và nạp trước khi gọi Service, để `XuLyLoiFilter` hiện lại view khi lỗi nghiệp vụ. View phải trùng tên action (`Them`, `Sua`), phần chung đặt ở partial `_Form`.
 - Mọi POST, PUT, DELETE (cả API) kiểm token chống CSRF (`AutoValidateAntiforgeryToken`); form Razor có sẵn token, fetch dùng `goiApi`.
 - Ngày `dd/MM/yyyy`; số và tiền theo kiểu Việt Nam. Thuật ngữ thống nhất: Hóa đơn nhập, Lô, Vị trí, Ô, Khu tiếp nhận.
 - Màn hình nào cũng có trạng thái rỗng, lỗi và đang tải.

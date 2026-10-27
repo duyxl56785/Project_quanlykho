@@ -14,14 +14,14 @@ public class StyleguideTests(UngDungFactory factory) : IClassFixture<UngDungFact
     [InlineData("/Styleguide/Quet")]
     public async Task TrangMau_Tra200(string url)
     {
-        var response = await factory.CreateClient().GetAsync(url);
+        var response = await factory.TaoClient().GetAsync(url);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
     public async Task DanhSach_LocVaPhanTrangGiuThamSo()
     {
-        var html = await factory.CreateClient().GetStringAsync("/Styleguide/DanhSach?trangThai=HoanThanh&trang=2");
+        var html = await factory.TaoClient().GetStringAsync("/Styleguide/DanhSach?trangThai=HoanThanh&trang=2");
 
         // 57 dòng mẫu, trạng thái i % 5 == 3 (HoanThanh) có 11 dòng: trang 2 là dòng 11–11.
         Assert.Contains("11–11 / 11 dòng", html);
@@ -32,14 +32,14 @@ public class StyleguideTests(UngDungFactory factory) : IClassFixture<UngDungFact
     [Fact]
     public async Task DanhSach_KhongCoKetQua_HienTrangThaiRong()
     {
-        var html = await factory.CreateClient().GetStringAsync("/Styleguide/DanhSach?tuKhoa=khongcoma");
+        var html = await factory.TaoClient().GetStringAsync("/Styleguide/DanhSach?tuKhoa=khongcoma");
         Assert.Contains("Không có đơn mua nào khớp bộ lọc.", html);
     }
 
     [Fact]
     public async Task BieuMau_LoiNghiepVu_HienLaiBieuMauGiuDuLieu()
     {
-        var client = factory.CreateClient();
+        var client = factory.TaoClient();
         var trang = await client.GetStringAsync("/Styleguide/BieuMau");
         var token = Regex.Match(trang, "name=\"__RequestVerificationToken\" type=\"hidden\" value=\"([^\"]+)\"").Groups[1].Value;
 
@@ -57,7 +57,7 @@ public class StyleguideTests(UngDungFactory factory) : IClassFixture<UngDungFact
     [Fact]
     public async Task Post_KhongCoTokenChongCsrf_BiTuChoi()
     {
-        var response = await factory.CreateClient().PostAsync("/Styleguide/BieuMau",
+        var response = await factory.TaoClient().PostAsync("/Styleguide/BieuMau",
             new FormUrlEncodedContent(new Dictionary<string, string> { ["Ma"] = "A", ["Ten"] = "B" }));
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }

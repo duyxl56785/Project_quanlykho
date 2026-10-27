@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 using quanlykho.Data;
+using quanlykho.Data.Seed;
+using quanlykho.Domain;
 using Testcontainers.PostgreSql;
 
 namespace quanlykho.Tests.HaTang;
@@ -31,6 +35,17 @@ public class CsdlFixture : IAsyncLifetime
         await using var db = TaoDbContext(chuoiKetNoi);
         await db.Database.MigrateAsync();
         return chuoiKetNoi;
+    }
+
+    public const string MatKhauThu = "MatKhauThu@1";
+
+    public async Task<string> TaoCsdlCoDuLieuThuAsync()
+    {
+        var chuoi = await TaoCsdlAsync();
+        await using var db = TaoDbContext(chuoi);
+        await new DuLieuThu(db, new PasswordHasher<NguoiDung>(), new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["DuLieuThu:MatKhau"] = MatKhauThu }).Build()).NapAsync();
+        return chuoi;
     }
 
     public static AppDbContext TaoDbContext(string chuoiKetNoi) =>

@@ -1,0 +1,59 @@
+@model quanlykho.Features.QuanLyNguoiDung.NguoiDungForm
+@{
+    ViewData["Title"] = $"Người dùng {Model.Ma}";
+    var dangKhoa = Model.TrangThai == TrangThaiTaiKhoan.DaKhoa;
+}
+
+<div class="tieu-de-trang">
+    <h1>@Model.Ma – @Model.Ten</h1>
+    <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+</div>
+
+<form class="the bieu-mau" method="post" asp-action="Sua" asp-route-ma="@Model.Ma">
+    <h2>Thông tin và phân quyền</h2>
+    <input type="hidden" asp-for="TrangThai" />
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut mt-4">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Quay lại danh sách</a>
+    </div>
+</form>
+
+<div class="the bieu-mau">
+    <h2>Đặt lại mật khẩu</h2>
+    <form method="post" asp-action="DatLaiMatKhau" asp-route-ma="@Model.Ma" class="row g-2 align-items-end"
+          data-xac-nhan="Đặt lại mật khẩu cho @Model.Ma? Người này sẽ bị đăng xuất khỏi mọi phiên.">
+        <div class="col-md-6">
+            <label class="form-label" for="matKhauMoi">Mật khẩu mới</label>
+            <input class="form-control" id="matKhauMoi" name="matKhauMoi" type="password" autocomplete="new-password" />
+            <div class="form-text">Ít nhất 8 ký tự, gồm cả chữ và số.</div>
+        </div>
+        <div class="col-md-6"><button type="submit" class="btn btn-outline-primary">Đặt lại mật khẩu</button></div>
+    </form>
+</div>
+
+<div class="the bieu-mau">
+    <h2>Khóa tài khoản</h2>
+    @if (dangKhoa)
+    {
+        <form method="post" asp-action="MoKhoa" asp-route-ma="@Model.Ma">
+            <p>Tài khoản đang bị khóa, không đăng nhập được.</p>
+            <button type="submit" class="btn btn-outline-primary">Mở khóa</button>
+        </form>
+    }
+    else
+    {
+        <form method="post" asp-action="Khoa" asp-route-ma="@Model.Ma"
+              data-xac-nhan="Khóa tài khoản @Model.Ma? Người này bị đăng xuất ngay và không đăng nhập được nữa.">
+            <p>Dùng khi người dùng nghỉ việc hoặc chuyển công tác. Tài khoản không bị xóa để giữ nhật ký.</p>
+            <button type="submit" class="btn btn-danger">Khóa tài khoản</button>
+        </form>
+        <form method="post" asp-action="MoKhoa" asp-route-ma="@Model.Ma" class="mt-2">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Gỡ khóa tạm do nhập sai mật khẩu</button>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

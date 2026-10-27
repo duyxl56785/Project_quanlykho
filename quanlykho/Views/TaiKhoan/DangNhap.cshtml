@@ -1,0 +1,23 @@
+@model quanlykho.Features.TaiKhoan.DangNhapModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_LayoutDon";
+}
+
+<h1 class="h4 mb-3">Đăng nhập</h1>
+<form method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="username" autofocus />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MatKhau" class="form-label"></label>
+        <input asp-for="MatKhau" class="form-control" autocomplete="current-password" />
+        <span asp-validation-for="MatKhau"></span>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+    <p class="text-secondary small mt-3 mb-0">Nhập sai mật khẩu nhiều lần liên tiếp, tài khoản sẽ bị khóa tạm 15 phút. Quên mật khẩu: liên hệ quản trị viên.</p>
+</form>

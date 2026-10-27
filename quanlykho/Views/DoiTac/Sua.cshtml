@@ -1,0 +1,14 @@
+@using quanlykho.Features.DanhMuc
+@model DoiTacForm
+@{
+    var ten = Model.Loai == LoaiDoiTac.NhaCungCap ? "nhà cung cấp" : "nơi nhận hàng";
+    ViewData["Title"] = Model.LaSua ? $"Sửa {ten} {Model.Ma}" : $"Thêm {ten}";
+}
+
+<div class="tieu-de-trang"><h1>@ViewData["Title"]</h1></div>
+
+<form class="the bieu-mau" method="post">
+    <partial name="_Form" model="Model" />
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

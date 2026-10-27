@@ -1,0 +1,68 @@
+@using quanlykho.Features.NhapKho
+@model DonMuaForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="the">
+    <h2>Thông tin chung</h2>
+    <div class="row g-3">
+        <div class="col-md-5">
+            <label asp-for="MaNhaCungCap" class="form-label bat-buoc"></label>
+            <select asp-for="MaNhaCungCap" class="form-select">
+                <option value="">Chọn nhà cung cấp</option>
+                @foreach (var n in Model.DanhSachNhaCungCap)
+                {
+                    <option value="@n.Ma" selected="@(n.Ma == Model.MaNhaCungCap)">@n.Ma – @n.Ten</option>
+                }
+            </select>
+            <span asp-validation-for="MaNhaCungCap"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="MaKho" class="form-label bat-buoc"></label>
+            @await Component.InvokeAsync("OChonKho", new { ten = nameof(Model.MaKho), chon = Model.MaKho, danhSach = Model.DanhSachKho })
+            <div class="form-text">Đơn có hàng cho nhiều kho thì lập nhiều đơn, mỗi đơn một kho.</div>
+        </div>
+        <div class="col-md-12">
+            <label asp-for="GhiChu" class="form-label"></label>
+            <input asp-for="GhiChu" class="form-control" />
+        </div>
+    </div>
+</div>
+
+<div class="the">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 me-auto">Dòng hàng</h2>
+        <button type="button" class="btn btn-outline-primary" data-them-dong="#dongDonMua">+ Thêm dòng</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table bang-dong-hang mb-0">
+            <thead><tr><th>#</th><th>Biến thể</th><th class="so">Số lượng</th><th class="so">Đơn giá</th><th class="so">Thành tiền</th><th></th></tr></thead>
+            <tbody id="dongDonMua" data-dong-hang>
+                @for (var i = 0; i < Model.Dong.Count; i++)
+                {
+                    <partial name="_DongDonMua" model="(Model, i.ToString())" />
+                }
+            </tbody>
+            <tfoot><tr><td colspan="4" class="text-end">Tổng tiền</td><td class="so tong-cong" data-tong-tien></td><td></td></tr></tfoot>
+            <template><partial name="_DongDonMua" model='(Model, "__i__")' /></template>
+        </table>
+    </div>
+    <div class="form-text">Số lượng và đơn giá theo đơn vị tính chính của hàng.</div>
+</div>
+
+<script>
+    (() => {
+        const bang = document.getElementById("dongDonMua");
+        const tinh = () => {
+            let tong = 0;
+            bang.querySelectorAll("tr").forEach((tr) => {
+                const tt = (+tr.querySelector("[data-so-luong]").value || 0) * (+tr.querySelector("[data-don-gia]").value || 0);
+                tr.querySelector("[data-thanh-tien]").textContent = QuanLyKho.dinhDangTien.format(tt);
+                tong += tt;
+            });
+            document.querySelector("[data-tong-tien]").textContent = QuanLyKho.dinhDangTien.format(tong);
+        };
+        document.addEventListener("DOMContentLoaded", tinh);
+        bang.addEventListener("input", tinh);
+        bang.addEventListener("dong-hang-doi", tinh);
+    })();
+</script>

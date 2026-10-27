@@ -12,7 +12,7 @@ public class LoConfiguration : IEntityTypeConfiguration<Lo>
         b.HasKey(x => x.MaLo);
         b.Property(x => x.MaLo).HasMaxLength(Ma);
         b.Property(x => x.MaBienThe).HasMaxLength(Ma);
-        b.HasOne<BienThe>().WithMany().HasForeignKey(x => x.MaBienThe);
+        b.HasOne(x => x.BienThe).WithMany().HasForeignKey(x => x.MaBienThe);
         b.HasIndex(x => new { x.MaBienThe, x.HanDung });
     }
 }

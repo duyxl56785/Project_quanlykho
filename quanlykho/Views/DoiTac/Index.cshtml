@@ -1,0 +1,67 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.DanhMuc
+@model TrangDuLieu<DoiTacDong>
+@{
+    var loai = (LoaiDoiTac)ViewData["Loai"]!;
+    var ten = loai == LoaiDoiTac.NhaCungCap ? "Nhà cung cấp" : "Nơi nhận hàng";
+    ViewData["Title"] = ten;
+    var trangThaiChon = ViewData["TrangThai"] as TrangThaiSuDung?;
+    var laQuanTri = User.IsInRole(Vai.QuanTri);
+}
+
+<div class="tieu-de-trang">
+    <h1>@ten</h1>
+    @if (laQuanTri)
+    {
+        <a class="btn btn-primary" asp-action="Them" asp-route-loai="@loai">Thêm</a>
+    }
+</div>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link @(loai == LoaiDoiTac.NhaCungCap ? "active" : "")" href="/DanhMuc/NhaCungCap">Nhà cung cấp</a></li>
+    <li class="nav-item"><a class="nav-link @(loai == LoaiDoiTac.NoiNhan ? "active" : "")" href="/DanhMuc/NoiNhan">Nơi nhận hàng</a></li>
+</ul>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Tìm kiếm</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@ViewData["TuKhoa"]" placeholder="Mã, tên" />
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+            {
+                <option value="@t" selected="@(t == trangThaiChon)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" href="/DanhMuc/@loai">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có dòng nào khớp bộ lọc.">
+    <thead><tr><th>Mã</th><th>Tên</th><th>Địa chỉ</th><th>Người liên hệ</th><th>Điện thoại</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var d in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@d.Ma</td>
+                <td>@d.Ten</td>
+                <td>@d.DiaChi</td>
+                <td>@d.NguoiLienHe</td>
+                <td>@d.SoDienThoai</td>
+                <td><partial name="_HuyHieuTrangThai" model="d.TrangThai" /></td>
+                <td class="text-end">
+                    @if (laQuanTri)
+                    {
+                        <a class="btn btn-sm btn-outline-secondary" href="/DanhMuc/@loai/@d.Ma">Sửa</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

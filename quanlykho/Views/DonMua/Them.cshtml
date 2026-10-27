@@ -1,0 +1,12 @@
+@model quanlykho.Features.NhapKho.DonMuaForm
+@{ ViewData["Title"] = "Lập đơn mua"; }
+
+<div class="tieu-de-trang"><h1>Lập đơn mua</h1></div>
+
+<form method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut">
+        <button type="submit" class="btn btn-primary">Lưu đơn</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>

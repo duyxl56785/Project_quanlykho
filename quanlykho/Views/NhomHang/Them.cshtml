@@ -1,0 +1,13 @@
+@model quanlykho.Features.DanhMuc.NhomForm
+@{ ViewData["Title"] = "Thêm nhóm hàng"; }
+
+<div class="tieu-de-trang"><h1>Thêm nhóm hàng</h1></div>
+
+<form class="the bieu-mau" method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+    <p class="form-text mt-3 mb-0">Sau khi lưu, khai báo thuộc tính của nhóm (ví dụ Size, Màu, Công suất) ở trang sửa nhóm.</p>
+    <div class="thanh-nut mt-4">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>

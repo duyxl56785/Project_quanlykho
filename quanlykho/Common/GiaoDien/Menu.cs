@@ -3,7 +3,7 @@ using quanlykho.Domain;
 namespace quanlykho.Common.GiaoDien;
 
 /// <param name="Url">null khi màn hình chưa làm: hiện mờ trên menu.</param>
-/// <param name="VaiTro">null là mọi vai; lọc theo vai làm ở nhiệm vụ đăng nhập.</param>
+/// <param name="VaiTro">null là mọi vai; _Layout chỉ hiện mục người dùng được phép mở.</param>
 public record MucMenu(string Ten, string? Url, VaiTro[]? VaiTro = null);
 
 public record NhomMenu(string Ten, MucMenu[] Muc);
@@ -16,10 +16,10 @@ public static class Menu
     public static readonly NhomMenu[] TatCa =
     [
         new("Chung", [new("Tổng quan", "/")]),
-        new("Nhập kho", [new("Đơn mua", null), new("Hóa đơn nhập", null), new("Xếp hàng", null)]),
+        new("Nhập kho", [new("Đơn mua", "/DonMua", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Hóa đơn nhập", "/PhieuNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Xếp hàng", null)]),
         new("Xuất kho", [new("Tồn khả dụng", null), new("Đơn đặt hàng", null), new("Lệnh xuất", null)]),
         new("Kho", [new("Chuyển kho", null), new("Kiểm kê", null), new("Báo cáo tồn", null)]),
-        new("Danh mục", [new("Hàng hóa", null), new("Kho và vị trí", null), new("Nhà cung cấp, nơi nhận", null)]),
-        new("Hệ thống", [new("Người dùng", null, QuanTri), new("Nhật ký", null, QuanTri), new("Styleguide", "/Styleguide", QuanTri)]),
+        new("Danh mục", [new("Hàng hóa", "/DanhMuc/SanPham"), new("Nhóm hàng", "/DanhMuc/NhomHang"), new("Kho và vị trí", null), new("Nhà cung cấp, nơi nhận", "/DanhMuc/NhaCungCap")]),
+        new("Hệ thống", [new("Người dùng", "/NguoiDung", QuanTri), new("Nhật ký", null, QuanTri), new("Styleguide", "/Styleguide", QuanTri)]),
     ];
 }
