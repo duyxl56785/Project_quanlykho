@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Testing;
+using quanlykho.Tests.HaTang;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using quanlykho.Common.Loi;
@@ -27,7 +27,7 @@ public class ThuLoiApiController : ControllerBase
     public IActionResult KhongQuyen() => throw new KhongCoQuyenException();
 }
 
-public class XuLyLoiTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class XuLyLoiTests(UngDungFactory factory) : IClassFixture<UngDungFactory>
 {
     private HttpClient TaoClient() => factory.WithWebHostBuilder(b => b.ConfigureServices(s =>
         s.AddControllers().AddApplicationPart(typeof(ThuLoiApiController).Assembly))).CreateClient();

@@ -26,12 +26,16 @@ dotnet tool restore           # lần đầu: cài dotnet-ef
 ```
 
 ```bash
-dotnet test                   # chạy toàn bộ test (quanlykho.Tests)
+dotnet test                   # chạy toàn bộ test (quanlykho.Tests); test tích hợp cần Docker đang chạy
+dotnet ef migrations add <Ten> --project quanlykho --output-dir Data/Migrations   # thêm migration
+dotnet ef database update --project quanlykho                                       # áp migration vào DB dev
 ```
+
+Khi app đang chạy bằng `dotnet run`, thư mục `bin/Debug` bị khóa: thêm `--configuration Release` cho lệnh `dotnet ef`. Ở Development app tự chạy migration lúc khởi động (`Csdl:TuDongMigrate` trong `appsettings.Development.json`).
 
 Kiểm tra kết nối CSDL: `GET /health/db` (200 khi kết nối được, 503 khi không).
 
-Test nằm ở `quanlykho.Tests/` (xUnit, `WebApplicationFactory<Program>` để dựng app trong bộ nhớ). CI ở `.github/workflows/ci.yml` chạy build và test khi push `develop`, `main` và khi có pull request.
+Test nằm ở `quanlykho.Tests/` (xUnit). Test dựng app dùng `HaTang/UngDungFactory` (tắt tự migrate). Test cần CSDL đặt trong `Integration/`, gắn `[Collection(CsdlCollection.Ten)]` và gọi `CsdlFixture.TaoCsdlAsync()` để có database riêng đã migrate trên container PostgreSQL của Testcontainers. CI ở `.github/workflows/ci.yml` chạy build và test khi push `develop`, `main` và khi có pull request.
 
 Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án khác dùng) qua `docker-compose.override.yml` (copy từ `docker-compose.override.example.yml`, đã nằm trong `.gitignore`). Chuỗi kết nối cổng 5434 đặt bằng `dotnet user-secrets` (khóa `ConnectionStrings:QuanLyKho`); `appsettings.Development.json` giữ cổng 5432 mặc định.
 
@@ -43,7 +47,8 @@ Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án k
 - Văn hóa request cố định là InvariantCulture (số `1.5`, ngày `yyyy-MM-dd` khi gửi lên); hiển thị kiểu Việt Nam do helper định dạng làm. Giờ hiện tại lấy qua `TimeProvider` (đã đăng ký), không gọi `DateTime.Now`.
 - API REST trả JSON dưới `/api/...`, đường dẫn tiếng Việt không dấu dạng kebab: `/api/don-mua`, `/api/phieu-nhap/{ma}/xac-nhan`, `/api/vi-tri/o-phu-hop`, `/api/xep-hang`.
 - Bảng và cột đặt tên tiếng Việt không dấu PascalCase như trong báo cáo: `ViTri`, `BienThe`, `Lo`, `TonKho`, `SoBienDong`, `DonMua`, `PhieuNhap`, `DonViQuyDoi`, `MaViTri`, `SoLuongDaGiu`...
-- Thay đổi CSDL bằng migration của EF Core.
+- Thay đổi CSDL bằng migration của EF Core. Cấu hình bảng bằng Fluent API trong `Data/Configurations/` (một lớp `IEntityTypeConfiguration` mỗi bảng, gom theo mảng); kiểu cột dùng helper trong `CauHinhChung` (`KichThuoc`, `KhoiLuong`, `SoLuong`, `Tien`, `ChiNhan<TEnum>`, `Check`). Enum mới phải thêm vào `ConfigureConventions` của `AppDbContext`. Mọi khóa ngoại là RESTRICT.
+- Mã chứng từ sinh bằng `MaChungTu.TaoAsync("PN")` (sequence PostgreSQL theo tiền tố).
 
 ## Quy tắc nghiệp vụ bắt buộc (Bảng 1.5)
 

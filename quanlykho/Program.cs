@@ -12,8 +12,15 @@ builder.Services.AddControllersWithViews(options => options.Filters.Add<XuLyLoiF
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<MaChungTu>();
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("Csdl:TuDongMigrate"))
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -1,7 +1,53 @@
 using Microsoft.EntityFrameworkCore;
+using quanlykho.Common;
+using quanlykho.Domain;
 
 namespace quanlykho.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<NhomHang> NhomHang => Set<NhomHang>();
+    public DbSet<ThuocTinh> ThuocTinh => Set<ThuocTinh>();
+    public DbSet<SanPham> SanPham => Set<SanPham>();
+    public DbSet<BienThe> BienThe => Set<BienThe>();
+    public DbSet<DonViQuyDoi> DonViQuyDoi => Set<DonViQuyDoi>();
+    public DbSet<NhaCungCap> NhaCungCap => Set<NhaCungCap>();
+    public DbSet<NoiNhan> NoiNhan => Set<NoiNhan>();
+    public DbSet<MucTon> MucTon => Set<MucTon>();
+    public DbSet<ViTri> ViTri => Set<ViTri>();
+    public DbSet<NguoiDung> NguoiDung => Set<NguoiDung>();
+    public DbSet<NguoiDungKho> NguoiDungKho => Set<NguoiDungKho>();
+    public DbSet<Lo> Lo => Set<Lo>();
+    public DbSet<TonKho> TonKho => Set<TonKho>();
+    public DbSet<SoBienDong> SoBienDong => Set<SoBienDong>();
+    public DbSet<DonMua> DonMua => Set<DonMua>();
+    public DbSet<ChiTietDonMua> ChiTietDonMua => Set<ChiTietDonMua>();
+    public DbSet<PhieuNhap> PhieuNhap => Set<PhieuNhap>();
+    public DbSet<ChiTietPhieuNhap> ChiTietPhieuNhap => Set<ChiTietPhieuNhap>();
+    public DbSet<NhatKy> NhatKy => Set<NhatKy>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder c)
+    {
+        c.Properties<VaiTro>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiTaiKhoan>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiSuDung>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<DieuKienBaoQuan>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<LoaiKhu>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<ChatLuong>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiDonMua>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiPhieu>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<LoaiPhieuNhap>().HaveConversion<string>().HaveMaxLength(20);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        foreach (var tienTo in MaChungTu.TienTo)
+            modelBuilder.HasSequence<long>(MaChungTu.TenSequence(tienTo));
+
+        // Không xóa cứng dữ liệu đã có tham chiếu: mọi khóa ngoại là RESTRICT.
+        foreach (var fk in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            fk.DeleteBehavior = DeleteBehavior.Restrict;
+    }
 }

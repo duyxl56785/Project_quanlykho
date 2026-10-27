@@ -1,9 +1,9 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
+using quanlykho.Tests.HaTang;
 
 namespace quanlykho.Tests;
 
-public class HomePageTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class HomePageTests(UngDungFactory factory) : IClassFixture<UngDungFactory>
 {
     [Fact]
     public async Task TrangChu_TraVe200()
