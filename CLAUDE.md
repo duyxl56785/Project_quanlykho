@@ -8,6 +8,7 @@ Phần mềm quản lý kho tổng: một hệ thống quản lý tập trung nh
 
 - Stack: ASP.NET Core MVC (.NET 10), Entity Framework Core, PostgreSQL (chạy bằng docker compose).
 - Một người làm toàn bộ dự án. Phần phân vai nhóm, giờ làm và người phụ trách trong báo cáo chỉ để tham khảo, không áp dụng.
+- Tiến độ và quy trình làm từng nhiệm vụ: [docs/NHIEM_VU.md](docs/NHIEM_VU.md). Làm xong nhiệm vụ nào thì tích ở đó, kèm mã commit gộp.
 - Đặc tả đầy đủ: [docs/BaoCao_DoAn_QuanLyKho.md](docs/BaoCao_DoAn_QuanLyKho.md). Hình (use case, sơ đồ hoạt động, ERD) ở `docs/images/`, `hinh-NN.png` ứng với Hình 2.NN. Khi chi tiết trong file này chưa đủ, đọc mục tương ứng của báo cáo.
 
 ## Lệnh
