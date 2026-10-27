@@ -44,3 +44,23 @@ public class ChiTietDonDatConfiguration : IEntityTypeConfiguration<ChiTietDonDat
         b.HasOne<BienThe>().WithMany().HasForeignKey(x => x.MaBienThe);
     }
 }
+
+public class LichSuGoiYConfiguration : IEntityTypeConfiguration<LichSuGoiY>
+{
+    public void Configure(EntityTypeBuilder<LichSuGoiY> b)
+    {
+        b.ToTable(t => t.ChiNhan<LoaiGoiY>(nameof(LichSuGoiY.Loai)));
+        b.HasKey(x => x.MaGoiY);
+        b.Property(x => x.MaGoiY).UseIdentityAlwaysColumn();
+        b.Property(x => x.MaKho).HasMaxLength(MaViTri);
+        b.Property(x => x.MaBienThe).HasMaxLength(Ma);
+        b.Property(x => x.NguoiDung).HasMaxLength(Ma);
+        b.Property(x => x.DauVao).HasColumnType("jsonb");
+        b.Property(x => x.KetQua).HasColumnType("jsonb");
+        b.Property(x => x.MaChungTu).HasMaxLength(Ma);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaKho);
+        b.HasOne<BienThe>().WithMany().HasForeignKey(x => x.MaBienThe);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiDung);
+        b.HasIndex(x => new { x.Loai, x.ThoiDiem });
+    }
+}

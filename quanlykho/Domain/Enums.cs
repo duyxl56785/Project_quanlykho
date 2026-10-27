@@ -24,3 +24,6 @@ public enum LoaiPhieuNhap { MuaHang, NhapKhac, TonDauKy }
 
 /// <summary>Đơn đặt hàng (Bảng 2.14 dòng 2). Hủy chỉ trước khi xuất.</summary>
 public enum TrangThaiDonDat { Nhap, ChoDuyet, DaDuyet, DangXuat, HoanThanh, DaHuy }
+
+/// <summary>G1 gợi ý lấy hàng, G3 gợi ý nhập bổ sung.</summary>
+public enum LoaiGoiY { LayHang, NhapBoSung }

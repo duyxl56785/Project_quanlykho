@@ -20,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ChuyenViTri> ChuyenViTri => Set<ChuyenViTri>();
     public DbSet<DonDatHang> DonDatHang => Set<DonDatHang>();
     public DbSet<ChiTietDonDat> ChiTietDonDat => Set<ChiTietDonDat>();
+    public DbSet<LichSuGoiY> LichSuGoiY => Set<LichSuGoiY>();
     public DbSet<Lo> Lo => Set<Lo>();
     public DbSet<TonKho> TonKho => Set<TonKho>();
     public DbSet<SoBienDong> SoBienDong => Set<SoBienDong>();
@@ -42,6 +43,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         c.Properties<LoaiPhieuNhap>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<LoaiChuyenViTri>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<TrangThaiDonDat>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<LoaiGoiY>().HaveConversion<string>().HaveMaxLength(20);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
