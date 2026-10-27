@@ -439,6 +439,70 @@ namespace quanlykho.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("quanlykho.Domain.LichSuGoiY", b =>
+                {
+                    b.Property<long>("MaGoiY")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("MaGoiY"));
+
+                    b.Property<bool?>("ChapNhan")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("DauVao")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("KetQua")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Loai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaBienThe")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaChungTu")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaKho")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("NguoiDung")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("ThoiDiem")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ThoiDiemPhanHoi")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MaGoiY");
+
+                    b.HasIndex("MaBienThe");
+
+                    b.HasIndex("MaKho");
+
+                    b.HasIndex("NguoiDung");
+
+                    b.HasIndex("Loai", "ThoiDiem");
+
+                    b.ToTable("LichSuGoiY", t =>
+                        {
+                            t.HasCheckConstraint("CK_LichSuGoiY_Loai", "\"Loai\" IN ('LayHang', 'NhapBoSung')");
+                        });
+                });
+
             modelBuilder.Entity("quanlykho.Domain.Lo", b =>
                 {
                     b.Property<string>("MaLo")
@@ -1184,6 +1248,26 @@ namespace quanlykho.Data.Migrations
                     b.HasOne("quanlykho.Domain.BienThe", null)
                         .WithMany()
                         .HasForeignKey("MaBienThe")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("quanlykho.Domain.LichSuGoiY", b =>
+                {
+                    b.HasOne("quanlykho.Domain.BienThe", null)
+                        .WithMany()
+                        .HasForeignKey("MaBienThe")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("quanlykho.Domain.ViTri", null)
+                        .WithMany()
+                        .HasForeignKey("MaKho")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiDung")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

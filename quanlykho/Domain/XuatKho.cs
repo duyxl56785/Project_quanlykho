@@ -25,3 +25,24 @@ public class ChiTietDonDat
     /// <summary>Theo đơn vị tính chính, cập nhật khi xác nhận phiếu xuất.</summary>
     public decimal SoLuongDaXuat { get; set; }
 }
+
+/// <summary>Lịch sử gợi ý AI (G1, G3): đầu vào, kết quả và người dùng có chấp nhận không, để thống kê tỷ lệ chấp nhận.</summary>
+public class LichSuGoiY
+{
+    public long MaGoiY { get; set; }
+    public LoaiGoiY Loai { get; set; }
+    public string MaKho { get; set; } = "";
+    /// <summary>G1 gợi ý cho một biến thể; G3 gợi ý cả danh sách nên để trống.</summary>
+    public string? MaBienThe { get; set; }
+    public DateTimeOffset ThoiDiem { get; set; }
+    public string NguoiDung { get; set; } = "";
+    /// <summary>JSON.</summary>
+    public string DauVao { get; set; } = "";
+    /// <summary>JSON.</summary>
+    public string KetQua { get; set; } = "";
+    /// <summary>Null khi chưa biết người dùng có làm theo không.</summary>
+    public bool? ChapNhan { get; set; }
+    public DateTimeOffset? ThoiDiemPhanHoi { get; set; }
+    /// <summary>Chứng từ dùng gợi ý (đơn đặt khi giữ hàng, lệnh xuất khi lấy hàng, đơn mua ở G3).</summary>
+    public string? MaChungTu { get; set; }
+}
