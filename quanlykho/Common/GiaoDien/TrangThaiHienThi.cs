@@ -20,6 +20,9 @@ public static class TrangThaiHienThi
         ["DaKhoa"] = ("Đã khóa", "do"),
         ["DangSuDung"] = ("Đang sử dụng", "luc"),
         ["NgungSuDung"] = ("Ngừng sử dụng", "xam"),
+        ["ChoDuyet"] = ("Chờ duyệt", "vang"),
+        ["DaDuyet"] = ("Đã duyệt", "lam"),
+        ["DangXuat"] = ("Đang xuất", "lam"),
         ["Dat"] = ("Đạt", "luc"),
         ["Loi"] = ("Lỗi", "do"),
     };

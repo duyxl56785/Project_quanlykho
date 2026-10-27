@@ -1,0 +1,67 @@
+@using quanlykho.Features.XuatKho
+@model TrangDuLieu<TonKhaDungDong>
+@{
+    ViewData["Title"] = "Tồn khả dụng";
+    dynamic loc = ViewData["Loc"]!;
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+    var cot = string.IsNullOrEmpty((string?)loc.maKho) ? kho : kho.Where(k => k.Ma == (string)loc.maKho).ToList();
+}
+
+<div class="tieu-de-trang"><h1>Tồn khả dụng</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Tìm hàng</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@loc.tuKhoa" placeholder="Mã, tên hoặc quét mã vạch" autofocus />
+    </div>
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = kho })
+    </div>
+    <div class="form-check align-self-center">
+        <input class="form-check-input" type="checkbox" id="chiConHang" name="chiConHang" value="true" checked="@((bool)loc.chiConHang)" />
+        <input type="hidden" name="chiConHang" value="false" />
+        <label class="form-check-label" for="chiConHang">Chỉ hàng còn khả dụng</label>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Tìm</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có hàng nào khớp tìm kiếm.">
+    <thead>
+        <tr>
+            <th>Hàng</th><th>Đơn vị</th>
+            @foreach (var k in cot)
+            {
+                <th class="so">@k.Ma</th>
+            }
+            @if (cot.Count > 1)
+            {
+                <th class="so">Tổng</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Muc)
+        {
+            <tr>
+                <td class="cot-chinh">
+                    <span class="fw-semibold">@d.MaBienThe</span>
+                    <div class="small text-secondary">@d.TenHang@(d.MaVach is null ? "" : $" · {d.MaVach}")</div>
+                </td>
+                <td>@d.DonViTinh</td>
+                @foreach (var k in cot)
+                {
+                    <td class="so">@So(d.TheoKho.GetValueOrDefault(k.Ma))</td>
+                }
+                @if (cot.Count > 1)
+                {
+                    <td class="so tong-cong">@So(d.Tong)</td>
+                }
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>
+<p class="text-secondary mt-2">Tồn khả dụng chỉ tính hàng đã xếp vào khu lưu trữ, chưa hết hạn, không đang kiểm kê, trừ phần đã giữ cho đơn khác. Hàng ở khu tiếp nhận, cách ly và hàng đang chuyển kho không tính.</p>

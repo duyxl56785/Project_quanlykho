@@ -21,3 +21,6 @@ public enum TrangThaiDonMua { Nhap, ChuaThucHien, DangThucHien, HoanThanh, DaHuy
 public enum TrangThaiPhieu { LuuTam, HoanTat, DaHuy }
 
 public enum LoaiPhieuNhap { MuaHang, NhapKhac, TonDauKy }
+
+/// <summary>Đơn đặt hàng (Bảng 2.14 dòng 2). Hủy chỉ trước khi xuất.</summary>
+public enum TrangThaiDonDat { Nhap, ChoDuyet, DaDuyet, DangXuat, HoanThanh, DaHuy }

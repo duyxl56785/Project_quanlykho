@@ -1,0 +1,13 @@
+@model quanlykho.Features.XuatKho.DonDatForm
+@{ ViewData["Title"] = "Tạo đơn đặt hàng"; }
+
+<div class="tieu-de-trang"><h1>Tạo đơn đặt hàng</h1></div>
+
+<form method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut">
+        <button type="submit" class="btn btn-primary" name="guiDuyet" value="true">Gửi duyệt</button>
+        <button type="submit" class="btn btn-outline-primary" name="guiDuyet" value="false">Lưu nháp</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>
