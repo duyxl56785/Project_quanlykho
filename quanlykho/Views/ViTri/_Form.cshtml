@@ -1,0 +1,71 @@
+@using quanlykho.Features.Kho
+@model ViTriForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<input type="hidden" asp-for="MaCha" />
+
+<div class="the">
+    <p class="text-secondary mb-3">Thuộc: @Model.TenDayDuCha</p>
+    <div class="row g-3">
+        <div class="col-sm-4 col-md-3">
+            <label asp-for="So" class="form-label"></label>
+            <input asp-for="So" class="form-control text-end" type="number" min="1" max="99" disabled="@(Model.Ma is not null)" />
+            <div class="form-text">Mã sinh ra: mã cha + "-" + tiền tố cấp + số 2 chữ số.</div>
+            <span asp-validation-for="So"></span>
+        </div>
+        <div class="col-sm-8 col-md-9">
+            <label asp-for="Ten" class="form-label bat-buoc"></label>
+            <input asp-for="Ten" class="form-control" placeholder="@CapViTri.Ten(Model.Cap) 1" />
+            <span asp-validation-for="Ten"></span>
+        </div>
+
+        @if (Model.Cap == CapViTri.CapKhaiKhu)
+        {
+            <div class="col-md-6">
+                <label asp-for="LoaiKhu" class="form-label bat-buoc"></label>
+                <select asp-for="LoaiKhu" class="form-select">
+                    <option value="">Chọn loại khu</option>
+                    @foreach (var k in Enum.GetValues<LoaiKhu>())
+                    {
+                        <option value="@k" selected="@(k == Model.LoaiKhu)">@CapViTri.TenKhu(k)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DieuKienBaoQuan" class="form-label bat-buoc"></label>
+                <select asp-for="DieuKienBaoQuan" class="form-select">
+                    <option value="">Chọn điều kiện</option>
+                    @foreach (var d in Enum.GetValues<DieuKienBaoQuan>())
+                    {
+                        <option value="@d" selected="@(d == Model.DieuKienBaoQuan)">@CapViTri.TenBaoQuan(d)</option>
+                    }
+                </select>
+                <div class="form-text">Các cấp con (hàng, kệ, ô) kế thừa loại khu và điều kiện bảo quản này.</div>
+            </div>
+        }
+        else if (Model.KeThua is not null)
+        {
+            <div class="col-12"><span class="text-secondary">Kế thừa từ phòng – dãy:</span> @Model.KeThua</div>
+        }
+
+        @if (Model.Cap == CapViTri.CapCuoi)
+        {
+            <div class="col-6 col-md-3">
+                <label asp-for="Dai" class="form-label bat-buoc"></label>
+                <input asp-for="Dai" class="form-control text-end" type="number" min="0.001" step="any" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label asp-for="Rong" class="form-label bat-buoc"></label>
+                <input asp-for="Rong" class="form-control text-end" type="number" min="0.001" step="any" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label asp-for="Cao" class="form-label bat-buoc"></label>
+                <input asp-for="Cao" class="form-control text-end" type="number" min="0.001" step="any" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label asp-for="TaiTrongToiDa" class="form-label bat-buoc"></label>
+                <input asp-for="TaiTrongToiDa" class="form-control text-end" type="number" min="0.001" step="any" />
+            </div>
+            <div class="col-12 form-text mt-1">Kích thước trong lòng ô, dùng để kiểm tra sức chứa khi xếp hàng.</div>
+        }
+    </div>
+</div>
