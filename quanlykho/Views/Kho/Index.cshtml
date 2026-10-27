@@ -1,0 +1,62 @@
+@using quanlykho.Features.Kho
+@model List<KhoDong>
+@{
+    ViewData["Title"] = "Danh mục kho";
+}
+
+<div class="tieu-de-trang">
+    <h1>Danh mục kho</h1>
+    <a class="btn btn-primary" asp-action="Them">Thêm kho</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <partial name="_TrangRong" model='"Chưa có kho nào."' />
+}
+else
+{
+    <div class="bang-du-lieu">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr><th>Kho</th><th class="so">Hệ số lấp đầy</th><th class="so">Số ô</th><th>Người được giao</th><th>Trạng thái</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var k in Model)
+                    {
+                        var dangDung = k.TrangThai == quanlykho.Domain.TrangThaiSuDung.DangSuDung;
+                        <tr>
+                            <td class="cot-chinh">
+                                <span class="fw-semibold">@k.Ten</span>
+                                <div class="small text-secondary">@k.Ma@(string.IsNullOrEmpty(k.LoaiHangLuuTru) ? "" : $" · {k.LoaiHangLuuTru}")</div>
+                                <div class="small text-secondary">@k.DiaChi</div>
+                            </td>
+                            <td class="so">@So(k.HeSoLapDay)</td>
+                            <td class="so">@k.SoO</td>
+                            <td class="cot-chinh">@(k.NguoiDuocGiao.Count == 0 ? "–" : string.Join(", ", k.NguoiDuocGiao))</td>
+                            <td class="text-nowrap"><partial name="_HuyHieuTrangThai" model="k.TrangThai" /></td>
+                            <td>
+                                <div class="thanh-nut justify-content-end flex-nowrap">
+                                    <a class="btn btn-sm btn-outline-secondary text-nowrap" asp-action="Sua" asp-route-ma="@k.Ma">Sửa</a>
+                                    <a class="btn btn-sm btn-outline-secondary text-nowrap" asp-controller="ViTri" asp-action="Index" asp-route-maKho="@k.Ma">Vị trí</a>
+                                    @if (!k.CoOMacDinh)
+                                    {
+                                        <form method="post" asp-action="KhuMacDinh" asp-route-ma="@k.Ma"
+                                              data-xac-nhan="Tạo cho kho @k.Ma một tòa mới gồm khu tiếp nhận, lưu trữ, cách ly, xuất (mỗi khu một ô)?">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">Tạo khu mặc định</button>
+                                        </form>
+                                    }
+                                    <form method="post" asp-action="Khoa" asp-route-ma="@k.Ma" asp-route-khoa="@dangDung"
+                                          data-xac-nhan="@(dangDung ? $"Ngừng sử dụng kho {k.Ma}? Mọi vị trí của kho bị khóa." : $"Dùng lại kho {k.Ma}? Mọi vị trí của kho được mở khóa.")">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap">@(dangDung ? "Ngừng sử dụng" : "Dùng lại")</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-secondary mt-2">Kho chưa có ô mặc định thì chưa xác nhận hóa đơn nhập được: bấm "Tạo khu mặc định".</p>
+}

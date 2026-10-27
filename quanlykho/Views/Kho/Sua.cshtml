@@ -1,0 +1,21 @@
+@model quanlykho.Features.Kho.KhoForm
+@{
+    ViewData["Title"] = $"Kho {Model.Ma}";
+}
+
+<div class="tieu-de-trang">
+    <h1>Sửa kho @Model.Ma</h1>
+    <a class="btn btn-outline-secondary" asp-controller="ViTri" asp-action="Index" asp-route-maKho="@Model.Ma">Cây vị trí</a>
+</div>
+
+<form class="the bieu-mau" method="post" asp-action="Sua" asp-route-ma="@Model.Ma">
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut mt-4">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Quay lại danh sách</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
