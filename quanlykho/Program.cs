@@ -35,3 +35,6 @@ app.MapGet("/health/db", async (AppDbContext db) =>
 
 
 app.Run();
+
+// Cho dự án test dùng WebApplicationFactory<Program>.
+public partial class Program;
