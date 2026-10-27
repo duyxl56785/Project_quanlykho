@@ -100,6 +100,46 @@ namespace quanlykho.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("quanlykho.Domain.ChiTietDonDat", b =>
+                {
+                    b.Property<string>("MaDonDat")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaBienThe")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("HeSo")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SoLuongDaXuat")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("numeric(14,3)");
+
+                    b.Property<decimal>("SoLuongDat")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("numeric(14,3)");
+
+                    b.Property<string>("TenDonVi")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("MaDonDat", "MaBienThe");
+
+                    b.HasIndex("MaBienThe");
+
+                    b.ToTable("ChiTietDonDat", t =>
+                        {
+                            t.HasCheckConstraint("CK_ChiTietDonDat_HeSo", "\"HeSo\" >= 1");
+
+                            t.HasCheckConstraint("CK_ChiTietDonDat_SoLuongDaXuat", "\"SoLuongDaXuat\" >= 0 AND \"SoLuongDaXuat\" <= \"SoLuongDat\" * \"HeSo\"");
+
+                            t.HasCheckConstraint("CK_ChiTietDonDat_SoLuongDat", "\"SoLuongDat\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("quanlykho.Domain.ChiTietDonMua", b =>
                 {
                     b.Property<string>("MaDonMua")
@@ -264,6 +304,56 @@ namespace quanlykho.Data.Migrations
                             t.HasCheckConstraint("CK_ChuyenViTri_Loai", "\"Loai\" IN ('XepHang', 'ChuyenTrongKho')");
 
                             t.HasCheckConstraint("CK_ChuyenViTri_SoLuong", "\"SoLuong\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("quanlykho.Domain.DonDatHang", b =>
+                {
+                    b.Property<string>("MaDonDat")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateOnly?>("HanGiao")
+                        .HasColumnType("date");
+
+                    b.Property<string>("MaKho")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("MaNoiNhan")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NguoiTao")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("MaDonDat");
+
+                    b.HasIndex("MaNoiNhan");
+
+                    b.HasIndex("NguoiTao");
+
+                    b.HasIndex("MaKho", "TrangThai");
+
+                    b.ToTable("DonDatHang", t =>
+                        {
+                            t.HasCheckConstraint("CK_DonDatHang_TrangThai", "\"TrangThai\" IN ('Nhap', 'ChoDuyet', 'DaDuyet', 'DangXuat', 'HoanThanh', 'DaHuy')");
                         });
                 });
 
@@ -969,6 +1059,21 @@ namespace quanlykho.Data.Migrations
                     b.Navigation("SanPham");
                 });
 
+            modelBuilder.Entity("quanlykho.Domain.ChiTietDonDat", b =>
+                {
+                    b.HasOne("quanlykho.Domain.BienThe", null)
+                        .WithMany()
+                        .HasForeignKey("MaBienThe")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.DonDatHang", null)
+                        .WithMany("ChiTiet")
+                        .HasForeignKey("MaDonDat")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("quanlykho.Domain.ChiTietDonMua", b =>
                 {
                     b.HasOne("quanlykho.Domain.BienThe", null)
@@ -1028,6 +1133,27 @@ namespace quanlykho.Data.Migrations
                     b.HasOne("quanlykho.Domain.NguoiDung", null)
                         .WithMany()
                         .HasForeignKey("NguoiThucHien")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("quanlykho.Domain.DonDatHang", b =>
+                {
+                    b.HasOne("quanlykho.Domain.ViTri", null)
+                        .WithMany()
+                        .HasForeignKey("MaKho")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.NoiNhan", null)
+                        .WithMany()
+                        .HasForeignKey("MaNoiNhan")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiTao")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -1211,6 +1337,11 @@ namespace quanlykho.Data.Migrations
                         .HasForeignKey("MaKho")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("quanlykho.Domain.DonDatHang", b =>
+                {
+                    b.Navigation("ChiTiet");
                 });
 
             modelBuilder.Entity("quanlykho.Domain.DonMua", b =>
