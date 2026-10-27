@@ -1,0 +1,6 @@
+# Copy thành docker-compose.override.yml (đã có trong .gitignore) khi cổng 5432 đang bị dự án khác dùng.
+# !override thay hẳn danh sách cổng; không có nó Compose sẽ cộng dồn và vẫn mở 5432.
+services:
+  db:
+    ports: !override
+      - "5433:5432"
