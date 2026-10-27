@@ -1,12 +1,17 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using quanlykho.Common;
+using quanlykho.Common.Loi;
 using quanlykho.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.Filters.Add<XuLyLoiFilter>());
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
+builder.Services.AddSingleton(TimeProvider.System);
 
 var app = builder.Build();
 
@@ -19,6 +24,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Đọc số và ngày gửi lên bằng InvariantCulture ("1.5", "2026-10-27") trên mọi máy; hiển thị kiểu Việt Nam do helper định dạng lo.
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
+    SupportedCultures = [CultureInfo.InvariantCulture],
+    SupportedUICultures = [CultureInfo.InvariantCulture],
+    RequestCultureProviders = []
+});
 app.UseRouting();
 
 app.UseAuthorization();
@@ -30,8 +43,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.MapGet("/health/db", async (AppDbContext db) =>
-    await db.Database.CanConnectAsync() ? Results.Ok("OK") : Results.StatusCode(503));
+app.MapKiemTraCsdl();
 
 
 app.Run();
