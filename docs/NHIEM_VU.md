@@ -53,7 +53,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 - [x] Vị trí cây 7 cấp (FR11, S3-01) — 0571a5c
   - Xong khi: tạo được mã `K01-TA02-TG03-P04-H05-KE06-O07` trên giao diện; loại khu, điều kiện bảo quản, kích thước và tải trọng ô; vị trí có hàng chỉ khóa, không xóa.
-- [ ] In nhãn mã vạch lô và ô
+- [x] In nhãn mã vạch lô và ô — fc21699
   - Xong khi: in được nhãn Code 128 cho nhiều ô và cho các lô của một hóa đơn nhập; nhãn in ra quét lại bằng máy quét ra đúng mã; ô quét mã nhận cả mã lô và mã ô.
 - [ ] Danh mục kho, gán người dùng theo kho (S3-03)
   - Xong khi: thêm kho thứ hai, gán thủ kho và quản lý kho; người dùng chỉ thấy kho được giao.
