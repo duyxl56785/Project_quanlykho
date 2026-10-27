@@ -37,7 +37,10 @@ Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án k
 
 ## Kiến trúc
 
-- Controller, Service, Repository, chia theo mảng chức năng; mỗi mảng có Controller, Service, View riêng.
+- Thư mục (KE_HOACH.md A1): `Domain/` entity và enum; `Data/` DbContext, cấu hình bảng, migration, dữ liệu thử; `Common/` phần dùng chung (lỗi, cổng ghi tồn, phân quyền, nhật ký); `Features/<Mang>/` controller trang, controller API, service, ViewModel của từng mảng; view ở `Views/<Mang>/`.
+- Controller, Service theo mảng; không có tầng Repository riêng, `AppDbContext` đóng vai trò đó. Luật nghiệp vụ chỉ nằm trong Service.
+- Lỗi: Service ném `NghiepVuException` (422), `XungDotException` (409), `KhongCoQuyenException` (403) trong `Common/Loi`. `XuLyLoiFilter` đổi thành JSON `{ loi, chiTiet }` cho controller `[ApiController]`, hoặc hiện lại view của action với lỗi trong ModelState cho trang. Không bắt các lỗi này trong controller.
+- Văn hóa request cố định là InvariantCulture (số `1.5`, ngày `yyyy-MM-dd` khi gửi lên); hiển thị kiểu Việt Nam do helper định dạng làm. Giờ hiện tại lấy qua `TimeProvider` (đã đăng ký), không gọi `DateTime.Now`.
 - API REST trả JSON dưới `/api/...`, đường dẫn tiếng Việt không dấu dạng kebab: `/api/don-mua`, `/api/phieu-nhap/{ma}/xac-nhan`, `/api/vi-tri/o-phu-hop`, `/api/xep-hang`.
 - Bảng và cột đặt tên tiếng Việt không dấu PascalCase như trong báo cáo: `ViTri`, `BienThe`, `Lo`, `TonKho`, `SoBienDong`, `DonMua`, `PhieuNhap`, `DonViQuyDoi`, `MaViTri`, `SoLuongDaGiu`...
 - Thay đổi CSDL bằng migration của EF Core.

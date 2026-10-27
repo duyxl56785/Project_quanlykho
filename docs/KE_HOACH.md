@@ -51,7 +51,7 @@ Mảng: `TaiKhoan`, `DanhMuc`, `Kho` (kho và vị trí), `NhapKho`, `XepHang`, 
 
 **A11. Test.** Logic thuần viết unit test. Mọi thứ đụng CSDL viết integration test bằng `Testcontainers.PostgreSql`: một container cho cả lượt chạy, mỗi lớp test tạo một database riêng rồi chạy migration. CI trên GitHub có sẵn Docker nên chạy được. Ca đồng thời (hai người lấy cùng lúc, hai người xếp cùng ô) dùng `Task.WhenAll` với hai DbContext riêng.
 
-**A12. Giao diện.** Bootstrap 5 có sẵn trong mẫu; biến CSS trong `wwwroot/css/site.css`; văn hóa `vi-VN` cho ngày `dd/MM/yyyy`, số và tiền. Máy quét mã vạch USB hoạt động như bàn phím, gõ mã rồi Enter; ô quét mã là `<input autofocus>` bắt phím Enter. Không làm quét bằng camera.
+**A12. Giao diện.** Bootstrap 5 có sẵn trong mẫu; biến CSS trong `wwwroot/css/site.css`; hiển thị ngày `dd/MM/yyyy`, số và tiền theo `vi-VN` qua helper (văn hóa request giữ InvariantCulture, xem nhiệm vụ Khung kiến trúc). Máy quét mã vạch USB hoạt động như bàn phím, gõ mã rồi Enter; ô quét mã là `<input autofocus>` bắt phím Enter. Không làm quét bằng camera.
 
 **A13. Excel và mã vạch.** Excel dùng ClosedXML (MIT). Mã vạch Code 128 trên nhãn sinh ở máy chủ dạng SVG bằng ZXing.Net (Apache 2.0), không cần mạng ở máy in.
 
@@ -88,7 +88,7 @@ Cột thêm ngoài ERD: `SanPham.MaNhom, MoTa, TheoDoiHanDung, TrangThai`; `Bien
 **Khung kiến trúc theo mảng**
 - Tạo các thư mục ở A1; chuyển `/health/db` vào `Common` (giữ nguyên đường dẫn).
 - `Common/Loi`: ba exception ở A6 và filter `XuLyLoiFilter` đăng ký toàn cục.
-- Đăng ký `TimeProvider.System`, văn hóa `vi-VN` (`RequestLocalization`).
+- Đăng ký `TimeProvider.System`; cố định văn hóa request là InvariantCulture để form gửi số `1.5` và ngày `yyyy-MM-dd` đọc đúng trên mọi máy (nếu đặt `vi-VN`, dấu thập phân thành dấu phẩy và ô `type=number` gửi lên bị đọc sai). Hiển thị kiểu Việt Nam qua helper `So()`, `Tien()`, `Ngay()` ở nhiệm vụ giao diện.
 - Test: một API thử ném `NghiepVuException` trả 422 với JSON `loi`.
 - Cập nhật mục Kiến trúc trong `CLAUDE.md` theo A1 đến A3.
 
