@@ -104,7 +104,8 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 
 - Mọi API kiểm tra quyền theo vai và theo kho ở máy chủ.
 - Mã HTTP: 401 chưa đăng nhập hoặc tài khoản bị khóa; 403 không có quyền theo vai hoặc kho; 422 lỗi nghiệp vụ kèm lý do (lỗi xếp hàng kèm số tối đa còn xếp được; thiếu hàng dạng "Cần X, còn Y"); 409 xung đột ghi đồng thời, cần thử lại.
-- API không trả đơn giá, thành tiền cho thủ kho; chỉ quản lý kho và quản trị viên xem giá.
+- API không trả đơn giá, thành tiền cho thủ kho; chỉ quản lý kho và quản trị viên xem giá. Service đặt giá là null khi người xem không được thấy; API mới trả `JsonResult` với `WhenWritingNull` để bỏ hẳn trường giá (xem `PhieuNhapApiController`).
+- Enum trong JSON là chuỗi tên giá trị (`"Dat"`, `"MuaHang"`), cả chiều gửi lên (`JsonStringEnumConverter` trong `Program.cs`).
 
 ## Gợi ý AI (mục 1.2.3)
 
