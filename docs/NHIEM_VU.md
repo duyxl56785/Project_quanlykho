@@ -51,7 +51,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 ## Giai đoạn 2. Vị trí và xếp hàng
 
-- [ ] Vị trí cây 7 cấp (FR11, S3-01)
+- [x] Vị trí cây 7 cấp (FR11, S3-01) — 0571a5c
   - Xong khi: tạo được mã `K01-TA02-TG03-P04-H05-KE06-O07` trên giao diện; loại khu, điều kiện bảo quản, kích thước và tải trọng ô; vị trí có hàng chỉ khóa, không xóa.
 - [ ] In nhãn mã vạch lô và ô
   - Xong khi: in được nhãn Code 128 cho nhiều ô và cho các lô của một hóa đơn nhập; nhãn in ra quét lại bằng máy quét ra đúng mã; ô quét mã nhận cả mã lô và mã ô.
