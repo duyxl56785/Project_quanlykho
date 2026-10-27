@@ -1,17 +1,20 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using quanlykho.Common.GiaoDien;
 using quanlykho.Common.Loi;
+using quanlykho.Common.PhanQuyen;
 using quanlykho.Domain;
 
 namespace quanlykho.Features.Styleguide;
 
 /// <summary>
 /// Trang /Styleguide (Bảng 1.12): mọi thành phần giao diện thật và bốn trang mẫu (danh sách, biểu mẫu, phiếu có dòng hàng, màn hình quét).
-/// Màn hình mới sao chép từ trang mẫu gần nhất. Chỉ mở ở Development (thêm điều kiện quản trị viên ở nhiệm vụ đăng nhập).
+/// Màn hình mới sao chép từ trang mẫu gần nhất. Chỉ mở ở Development, cho quản trị viên.
 /// Dữ liệu trên các trang mẫu là dữ liệu giả trong bộ nhớ.
 /// </summary>
+[Authorize(Roles = Vai.QuanTri)]
 public class StyleguideController(IWebHostEnvironment env) : Controller
 {
     public override void OnActionExecuting(ActionExecutingContext context)

@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using quanlykho.Tests.HaTang;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.TestHost;
 using quanlykho.Common.Loi;
+using quanlykho.Common.PhanQuyen;
 
 namespace quanlykho.Tests;
 
@@ -29,8 +31,13 @@ public class ThuLoiApiController : ControllerBase
 
 public class XuLyLoiTests(UngDungFactory factory) : IClassFixture<UngDungFactory>
 {
-    private HttpClient TaoClient() => factory.WithWebHostBuilder(b => b.ConfigureServices(s =>
-        s.AddControllers().AddApplicationPart(typeof(ThuLoiApiController).Assembly))).CreateClient();
+    private HttpClient TaoClient()
+    {
+        var client = factory.WithWebHostBuilder(b => b.ConfigureTestServices(s =>
+            s.AddControllers().AddApplicationPart(typeof(ThuLoiApiController).Assembly))).CreateClient();
+        client.DefaultRequestHeaders.Add(XacThucGia.HeaderVai, Vai.QuanTri);
+        return client;
+    }
 
     [Theory]
     [InlineData("nghiep-vu", HttpStatusCode.UnprocessableEntity, "Cần 10, còn 4")]

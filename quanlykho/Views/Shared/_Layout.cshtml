@@ -1,7 +1,10 @@
-﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@using quanlykho.Common.PhanQuyen
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var duongDan = Context.Request.Path.Value ?? "/";
     bool DangMo(string url) => url == "/" ? duongDan == "/" : duongDan.StartsWith(url, StringComparison.OrdinalIgnoreCase);
+    bool DuocXem(MucMenu muc) => muc.VaiTro is null || muc.VaiTro.Any(v => User.IsInRole(v.ToString()));
+    var vaiHienTai = Enum.TryParse<VaiTro>(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value, out var v) ? Vai.TenHienThi(v) : "";
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -22,11 +25,11 @@
                 <button type="button" class="btn-close btn-close-white ms-auto me-3 d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#thanhMenu" aria-label="Đóng menu"></button>
             </div>
             <nav class="pb-3">
-                @foreach (var nhom in Menu.TatCa)
+                @foreach (var nhom in Menu.TatCa.Where(n => n.Muc.Any(DuocXem)))
                 {
                     <div class="nhom">@nhom.Ten</div>
                     <ul class="nav flex-column">
-                        @foreach (var muc in nhom.Muc)
+                        @foreach (var muc in nhom.Muc.Where(DuocXem))
                         {
                             <li class="nav-item">
                                 @if (muc.Url is null)
@@ -48,7 +51,12 @@
             <header class="thanh-tren">
                 <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#thanhMenu" aria-controls="thanhMenu" aria-label="Mở menu">☰</button>
                 <p class="tieu-de">@ViewData["Title"]</p>
-                <span class="nguoi-dung">Chưa đăng nhập</span>
+                <div class="nguoi-dung">
+                    <span>@User.Identity?.Name <span class="d-none d-md-inline">· @vaiHienTai</span></span>
+                    <form method="post" asp-controller="TaiKhoan" asp-action="DangXuat" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">Đăng xuất</button>
+                    </form>
+                </div>
             </header>
             <main role="main">
                 <partial name="_ThongBao" />
