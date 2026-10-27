@@ -34,6 +34,23 @@ public class ViTriService(AppDbContext db, NguoiDungHienTai nguoiDung, GhiNhatKy
         return nut;
     }
 
+    /// <summary>Nhãn của các ô được chọn; chọn vị trí cấp trên là in mọi ô bên dưới.</summary>
+    public async Task<List<InNhan.NhanIn>> NhanOAsync(IReadOnlyCollection<string> ma)
+    {
+        if (ma.Count == 0)
+            throw new NghiepVuException("Chọn ít nhất một vị trí để in nhãn.");
+        var chon = await db.ViTri.Where(v => ma.Contains(v.MaViTri)).Select(v => new { v.MaViTri, v.MaKho }).ToListAsync();
+        if (ma.Except(chon.Select(c => c.MaViTri)).FirstOrDefault() is { } thieu)
+            throw new NghiepVuException($"Không có vị trí {thieu}.");
+        var kho = chon.Select(c => c.MaKho).Distinct().ToList();
+        foreach (var k in kho)
+            await nguoiDung.DamBaoQuyenKhoAsync(k);
+        var o = await db.ViTri.Where(v => kho.Contains(v.MaKho) && v.Cap == CapViTri.CapCuoi).OrderBy(v => v.MaViTri)
+            .Select(v => new { v.MaViTri, v.TenDayDu }).ToListAsync();
+        return o.Where(v => ma.Any(m => v.MaViTri == m || v.MaViTri.StartsWith(m + "-")))
+            .Select(v => new InNhan.NhanIn(v.MaViTri, v.TenDayDu)).ToList();
+    }
+
     public async Task<ViTriChiTiet> LayAsync(string ma)
     {
         var v = await TimAsync(ma);
