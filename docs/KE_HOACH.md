@@ -110,7 +110,7 @@ Cột thêm ngoài ERD: `SanPham.MaNhom, MoTa, TheoDoiHanDung, TrangThai`; `Bien
 **Bộ giao diện dùng chung và `/Styleguide`**
 - `site.css`: biến màu, cỡ chữ, khoảng cách, màu cố định cho từng trạng thái.
 - `_Layout`: thanh menu bên trái theo vai (lọc theo vai làm ở nhiệm vụ đăng nhập), tên người dùng, nút đăng xuất; co lại thành menu gập ở khổ máy tính bảng.
-- Partial dùng chung trong `Views/Shared/`: `_BangDuLieu` (lọc, phân trang qua model `TrangDuLieu<T>`), `_OQuetMa`, `_HuyHieuTrangThai`, `_HopXacNhan` (modal Bootstrap), `_ThongBao` (TempData), `_OChonKho`, `_TrangRong`, `_DangTai`; HTML helper `So()`, `Tien()`, `Ngay()`.
+- Partial dùng chung trong `Views/Shared/`: bảng dữ liệu làm thành tag helper `<bang-du-lieu>` (trạng thái rỗng, phân trang giữ tham số lọc, model `TrangDuLieu<T>`) vì partial không bọc được nội dung bảng của từng trang, `_OQuetMa`, `_HuyHieuTrangThai`, `_HopXacNhan` (modal Bootstrap), `_ThongBao` (TempData), `_OChonKho`, `_TrangRong`, `_DangTai`; HTML helper `So()`, `Tien()`, `Ngay()`.
 - Bốn trang mẫu trên `/Styleguide`: danh sách, biểu mẫu, phiếu có dòng hàng (thêm, xóa dòng bằng JS), màn hình quét.
 - Kiểm tra: xem ở khổ 768 × 1024.
 

@@ -1,0 +1,11 @@
+@model OChonKhoModel
+<select class="form-select" id="@Model.Ten" name="@Model.Ten">
+    @if (Model.CoTatCa)
+    {
+        <option value="">Tất cả kho</option>
+    }
+    @foreach (var kho in Model.DanhSach)
+    {
+        <option value="@kho.Ma" selected="@(kho.Ma == Model.Chon)">@kho.Ma – @kho.Ten</option>
+    }
+</select>
