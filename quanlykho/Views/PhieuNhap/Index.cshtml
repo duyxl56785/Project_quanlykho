@@ -1,0 +1,71 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.NhapKho
+@model TrangDuLieu<PhieuNhapDong>
+@{
+    ViewData["Title"] = "Hóa đơn nhập";
+    dynamic loc = ViewData["Loc"]!;
+    var ds = (PhieuNhapForm)ViewData["DanhSach"]!;
+    var xemGia = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Hóa đơn nhập</h1>
+    <a class="btn btn-primary" asp-action="Them">Lập hóa đơn nhập</a>
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Mã hóa đơn, mã đơn mua</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@loc.tuKhoa" />
+    </div>
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = ds.DanhSachKho })
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiPhieu>())
+            {
+                <option value="@t" selected="@(t == (TrangThaiPhieu?)loc.trangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có hóa đơn nhập nào khớp bộ lọc.">
+    <thead>
+        <tr>
+            <th>Mã hóa đơn</th><th>Loại</th><th>Đơn mua</th><th>Kho</th><th>Ngày nhập</th><th class="so">Số dòng</th>
+            @if (xemGia)
+            {
+                <th class="so">Tổng tiền</th>
+            }
+            <th>Trạng thái</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@p.Ma</td>
+                <td>@(p.LoaiPhieu == LoaiPhieuNhap.MuaHang ? "Mua hàng" : p.LoaiPhieu == LoaiPhieuNhap.NhapKhac ? "Nhập khác" : "Tồn đầu kỳ")</td>
+                <td>@p.MaDonMua</td>
+                <td>@p.MaKho</td>
+                <td>@NgayGio(p.NgayNhap)</td>
+                <td class="so">@p.SoDong</td>
+                @if (xemGia)
+                {
+                    <td class="so">@Tien(p.TongTien ?? 0)</td>
+                }
+                <td><partial name="_HuyHieuTrangThai" model="p.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@p.Ma">@(p.TrangThai == TrangThaiPhieu.LuuTam ? "Nhận hàng" : "Xem")</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

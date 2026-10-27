@@ -27,7 +27,14 @@
         }
         <div class="col-12">
             <div class="text-secondary small">Hóa đơn nhập</div>
-            @(Model.PhieuNhap.Count == 0 ? "Chưa có" : string.Join(", ", Model.PhieuNhap))
+            @if (Model.PhieuNhap.Count == 0)
+            {
+                @:Chưa có
+            }
+            @foreach (var p in Model.PhieuNhap)
+            {
+                <a class="me-2" asp-controller="PhieuNhap" asp-action="ChiTiet" asp-route-ma="@p">@p</a>
+            }
         </div>
     </div>
 </div>
@@ -71,24 +78,25 @@
     </div>
 </div>
 
-@if (quanLy)
-{
-    <div class="thanh-nut">
-        @if (Model.TrangThai == TrangThaiDonMua.Nhap)
-        {
-            <form method="post" asp-action="XacNhan" asp-route-ma="@Model.Ma" data-xac-nhan="Xác nhận đơn nháp @Model.Ma thành đơn chính thức?">
-                <button type="submit" class="btn btn-primary">Xác nhận đơn</button>
-            </form>
-        }
-        @if (Model.SuaDuoc)
-        {
-            <a class="btn btn-outline-primary" asp-action="Sua" asp-route-ma="@Model.Ma">Sửa</a>
-        }
-        @if (Model.TrangThai is not (TrangThaiDonMua.DaHuy or TrangThaiDonMua.HoanThanh))
-        {
-            <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy đơn mua @Model.Ma?">
-                <button type="submit" class="btn btn-outline-danger">Hủy đơn</button>
-            </form>
-        }
-    </div>
-}
+<div class="thanh-nut">
+    @if (Model.TrangThai is TrangThaiDonMua.ChuaThucHien or TrangThaiDonMua.DangThucHien)
+    {
+        <a class="btn btn-primary" asp-controller="PhieuNhap" asp-action="Them" asp-route-maDonMua="@Model.Ma">Lập hóa đơn nhập</a>
+    }
+    @if (quanLy && Model.TrangThai == TrangThaiDonMua.Nhap)
+    {
+        <form method="post" asp-action="XacNhan" asp-route-ma="@Model.Ma" data-xac-nhan="Xác nhận đơn nháp @Model.Ma thành đơn chính thức?">
+            <button type="submit" class="btn btn-primary">Xác nhận đơn</button>
+        </form>
+    }
+    @if (quanLy && Model.SuaDuoc)
+    {
+        <a class="btn btn-outline-primary" asp-action="Sua" asp-route-ma="@Model.Ma">Sửa</a>
+    }
+    @if (quanLy && Model.TrangThai is not (TrangThaiDonMua.DaHuy or TrangThaiDonMua.HoanThanh))
+    {
+        <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy đơn mua @Model.Ma?">
+            <button type="submit" class="btn btn-outline-danger">Hủy đơn</button>
+        </form>
+    }
+</div>

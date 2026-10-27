@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using Microsoft.Extensions.WebEncoders;
 using Microsoft.AspNetCore.Identity;
@@ -25,7 +26,7 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<XuLyLoiFilter>();
     // Chống CSRF cho mọi POST, PUT, DELETE: form có token sẵn, fetch gửi header RequestVerificationToken (site.js).
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-});
+}).AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
 // Giữ nguyên chữ tiếng Việt trong HTML thay vì mã hóa thành &#x...; (vẫn mã hóa ký tự nguy hiểm như < > " &).
@@ -42,6 +43,7 @@ builder.Services.AddScoped<NguoiDungService>();
 builder.Services.AddScoped<DanhMucService>();
 builder.Services.AddScoped<DoiTacService>();
 builder.Services.AddScoped<DonMuaService>();
+builder.Services.AddScoped<PhieuNhapService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,214 @@
+@using quanlykho.Features.NhapKho
+@model PhieuNhapChiTiet
+@{
+    ViewData["Title"] = $"Hóa đơn nhập {Model.Ma}";
+    var luuTam = Model.TrangThai == TrangThaiPhieu.LuuTam;
+    var theoDon = Model.MaDonMua is not null;
+}
+
+<div class="@(luuTam ? "man-hinh-quet" : null)">
+    <div class="tieu-de-trang">
+        <h1>Hóa đơn nhập @Model.Ma</h1>
+        <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+        <a class="btn btn-outline-secondary" asp-action="Index">Danh sách</a>
+    </div>
+
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="text-secondary small">@(theoDon ? "Đơn mua, nhà cung cấp" : "Loại phiếu")</div>
+                @if (theoDon)
+                {
+                    <span><a asp-controller="DonMua" asp-action="ChiTiet" asp-route-ma="@Model.MaDonMua">@Model.MaDonMua</a> – @Model.TenNhaCungCap</span>
+                }
+                else
+                {
+                    @(Model.LoaiPhieu == LoaiPhieuNhap.NhapKhac ? "Nhập khác" : "Tồn đầu kỳ")
+                }
+            </div>
+            <div class="col-md-4"><div class="text-secondary small">Kho nhập</div>@Model.MaKho – @Model.TenKho</div>
+            <div class="col-md-4"><div class="text-secondary small">Người lập, ngày nhập</div>@Model.NguoiLap · @NgayGio(Model.NgayNhap)</div>
+            @if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <div class="col-12"><div class="text-secondary small">Ghi chú</div>@Model.GhiChu</div>
+            }
+        </div>
+    </div>
+
+    @if (luuTam)
+    {
+        <div class="the">
+            <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã vạch hàng", "Quét hoặc gõ mã vạch, mã biến thể rồi Enter")' />
+            <form id="formDong" class="row g-3 mt-1" novalidate>
+                <div class="col-12">
+                    <label class="form-label bat-buoc" for="maBienThe">Hàng</label>
+                    <select class="form-select" id="maBienThe" required>
+                        <option value="">Quét mã hoặc chọn hàng</option>
+                        @foreach (var h in Model.Hang)
+                        {
+                            <option value="@h.MaBienThe" data-ma-vach="@h.MaVach" data-don-vi="@h.TenDonVi" data-han-dung="@(h.TheoDoiHanDung ? 1 : 0)" data-con="@h.ConNhan">
+                                @h.MaBienThe – @h.TenHang@(h.ConNhan is null ? "" : $" (còn {So(h.ConNhan.Value)} {h.TenDonVi})")
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label bat-buoc" for="soLuong">Số thực nhận <span class="text-secondary" data-don-vi></span></label>
+                    <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" required />
+                </div>
+                <div class="col-sm-6 col-lg-3" id="khungHanDung" hidden>
+                    <label class="form-label bat-buoc" for="hanDung">Hạn dùng</label>
+                    <input class="form-control" id="hanDung" type="date" />
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <span class="form-label d-block">Chất lượng</span>
+                    <div class="btn-group w-100" role="group" aria-label="Chất lượng">
+                        <input type="radio" class="btn-check" name="chatLuong" id="clDat" value="Dat" checked />
+                        <label class="btn btn-outline-success" for="clDat">Đạt</label>
+                        <input type="radio" class="btn-check" name="chatLuong" id="clLoi" value="Loi" />
+                        <label class="btn btn-outline-danger" for="clLoi">Lỗi</label>
+                    </div>
+                </div>
+                @if (Model.XemGia && !theoDon)
+                {
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="form-label" for="donGia">Đơn giá</label>
+                        <input class="form-control text-end" id="donGia" type="number" min="0" step="any" />
+                    </div>
+                }
+                <div class="col-12">
+                    <div class="alert alert-danger mb-2" role="alert" id="loiDong" hidden></div>
+                    <button type="submit" class="btn btn-primary w-100">Thêm dòng</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <div class="the">
+        <h2>Hàng đã nhận</h2>
+        @if (Model.Dong.Count == 0)
+        {
+            <partial name="_TrangRong" model='"Chưa có dòng nào. Quét mã hàng để bắt đầu."' />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Hàng</th><th>Lô</th><th class="so">Số lượng</th><th>Hạn dùng</th><th>Chất lượng</th>
+                            @if (Model.XemGia)
+                            {
+                                <th class="so">Đơn giá</th><th class="so">Thành tiền</th>
+                            }
+                            @if (luuTam)
+                            {
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model.Dong)
+                        {
+                            <tr>
+                                <td>@d.STT</td>
+                                <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                                <td>@d.MaLo</td>
+                                <td class="so">@So(d.SoLuong) @d.TenDonVi</td>
+                                <td>@(d.HanDung?.ToString("dd/MM/yyyy"))</td>
+                                <td><partial name="_HuyHieuTrangThai" model="d.ChatLuong" /></td>
+                                @if (Model.XemGia)
+                                {
+                                    <td class="so">@Tien(d.DonGia ?? 0)</td>
+                                    <td class="so">@Tien(d.ThanhTien ?? 0)</td>
+                                }
+                                @if (luuTam)
+                                {
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-xoa-stt="@d.STT" data-xac-nhan="Xóa dòng @d.STT (@d.MaBienThe, lô @d.MaLo)?" aria-label="Xóa dòng @d.STT">✕</button>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    @if (Model.XemGia)
+                    {
+                        <tfoot><tr><td colspan="7" class="text-end">Tổng tiền</td><td class="so tong-cong">@Tien(Model.TongTien ?? 0)</td>@if (luuTam) { <td></td> }</tr></tfoot>
+                    }
+                </table>
+            </div>
+        }
+    </div>
+
+    @if (luuTam)
+    {
+        <div class="thanh-nut">
+            <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy hóa đơn nhập @Model.Ma? Các dòng đã quét sẽ không được nhập.">
+                <button type="submit" class="btn btn-outline-danger">Hủy hóa đơn</button>
+            </form>
+        </div>
+    }
+</div>
+
+@if (luuTam)
+{
+    <script>
+        (() => {
+            const ma = @Json.Serialize(Model.Ma);
+            const form = document.getElementById("formDong");
+            const oQuet = document.getElementById("oQuet");
+            const chon = document.getElementById("maBienThe");
+            const soLuong = document.getElementById("soLuong");
+            const hanDung = document.getElementById("hanDung");
+            const donGia = document.getElementById("donGia");
+            const loi = document.getElementById("loiDong");
+
+            const capNhat = () => {
+                const o = chon.selectedOptions[0];
+                hanDung.required = o?.dataset.hanDung === "1";
+                document.getElementById("khungHanDung").hidden = !hanDung.required;
+                form.querySelector("[data-don-vi]").textContent = o?.dataset.donVi ? `(${o.dataset.donVi})` : "";
+            };
+            chon.addEventListener("change", capNhat);
+
+            oQuet.addEventListener("quet-ma", (e) => {
+                const o = [...chon.options].find((x) => x.value && (x.dataset.maVach === e.detail || x.value === e.detail));
+                if (!o) return QuanLyKho.baoQuet(oQuet, `Mã ${e.detail} không có trong ${@Json.Serialize(Model.MaDonMua is null ? "danh mục hàng" : "đơn mua")}.`, false);
+                chon.value = o.value;
+                capNhat();
+                soLuong.value = o.dataset.con ?? 1;
+                QuanLyKho.baoQuet(oQuet, `${o.value}: nhập số thực nhận rồi bấm Thêm dòng.`, true);
+                soLuong.focus();
+                soLuong.select();
+            });
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                loi.hidden = true;
+                if (!form.reportValidity()) return;
+                const kq = await QuanLyKho.goiApi(`/api/phieu-nhap/${encodeURIComponent(ma)}/dong`, {
+                    method: "POST",
+                    body: {
+                        ma: chon.value, soLuong: +soLuong.value, hanDung: hanDung.value || null,
+                        chatLuong: form.querySelector('[name="chatLuong"]:checked').value,
+                        donGia: donGia?.value ? +donGia.value : null,
+                    },
+                });
+                if (!kq.ok) {
+                    loi.textContent = kq.loi;
+                    loi.hidden = false;
+                    return;
+                }
+                location.reload();
+            });
+
+            document.addEventListener("da-xac-nhan", async (e) => {
+                const stt = e.target.dataset.xoaStt;
+                if (!stt) return;
+                const kq = await QuanLyKho.goiApi(`/api/phieu-nhap/${encodeURIComponent(ma)}/dong/${stt}`, { method: "DELETE" });
+                if (!kq.ok) return QuanLyKho.baoQuet(oQuet, kq.loi, false);
+                location.reload();
+            });
+        })();
+    </script>
+}
