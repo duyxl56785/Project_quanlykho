@@ -1,0 +1,13 @@
+@using quanlykho.Features.Kho
+@model ViTriForm
+@{ ViewData["Title"] = $"Thêm {CapViTri.Ten(Model.Cap).ToLowerInvariant()}"; }
+
+<div class="tieu-de-trang"><h1>Thêm @CapViTri.Ten(Model.Cap).ToLowerInvariant()</h1></div>
+
+<form method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+    <div class="thanh-nut">
+        <button type="submit" class="btn btn-primary">Thêm vị trí</button>
+        <a class="btn btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@Model.MaCha">Hủy bỏ</a>
+    </div>
+</form>

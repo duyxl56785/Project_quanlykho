@@ -180,3 +180,4 @@ td.so, th.so { text-align: right; white-space: nowrap; font-variant-numeric: tab
 .cap-4 { padding-left: 6rem !important; }
 .cap-5 { padding-left: 7.5rem !important; }
 .cap-6 { padding-left: 9rem !important; }
+.nut-thu { min-width: 2.25rem; margin-right: var(--khoang-1); }
