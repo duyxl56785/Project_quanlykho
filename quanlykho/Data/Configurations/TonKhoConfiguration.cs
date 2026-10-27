@@ -56,3 +56,31 @@ public class SoBienDongConfiguration : IEntityTypeConfiguration<SoBienDong>
         b.HasIndex(x => x.MaChungTu);
     }
 }
+
+public class ChuyenViTriConfiguration : IEntityTypeConfiguration<ChuyenViTri>
+{
+    public void Configure(EntityTypeBuilder<ChuyenViTri> b)
+    {
+        b.ToTable(t =>
+        {
+            t.Check("SoLuong", "\"SoLuong\" > 0");
+            t.Check("HaiOKhacNhau", "\"MaViTriDi\" <> \"MaViTriDen\"");
+            t.ChiNhan<LoaiChuyenViTri>(nameof(ChuyenViTri.Loai));
+        });
+        b.HasKey(x => x.MaChuyen);
+        b.Property(x => x.MaChuyen).HasMaxLength(Ma);
+        b.Property(x => x.MaKho).HasMaxLength(MaViTri);
+        b.Property(x => x.MaLo).HasMaxLength(Ma);
+        b.Property(x => x.MaViTriDi).HasMaxLength(MaViTri);
+        b.Property(x => x.MaViTriDen).HasMaxLength(MaViTri);
+        b.Property(x => x.SoLuong).SoLuong();
+        b.Property(x => x.NguoiThucHien).HasMaxLength(Ma);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaKho);
+        b.HasOne<Lo>().WithMany().HasForeignKey(x => x.MaLo);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaViTriDi);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaViTriDen);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiThucHien);
+        b.HasIndex(x => new { x.MaKho, x.ThoiDiem });
+        b.HasIndex(x => x.MaLo);
+    }
+}

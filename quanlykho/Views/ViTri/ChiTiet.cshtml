@@ -1,0 +1,135 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.Kho
+@model ViTriChiTiet
+@{
+    var n = Model.Nut;
+    ViewData["Title"] = $"Vị trí {n.Ma}";
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>@n.Ten</h1>
+    @if (n.DangKhoa)
+    {
+        <span class="trang-thai trang-thai-do">Đã khóa</span>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-maKho="@Model.MaKho">Cây vị trí</a>
+</div>
+
+<div class="the">
+    <div class="row g-3">
+        <div class="col-md-6"><div class="text-secondary small">Mã, cấp</div><span class="fw-semibold">@n.Ma</span> · @CapViTri.Ten(n.Cap)</div>
+        <div class="col-md-6"><div class="text-secondary small">Đường dẫn</div>@Model.TenDayDu</div>
+        @if (n.LoaiKhu is not null)
+        {
+            <div class="col-md-6">
+                <div class="text-secondary small">Khu, bảo quản</div>
+                @CapViTri.TenKhu(n.LoaiKhu), @CapViTri.TenBaoQuan(n.DieuKienBaoQuan).ToLowerInvariant()
+                @if (n.LaOMacDinh)
+                {
+                    <span class="trang-thai trang-thai-lam">Ô mặc định nhận hàng</span>
+                }
+            </div>
+        }
+        @if (n.Cap == CapViTri.CapCuoi)
+        {
+            <div class="col-md-6"><div class="text-secondary small">Kích thước trong (dài × rộng × cao), tải trọng</div>@So(n.Dai) × @So(n.Rong) × @So(n.Cao) m, @So(n.TaiTrongToiDa) kg</div>
+        }
+        @if (n.MaPhieuKiemKe is not null)
+        {
+            <div class="col-md-6"><div class="text-secondary small">Kiểm kê</div>Đang khóa bởi phiếu @n.MaPhieuKiemKe</div>
+        }
+    </div>
+</div>
+
+@if (quanLy && n.Cap > 1)
+{
+    <div class="thanh-nut mb-3">
+        <a class="btn btn-outline-primary" asp-action="Sua" asp-route-ma="@n.Ma">Sửa</a>
+        <form method="post" asp-action="Khoa" asp-route-ma="@n.Ma" asp-route-khoa="@(!n.DangKhoa)"
+              data-xac-nhan="@(n.DangKhoa ? $"Mở khóa {n.Ma} và mọi vị trí con?" : $"Khóa {n.Ma} và mọi vị trí con? Vị trí khóa không nhận hàng xếp vào.")">
+            <button type="submit" class="btn btn-outline-secondary">@(n.DangKhoa ? "Mở khóa" : "Khóa")</button>
+        </form>
+        @if (Model.XoaDuoc)
+        {
+            <form method="post" asp-action="Xoa" asp-route-ma="@n.Ma" data-xac-nhan="Xóa vị trí @n.Ma?">
+                <button type="submit" class="btn btn-outline-danger">Xóa</button>
+            </form>
+        }
+        else
+        {
+            <span class="text-secondary small align-self-center">
+                @(n.SoCon > 0 ? "Còn vị trí con nên chưa xóa được." : n.LaOMacDinh ? "Ô mặc định không xóa được." : "Đã từng có hàng: chỉ khóa, không xóa.")
+            </span>
+        }
+    </div>
+}
+
+@if (n.Cap == 1 && User.IsInRole(Vai.QuanTri))
+{
+    <div class="thanh-nut mb-3">
+        <a class="btn btn-outline-primary" asp-controller="Kho" asp-action="Sua" asp-route-ma="@n.Ma">Sửa thông tin kho, người được giao</a>
+    </div>
+}
+
+@if (n.Cap < CapViTri.CapCuoi)
+{
+    <div class="the">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="mb-0 me-auto">@CapViTri.Ten(n.Cap + 1) trong @n.Ten</h2>
+            @if (quanLy)
+            {
+                <a class="btn btn-outline-primary" asp-action="Them" asp-route-maCha="@n.Ma">+ Thêm @CapViTri.Ten(n.Cap + 1).ToLowerInvariant()</a>
+            }
+        </div>
+        @if (Model.Con.Count == 0)
+        {
+            <partial name="_TrangRong" model='"Chưa có vị trí con."' />
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var c in Model.Con)
+                {
+                    <li class="list-group-item d-flex align-items-center gap-2">
+                        <a class="fw-semibold" asp-action="ChiTiet" asp-route-ma="@c.Ma">@c.Ten</a>
+                        <span class="small text-secondary me-auto">@c.Ma</span>
+                        @if (c.DangKhoa)
+                        {
+                            <span class="trang-thai trang-thai-do">Đã khóa</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+<div class="the">
+    <h2>Hàng đang nằm ở đây</h2>
+    @if (Model.Hang.Count == 0)
+    {
+        <partial name="_TrangRong" model='"Không có hàng."' />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Tồn</th><th class="so">Đã giữ</th></tr></thead>
+                <tbody>
+                    @foreach (var h in Model.Hang)
+                    {
+                        <tr>
+                            <td class="small">@h.MaViTri</td>
+                            <td>@h.MaLo</td>
+                            <td><span class="fw-semibold">@h.MaBienThe</span><div class="small text-secondary">@h.TenHang</div></td>
+                            <td>@Ngay(h.HanDung)</td>
+                            <td class="so">@So(h.SoLuong) @h.DonViTinh</td>
+                            <td class="so">@So(h.SoLuongDaGiu)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

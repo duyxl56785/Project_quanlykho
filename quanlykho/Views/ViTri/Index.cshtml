@@ -1,0 +1,128 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.Kho
+@model List<ViTriNut>
+@{
+    ViewData["Title"] = "Kho và vị trí";
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+    var maKho = (string?)ViewData["MaKho"];
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang"><h1>Kho và vị trí</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = maKho, danhSach = kho })
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Xem</button>
+        <button class="btn btn-outline-secondary" type="button" data-thu-tat-ca>Thu gọn đến kệ</button>
+        @if (Model.Count > 0)
+        {
+            <button class="btn btn-outline-secondary" type="submit" form="formNhan">In nhãn ô đã chọn</button>
+        }
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <partial name="_TrangRong" model='"Bạn chưa được giao kho nào."' />
+}
+else
+{
+    <form class="bang-du-lieu" id="formNhan" method="get" action="/InNhan/O">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="cayViTri">
+                <thead><tr><th><span class="visually-hidden">Chọn in nhãn</span></th><th>Vị trí</th><th>Cấp</th><th>Khu</th><th>Kích thước ô (m), tải trọng</th><th class="so">Tồn</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var n in Model)
+                    {
+                        <tr data-ma="@n.Ma">
+                            <td><input class="form-check-input" type="checkbox" name="ma" value="@n.Ma" aria-label="Chọn in nhãn @n.Ma" /></td>
+                            <td class="cap-@(n.Cap - 1) text-nowrap">
+                                @if (n.SoCon > 0)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary nut-thu" data-thu="@n.Ma" aria-expanded="true" aria-label="Thu, mở nhánh @n.Ten">−</button>
+                                }
+                                <span class="fw-semibold">@n.Ten</span>
+                                <div class="small text-secondary text-nowrap">@n.Ma</div>
+                            </td>
+                            <td>@CapViTri.Ten(n.Cap)</td>
+                            <td>
+                                @if (n.Cap == CapViTri.CapKhaiKhu)
+                                {
+                                    @CapViTri.TenKhu(n.LoaiKhu)
+                                }
+                                @if (n.Cap == CapViTri.CapKhaiKhu && n.DieuKienBaoQuan == DieuKienBaoQuan.Lanh)
+                                {
+                                    <span class="small text-secondary">(lạnh)</span>
+                                }
+                                @if (n.LaOMacDinh)
+                                {
+                                    <span class="trang-thai trang-thai-lam">Ô mặc định</span>
+                                }
+                                @if (n.DangKhoa)
+                                {
+                                    <span class="trang-thai trang-thai-do">Đã khóa</span>
+                                }
+                                @if (n.MaPhieuKiemKe is not null)
+                                {
+                                    <span class="trang-thai trang-thai-vang">Đang kiểm kê</span>
+                                }
+                            </td>
+                            <td>
+                                @if (n.Cap == CapViTri.CapCuoi)
+                                {
+                                    @($"{So(n.Dai)} × {So(n.Rong)} × {So(n.Cao)}, {So(n.TaiTrongToiDa)} kg")
+                                }
+                            </td>
+                            <td class="so">@(n.TonHienTai > 0 ? So(n.TonHienTai) : "")</td>
+                            <td class="text-end text-nowrap">
+                                @if (quanLy && n.Cap < CapViTri.CapCuoi)
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Them" asp-route-maCha="@n.Ma">+ @CapViTri.Ten(n.Cap + 1)</a>
+                                }
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@n.Ma">Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </form>
+}
+
+<script>
+    (() => {
+        const bang = document.getElementById("cayViTri");
+        if (!bang) return;
+        const dong = [...bang.querySelectorAll("tr[data-ma]")];
+        const thu = new Set();
+        const ve = () => {
+            dong.forEach((tr) => tr.hidden = [...thu].some((m) => tr.dataset.ma.startsWith(m + "-")));
+            bang.querySelectorAll("[data-thu]").forEach((b) => {
+                const dangThu = thu.has(b.dataset.thu);
+                b.textContent = dangThu ? "+" : "−";
+                b.setAttribute("aria-expanded", String(!dangThu));
+            });
+        };
+        bang.addEventListener("change", (e) => {
+            if (e.target.name !== "ma") return;
+            dong.filter((tr) => tr.dataset.ma.startsWith(e.target.value + "-"))
+                .forEach((tr) => tr.querySelector('[name="ma"]').checked = e.target.checked);
+        });
+        bang.addEventListener("click", (e) => {
+            const b = e.target.closest("[data-thu]");
+            if (!b) return;
+            thu.has(b.dataset.thu) ? thu.delete(b.dataset.thu) : thu.add(b.dataset.thu);
+            ve();
+        });
+        document.querySelector("[data-thu-tat-ca]").addEventListener("click", () => {
+            bang.querySelectorAll('[data-thu]').forEach((b) => {
+                if (b.closest("tr").querySelector(".cap-5")) thu.add(b.dataset.thu);
+            });
+            ve();
+        });
+    })();
+</script>

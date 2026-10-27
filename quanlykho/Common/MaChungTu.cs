@@ -6,8 +6,8 @@ namespace quanlykho.Common;
 /// <summary>Sinh mã chứng từ dạng tiền tố + 6 chữ số (PN000001) từ sequence PostgreSQL của từng tiền tố.</summary>
 public class MaChungTu(AppDbContext db)
 {
-    /// <summary>PN phiếu nhập, PX phiếu xuất, DM đơn mua, DD đơn đặt hàng, LX lệnh xuất, DC điều chuyển, KK kiểm kê, L lô, ND người dùng.</summary>
-    public static readonly string[] TienTo = ["PN", "PX", "DM", "DD", "LX", "DC", "KK", "L", "ND"];
+    /// <summary>PN phiếu nhập, PX phiếu xuất, DM đơn mua, DD đơn đặt hàng, LX lệnh xuất, DC điều chuyển, KK kiểm kê, L lô, ND người dùng, CV chuyển vị trí (xếp hàng).</summary>
+    public static readonly string[] TienTo = ["PN", "PX", "DM", "DD", "LX", "DC", "KK", "L", "ND", "CV"];
 
     public static string TenSequence(string tienTo) => $"MaChungTu_{tienTo}";
 

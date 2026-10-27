@@ -51,15 +51,15 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 ## Giai đoạn 2. Vị trí và xếp hàng
 
-- [ ] Vị trí cây 7 cấp (FR11, S3-01)
+- [x] Vị trí cây 7 cấp (FR11, S3-01) — 0571a5c
   - Xong khi: tạo được mã `K01-TA02-TG03-P04-H05-KE06-O07` trên giao diện; loại khu, điều kiện bảo quản, kích thước và tải trọng ô; vị trí có hàng chỉ khóa, không xóa.
-- [ ] In nhãn mã vạch lô và ô
+- [x] In nhãn mã vạch lô và ô — fc21699
   - Xong khi: in được nhãn Code 128 cho nhiều ô và cho các lô của một hóa đơn nhập; nhãn in ra quét lại bằng máy quét ra đúng mã; ô quét mã nhận cả mã lô và mã ô.
-- [ ] Danh mục kho, gán người dùng theo kho (S3-03)
+- [x] Danh mục kho, gán người dùng theo kho (S3-03) — 8c3a4bc
   - Xong khi: thêm kho thứ hai, gán thủ kho và quản lý kho; người dùng chỉ thấy kho được giao.
-- [ ] Dịch vụ kiểm tra sức chứa, API ô phù hợp (FR12, S3-02)
+- [x] Dịch vụ kiểm tra sức chứa, API ô phù hợp (FR12, S3-02) — 897fda9
   - Xong khi: đạt các ca biên ở mục 2.16.3 (ví dụ ô 1 m³, 50 kg, thùng 12 kg cho q_max = 4; thanh 1,2 m bị chặn; kiện 0,4 × 1 × 0,5 m ra 4 chứ không phải 5); chỉ trả ô đúng bảo quản, không khóa, còn chỗ.
-- [ ] Xếp hàng vào vị trí (FR12, S3-04)
+- [x] Xếp hàng vào vị trí (FR12, S3-04) — f815599
   - Xong khi: quét lô, quét ô, hiện chỗ còn lại; khóa dòng ô và ghi qua cổng trong một transaction; hai người xếp cùng ô thì người sau nhận 409; đi trọn luồng Hình 2.10.
 
 ## Giai đoạn 3. Xuất kho

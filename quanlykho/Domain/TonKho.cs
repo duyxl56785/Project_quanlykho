@@ -31,3 +31,19 @@ public class SoBienDong
     public DateTimeOffset ThoiDiem { get; set; }
     public string NguoiThucHien { get; set; } = "";
 }
+
+public enum LoaiChuyenViTri { XepHang, ChuyenTrongKho }
+
+/// <summary>Mỗi lần chuyển một lô giữa hai ô cùng kho (xếp hàng, chuyển vị trí); tồn đổi qua cổng ghi tồn với MaChungTu = MaChuyen.</summary>
+public class ChuyenViTri
+{
+    public string MaChuyen { get; set; } = "";
+    public LoaiChuyenViTri Loai { get; set; }
+    public string MaKho { get; set; } = "";
+    public string MaLo { get; set; } = "";
+    public string MaViTriDi { get; set; } = "";
+    public string MaViTriDen { get; set; } = "";
+    public decimal SoLuong { get; set; }
+    public DateTimeOffset ThoiDiem { get; set; }
+    public string NguoiThucHien { get; set; } = "";
+}

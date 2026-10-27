@@ -26,7 +26,7 @@ dotnet tool restore           # lần đầu: cài dotnet-ef
 dotnet run --project quanlykho -- --seed   # migrate rồi nạp dữ liệu thử (chạy lại không nhân đôi), xong thì thoát
 ```
 
-Dữ liệu thử ở `Data/Seed/DuLieuThu.cs`: kho `K01`, `K02` (19 ô mỗi kho, có ô mặc định khu tiếp nhận và cách ly), 4 nhóm hàng, 50 biến thể, 3 nhà cung cấp, 2 nơi nhận, 7 tài khoản `ND001`–`ND007` email `@kho.test` (mật khẩu ở `DuLieuThu:MatKhau` trong `appsettings.Development.json`). Muốn DB sạch: `docker compose down -v`, `docker compose up -d`, rồi seed lại.
+Dữ liệu thử ở `Data/Seed/DuLieuThu.cs`: kho `K01`, `K02` (19 ô mỗi kho, có ô mặc định khu tiếp nhận và cách ly), 4 nhóm hàng, 50 biến thể, 3 nhà cung cấp, 2 nơi nhận, 7 tài khoản `ND001`–`ND007` email `@kho.test` (mật khẩu ở `DuLieuThu:MatKhau` trong `appsettings.Development.json`). `--seed` còn thêm mỗi kho một hóa đơn nhập mẫu đã xác nhận và đã xếp vào ô lưu trữ (`Data/Seed/PhieuNhapMau.cs`, đi qua service, không có trong DB test). Muốn DB sạch: `docker compose down -v`, `docker compose up -d`, rồi seed lại.
 
 ```bash
 dotnet test                   # chạy toàn bộ test (quanlykho.Tests); test tích hợp cần Docker đang chạy

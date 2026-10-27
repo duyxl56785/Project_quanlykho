@@ -1,0 +1,46 @@
+@using quanlykho.Features.Kho
+@model KhoForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<div class="row g-3">
+    <div class="col-sm-4 col-md-3">
+        <label asp-for="Ma" class="form-label bat-buoc"></label>
+        <input asp-for="Ma" class="form-control" readonly="@Model.LaSua" />
+        <span asp-validation-for="Ma"></span>
+    </div>
+    <div class="col-sm-8 col-md-9">
+        <label asp-for="Ten" class="form-label bat-buoc"></label>
+        <input asp-for="Ten" class="form-control" />
+        <span asp-validation-for="Ten"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="DiaChi" class="form-label"></label>
+        <input asp-for="DiaChi" class="form-control" />
+    </div>
+    <div class="col-md-8">
+        <label asp-for="LoaiHangLuuTru" class="form-label"></label>
+        <input asp-for="LoaiHangLuuTru" class="form-control" placeholder="Tổng hợp" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="HeSoLapDay" class="form-label bat-buoc"></label>
+        <input asp-for="HeSoLapDay" class="form-control text-end" type="number" min="0.01" max="1" step="0.01" />
+        <div class="form-text">Dùng khi xếp nhiều biến thể vào một ô.</div>
+        <span asp-validation-for="HeSoLapDay"></span>
+    </div>
+    <fieldset class="col-12">
+        <legend class="form-label fs-6">Người được giao</legend>
+        @if (Model.DanhSachNguoiDung.Count == 0)
+        {
+            <p class="text-secondary">Chưa có tài khoản quản lý kho hoặc thủ kho.</p>
+        }
+        <div class="row g-2">
+            @foreach (var n in Model.DanhSachNguoiDung)
+            {
+                <div class="col-md-6 form-check">
+                    <input class="form-check-input" type="checkbox" name="NguoiDung" value="@n.Ma" id="nd-@n.Ma" checked="@Model.NguoiDung.Contains(n.Ma)" />
+                    <label class="form-check-label" for="nd-@n.Ma">@n.Ma – @n.Ten</label>
+                </div>
+            }
+        </div>
+        <div class="form-text">Quản lý kho và thủ kho chỉ thấy, thao tác trên kho được giao. Dữ liệu này dùng chung với màn hình Người dùng.</div>
+    </fieldset>
+</div>
