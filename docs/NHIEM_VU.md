@@ -27,7 +27,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: có dự án xUnit trong `quanlykho.slnx`, một test mẫu chạy được bằng `dotnet test`; GitHub Actions chạy build và test trên mỗi lần push `develop`.
 - [x] Khung kiến trúc theo mảng (S1-02) — 7b6f60a
   - Xong khi: có quy ước thư mục Controller, Service, Repository theo mảng; ghi vào `CLAUDE.md`.
-- [ ] ERD và migration đầu tiên (S1-05, S1-06)
+- [x] ERD và migration đầu tiên (S1-05, S1-06) — c139f09
   - Xong khi: entity và migration cho danh mục, vị trí, lô, tồn kho, sổ biến động, đơn mua, phiếu nhập, đơn vị quy đổi theo Bảng 2.32, 2.34 và Hình 2.11; `dotnet ef database update` chạy sạch trên DB trống; ràng buộc (khóa, không âm, unique) có trong CSDL.
 - [ ] Dữ liệu thử (S1-06)
   - Xong khi: seed tạo 2 kho, khoảng 40 ô, khoảng 50 biến thể thuộc 4 ngành (thời trang, điện tử, thực phẩm, văn phòng phẩm), tài khoản mẫu cho 4 vai; chạy lại không nhân đôi dữ liệu.
