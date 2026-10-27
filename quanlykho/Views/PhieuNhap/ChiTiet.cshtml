@@ -140,14 +140,39 @@
         }
     </div>
 
-    @if (luuTam)
+    @if (Model.TrangThai == TrangThaiPhieu.HoanTat)
     {
-        <div class="thanh-nut">
+        <p class="text-secondary">Đã ghi tồn: hàng đạt ở ô mặc định khu tiếp nhận, hàng lỗi ở ô mặc định khu cách ly.</p>
+    }
+    @if (luuTam && Model.XemGia && Model.Dong.Count > 0)
+    {
+        <div class="alert alert-danger" role="alert" id="loiXacNhan" hidden></div>
+    }
+    <div class="thanh-nut">
+        @if (luuTam && Model.XemGia && Model.Dong.Count > 0)
+        {
+            <button type="button" class="btn btn-primary flex-grow-1" id="nutXacNhan"
+                    data-xac-nhan="Xác nhận hóa đơn @Model.Ma? Hàng sẽ được ghi tồn vào khu tiếp nhận (đạt) và khu cách ly (lỗi); sau đó không sửa dòng được nữa.">
+                Xác nhận nhập kho
+            </button>
+        }
+        else if (luuTam && !Model.XemGia)
+        {
+            <span class="text-secondary align-self-center me-auto">Quét xong thì báo quản lý kho xác nhận.</span>
+        }
+        @if (luuTam)
+        {
             <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy hóa đơn nhập @Model.Ma? Các dòng đã quét sẽ không được nhập.">
                 <button type="submit" class="btn btn-outline-danger">Hủy hóa đơn</button>
             </form>
-        </div>
-    }
+        }
+        else if (Model.TrangThai == TrangThaiPhieu.HoanTat && Model.XemGia)
+        {
+            <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy hóa đơn đã xác nhận @Model.Ma? Hệ thống ghi bút toán đảo trừ lại tồn; chỉ được khi hàng còn nguyên ở khu tiếp nhận hoặc cách ly.">
+                <button type="submit" class="btn btn-outline-danger">Hủy hóa đơn (bút toán đảo)</button>
+            </form>
+        }
+    </div>
 </div>
 
 @if (luuTam)
@@ -202,7 +227,18 @@
                 location.reload();
             });
 
+            const khoaXacNhan = crypto.randomUUID();
             document.addEventListener("da-xac-nhan", async (e) => {
+                if (e.target.id === "nutXacNhan") {
+                    e.target.disabled = true;
+                    const kq = await QuanLyKho.goiApi(`/api/phieu-nhap/${encodeURIComponent(ma)}/xac-nhan`, { method: "POST", khoaChongLap: khoaXacNhan });
+                    if (kq.ok) return location.reload();
+                    e.target.disabled = false;
+                    const loiXacNhan = document.getElementById("loiXacNhan");
+                    loiXacNhan.textContent = kq.loi;
+                    loiXacNhan.hidden = false;
+                    return;
+                }
                 const stt = e.target.dataset.xoaStt;
                 if (!stt) return;
                 const kq = await QuanLyKho.goiApi(`/api/phieu-nhap/${encodeURIComponent(ma)}/dong/${stt}`, { method: "DELETE" });

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using quanlykho.Common;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Domain;
 
@@ -72,6 +73,13 @@ public class PhieuNhapApiController(PhieuNhapService service) : ControllerBase
     {
         var ma = await service.TaoAsync(new PhieuNhapForm { LoaiPhieu = body.LoaiPhieu, MaDonMua = body.MaDonMua, MaKho = body.MaKho, GhiChu = body.GhiChu });
         return CreatedAtAction(nameof(ChiTiet), new { ma }, new { ma });
+    }
+
+    [HttpPost("{ma}/xac-nhan"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> XacNhan(string ma, [FromHeader(Name = "Idempotency-Key")] string? khoaChongLap)
+    {
+        var kq = await service.XacNhanAsync(ma, khoaChongLap);
+        return Ok(new { ma, daGhiTruocDo = kq == KetQuaGhi.DaGhiTruocDo });
     }
 
     [HttpPost("{ma}/dong")]

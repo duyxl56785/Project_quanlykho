@@ -31,7 +31,7 @@ public class PhieuNhapTests(CsdlFixture csdl) : IAsyncLifetime
         var hienTai = NguoiThu.HienTai(db, ma, vai);
         var nhatKy = NguoiThu.NhatKy(db, hienTai);
         var donMua = new DonMuaService(db, hienTai, new MaChungTu(db), nhatKy, TimeProvider.System);
-        return new PhieuNhapService(db, hienTai, new MaChungTu(db), nhatKy, donMua, TimeProvider.System);
+        return new PhieuNhapService(db, hienTai, new MaChungTu(db), nhatKy, donMua, new CongGhiTon(db, hienTai, TimeProvider.System), TimeProvider.System);
     }
 
     private async Task<T> Voi<T>(Func<PhieuNhapService, Task<T>> lam, string ma = "ND004", string vai = Vai.ThuKho)
@@ -201,5 +201,119 @@ public class PhieuNhapTests(CsdlFixture csdl) : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Forbidden, (await _app.TaoClient(Vai.ThuKho, "ND006").GetAsync("/PhieuNhap/PN000001")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await _app.TaoClient(Vai.BanHang, "ND007").GetAsync("/PhieuNhap")).StatusCode);
         Assert.Contains("PN000001", await _app.TaoClient(Vai.QuanLyKho, "ND002").GetStringAsync($"/DonMua/{don}"));
+    }
+
+    private const string QLK = "ND002";
+
+    private async Task<string> OMacDinh(LoaiKhu khu)
+    {
+        await using var db = CsdlFixture.TaoDbContext(_chuoi);
+        return await db.ViTri.Where(v => v.MaKho == "K01" && v.LaOMacDinh && v.LoaiKhu == khu).Select(v => v.MaViTri).SingleAsync();
+    }
+
+    private async Task<Dictionary<(string, string), decimal>> Ton()
+    {
+        await using var db = CsdlFixture.TaoDbContext(_chuoi);
+        return await db.TonKho.Where(t => t.SoLuong != 0).ToDictionaryAsync(t => (t.MaLo, t.MaViTri), t => t.SoLuong);
+    }
+
+    private async Task<string> PhieuDaQuet()
+    {
+        var don = await TaoDon(("AOTHUN-01", 10));
+        var phieu = await TaoPhieu(don);
+        await Them(phieu, "AOTHUN-01", 7);
+        await Them(phieu, "AOTHUN-01", 3, chatLuong: ChatLuong.Loi);
+        return phieu;
+    }
+
+    [Fact]
+    public async Task XacNhan_HangDungKhu_BamLapChiGhiMotLan_DonHoanThanh()
+    {
+        var phieu = await PhieuDaQuet();
+        await Assert.ThrowsAsync<KhongCoQuyenException>(() => Voi(s => s.XacNhanAsync(phieu, "k1")));
+
+        Assert.Equal(KetQuaGhi.DaGhi, await Voi(s => s.XacNhanAsync(phieu, "k1"), QLK, Vai.QuanLyKho));
+        Assert.Equal(KetQuaGhi.DaGhiTruocDo, await Voi(s => s.XacNhanAsync(phieu, "k1"), QLK, Vai.QuanLyKho));
+        await Assert.ThrowsAsync<NghiepVuException>(() => Voi(s => s.XacNhanAsync(phieu, "k2"), QLK, Vai.QuanLyKho));
+        await Assert.ThrowsAsync<NghiepVuException>(() => Them(phieu, "AOTHUN-01", 1));
+
+        var tiepNhan = await OMacDinh(LoaiKhu.TiepNhan);
+        var cachLy = await OMacDinh(LoaiKhu.CachLy);
+        Assert.Equal(new Dictionary<(string, string), decimal> { [("L000001", tiepNhan)] = 7, [("L000002", cachLy)] = 3 }, await Ton());
+        await using var db = CsdlFixture.TaoDbContext(_chuoi);
+        Assert.Equal(2, await db.SoBienDong.CountAsync(s => s.MaChungTu == phieu));
+        var p = await db.PhieuNhap.SingleAsync(x => x.MaPhieuNhap == phieu);
+        Assert.Equal((TrangThaiPhieu.HoanTat, QLK), (p.TrangThai, p.NguoiXacNhan));
+        Assert.Equal(TrangThaiDonMua.HoanThanh, (await db.DonMua.SingleAsync(d => d.MaDonMua == p.MaDonMua)).TrangThai);
+        Assert.True(await db.NhatKy.AnyAsync(n => n.LoaiThaoTac == "XacNhanPhieuNhap" && n.MaDoiTuong == phieu));
+    }
+
+    [Fact]
+    public async Task XacNhan_HaiYeuCauSongSongCungKhoa_ChiGhiMotLan()
+    {
+        var phieu = await PhieuDaQuet();
+
+        var kq = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ => Voi(s => s.XacNhanAsync(phieu, "cung-khoa"), QLK, Vai.QuanLyKho)));
+
+        Assert.Equal([KetQuaGhi.DaGhi, KetQuaGhi.DaGhiTruocDo], kq.Order());
+        Assert.Equal(10m, (await Ton()).Values.Sum());
+    }
+
+    [Fact]
+    public async Task HuyPhieuHoanTat_ButToanDao_ChanKhiHangDaXepDi()
+    {
+        var phieu = await PhieuDaQuet();
+        await Voi(s => s.XacNhanAsync(phieu, "k1"), QLK, Vai.QuanLyKho);
+        await Assert.ThrowsAsync<KhongCoQuyenException>(() => Voi(s => s.HuyAsync(phieu)));
+
+        await Voi(s => s.HuyAsync(phieu), QLK, Vai.QuanLyKho);
+
+        Assert.Empty(await Ton());
+        await using (var db = CsdlFixture.TaoDbContext(_chuoi))
+        {
+            Assert.Equal(4, await db.SoBienDong.CountAsync(s => s.MaChungTu == phieu));
+            Assert.Equal(0m, await db.SoBienDong.Where(s => s.MaChungTu == phieu).SumAsync(s => s.SoLuongThayDoi));
+            var p = await db.PhieuNhap.SingleAsync(x => x.MaPhieuNhap == phieu);
+            Assert.Equal(TrangThaiPhieu.DaHuy, p.TrangThai);
+            Assert.Equal(TrangThaiDonMua.ChuaThucHien, (await db.DonMua.SingleAsync(d => d.MaDonMua == p.MaDonMua)).TrangThai);
+        }
+        await Assert.ThrowsAsync<NghiepVuException>(() => Voi(s => s.HuyAsync(phieu), QLK, Vai.QuanLyKho));
+
+        var phieu2 = await PhieuDaQuet();
+        await Voi(s => s.XacNhanAsync(phieu2, "k2"), QLK, Vai.QuanLyKho);
+        var tiepNhan = await OMacDinh(LoaiKhu.TiepNhan);
+        await using (var db = CsdlFixture.TaoDbContext(_chuoi))
+        {
+            var oLuuTru = await db.ViTri.Where(v => v.MaKho == "K01" && v.Cap == 7 && v.LoaiKhu == LoaiKhu.LuuTru).Select(v => v.MaViTri).FirstAsync();
+            await using var tx = await db.Database.BeginTransactionAsync();
+            await new CongGhiTon(db, NguoiThu.HienTai(db, "ND004", Vai.ThuKho), TimeProvider.System)
+                .GhiAsync("xep-thu", "ChuyenViTri", "XEP1", [new("L000003", tiepNhan, -2), new("L000003", oLuuTru, 2)]);
+            await tx.CommitAsync();
+        }
+        var loi = await Assert.ThrowsAsync<NghiepVuException>(() => Voi(s => s.HuyAsync(phieu2), QLK, Vai.QuanLyKho));
+        Assert.Contains("không còn nguyên", loi.Message);
+    }
+
+    [Fact]
+    public async Task Api_XacNhan_CanKhoaChongLap_ThuKhoBiChan()
+    {
+        var phieu = await PhieuDaQuet();
+        var quanLy = _app.TaoClient(Vai.QuanLyKho, QLK);
+        var token = await NguoiThu.TokenAsync(quanLy, "/PhieuNhap");
+
+        async Task<HttpResponseMessage> XacNhan(HttpClient c, string? khoa)
+        {
+            var r = new HttpRequestMessage(HttpMethod.Post, $"/api/phieu-nhap/{phieu}/xac-nhan");
+            r.Headers.Add("RequestVerificationToken", token);
+            if (khoa is not null) r.Headers.Add("Idempotency-Key", khoa);
+            return await c.SendAsync(r);
+        }
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await XacNhan(_app.TaoClient(Vai.ThuKho, "ND004"), "a")).StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await XacNhan(quanLy, null)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await XacNhan(quanLy, "a")).StatusCode);
+        var lap = await XacNhan(quanLy, "a");
+        Assert.True((await lap.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("daGhiTruocDo").GetBoolean());
+        Assert.Contains("Hủy hóa đơn (bút toán đảo)", await quanLy.GetStringAsync($"/PhieuNhap/{phieu}"));
     }
 }
