@@ -44,7 +44,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: thêm ngành hàng mới với thuộc tính mới trên giao diện, sinh biến thể từ tổ hợp thuộc tính, khai báo kích thước, khối lượng, cờ hạn dùng, điều kiện bảo quản; không xóa cứng thứ đã có chứng từ.
 - [x] Đơn mua (FR01, S2-04) — 77ba3cb
   - Xong khi: lập, duyệt đơn mua theo nhà cung cấp và kho; số chưa nhận tự cập nhật; trạng thái theo Bảng 2.14 do hệ thống tính.
-- [ ] Hóa đơn nhập kho (FR01, S2-05)
+- [x] Hóa đơn nhập kho (FR01, S2-05) — dfb703d
   - Xong khi: lập từ đơn mua, quét mã, ghi số thực nhận, lô tự sinh, bắt hạn dùng, phân loại đạt hoặc lỗi; tính thành tiền, tổng tiền; chặn số nhận vượt số chưa nhận; thủ kho không thấy giá; dùng được trên máy tính bảng.
 - [ ] Xác nhận hóa đơn nhập (FR01, S2-06)
   - Xong khi: xác nhận ghi tồn qua cổng; hàng đạt vào khu tiếp nhận, hàng lỗi vào khu cách ly (Hình 2.5); bấm lặp không ghi hai lần.
