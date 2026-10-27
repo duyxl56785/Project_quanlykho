@@ -1,0 +1,96 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.NhapKho
+@model TrangDuLieu<DonMuaDong>
+@{
+    ViewData["Title"] = "Đơn mua";
+    dynamic loc = ViewData["Loc"]!;
+    var ds = (DonMuaForm)ViewData["DanhSach"]!;
+    var xemGia = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Đơn mua</h1>
+    @if (xemGia)
+    {
+        <a class="btn btn-primary" asp-action="Them">Lập đơn mua</a>
+    }
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Mã đơn</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@loc.tuKhoa" />
+    </div>
+    <div>
+        <label class="form-label" for="maNhaCungCap">Nhà cung cấp</label>
+        <select class="form-select" id="maNhaCungCap" name="maNhaCungCap">
+            <option value="">Tất cả</option>
+            @foreach (var n in ds.DanhSachNhaCungCap)
+            {
+                <option value="@n.Ma" selected="@(n.Ma == (string?)loc.maNhaCungCap)">@n.Ten</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = ds.DanhSachKho })
+    </div>
+    <div>
+        <label class="form-label" for="tuNgay">Từ ngày</label>
+        <input class="form-control" id="tuNgay" name="tuNgay" type="date" value="@(((DateOnly?)loc.tuNgay)?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div>
+        <label class="form-label" for="denNgay">Đến ngày</label>
+        <input class="form-control" id="denNgay" name="denNgay" type="date" value="@(((DateOnly?)loc.denNgay)?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiDonMua>())
+            {
+                <option value="@t" selected="@(t == (TrangThaiDonMua?)loc.trangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có đơn mua nào khớp bộ lọc.">
+    <thead>
+        <tr>
+            <th>Mã đơn</th><th>Nhà cung cấp</th><th>Kho</th><th>Ngày lập</th>
+            @if (xemGia)
+            {
+                <th class="so">Tổng tiền</th>
+            }
+            <th>Trạng thái</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@d.Ma</td>
+                <td>@d.NhaCungCap</td>
+                <td>@d.MaKho</td>
+                <td>@NgayGio(d.NgayTao)</td>
+                @if (xemGia)
+                {
+                    <td class="so">@Tien(d.TongTien)</td>
+                }
+                <td>
+                    <partial name="_HuyHieuTrangThai" model="d.TrangThai" />
+                    @if (d.Buoc is not null)
+                    {
+                        <div class="small text-secondary">@d.Buoc</div>
+                    }
+                </td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@d.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

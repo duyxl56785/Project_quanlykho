@@ -1,0 +1,94 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.NhapKho
+@model DonMuaChiTiet
+@{
+    ViewData["Title"] = $"Đơn mua {Model.Ma}";
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Đơn mua @Model.Ma</h1>
+    <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+    @if (Model.Buoc is not null)
+    {
+        <span class="trang-thai trang-thai-vang">@Model.Buoc</span>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Index">Danh sách</a>
+</div>
+
+<div class="the">
+    <div class="row g-3">
+        <div class="col-md-4"><div class="text-secondary small">Nhà cung cấp</div>@Model.MaNhaCungCap – @Model.TenNhaCungCap</div>
+        <div class="col-md-4"><div class="text-secondary small">Kho nhập</div>@Model.MaKho – @Model.TenKho</div>
+        <div class="col-md-4"><div class="text-secondary small">Người lập, ngày lập</div>@Model.NguoiTao · @NgayGio(Model.NgayTao)</div>
+        @if (!string.IsNullOrEmpty(Model.GhiChu))
+        {
+            <div class="col-12"><div class="text-secondary small">Ghi chú</div>@Model.GhiChu</div>
+        }
+        <div class="col-12">
+            <div class="text-secondary small">Hóa đơn nhập</div>
+            @(Model.PhieuNhap.Count == 0 ? "Chưa có" : string.Join(", ", Model.PhieuNhap))
+        </div>
+    </div>
+</div>
+
+<div class="the">
+    <h2>Tiến độ nhận hàng</h2>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Hàng</th><th>Đơn vị</th><th class="so">Đặt</th><th class="so">Đã nhận</th><th class="so">Đang kiểm đếm</th><th class="so">Chưa nhận</th>
+                    @if (quanLy)
+                    {
+                        <th class="so">Đơn giá</th><th class="so">Thành tiền</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.Dong)
+                {
+                    <tr>
+                        <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                        <td>@d.TenDonVi</td>
+                        <td class="so">@So(d.SoLuongDat)</td>
+                        <td class="so">@So(d.DaNhan)</td>
+                        <td class="so">@So(d.DangNhan)</td>
+                        <td class="so fw-semibold">@So(d.ChuaNhan)</td>
+                        @if (quanLy)
+                        {
+                            <td class="so">@Tien(d.DonGia)</td>
+                            <td class="so">@Tien(d.ThanhTien)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+            @if (quanLy)
+            {
+                <tfoot><tr><td colspan="7" class="text-end">Tổng tiền</td><td class="so tong-cong">@Tien(Model.TongTien)</td></tr></tfoot>
+            }
+        </table>
+    </div>
+</div>
+
+@if (quanLy)
+{
+    <div class="thanh-nut">
+        @if (Model.TrangThai == TrangThaiDonMua.Nhap)
+        {
+            <form method="post" asp-action="XacNhan" asp-route-ma="@Model.Ma" data-xac-nhan="Xác nhận đơn nháp @Model.Ma thành đơn chính thức?">
+                <button type="submit" class="btn btn-primary">Xác nhận đơn</button>
+            </form>
+        }
+        @if (Model.SuaDuoc)
+        {
+            <a class="btn btn-outline-primary" asp-action="Sua" asp-route-ma="@Model.Ma">Sửa</a>
+        }
+        @if (Model.TrangThai is not (TrangThaiDonMua.DaHuy or TrangThaiDonMua.HoanThanh))
+        {
+            <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy đơn mua @Model.Ma?">
+                <button type="submit" class="btn btn-outline-danger">Hủy đơn</button>
+            </form>
+        }
+    </div>
+}
