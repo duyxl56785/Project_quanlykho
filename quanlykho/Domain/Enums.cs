@@ -1,0 +1,23 @@
+namespace quanlykho.Domain;
+
+// Lưu trong CSDL bằng tên (chuỗi không dấu), có CHECK danh sách giá trị.
+
+public enum VaiTro { QuanTriVien, QuanLyKho, ThuKho, NhanVienBanHang }
+
+public enum TrangThaiTaiKhoan { DangHoatDong, DaKhoa }
+
+public enum TrangThaiSuDung { DangSuDung, NgungSuDung }
+
+public enum DieuKienBaoQuan { Thuong, Lanh }
+
+public enum LoaiKhu { TiepNhan, LuuTru, CachLy, Xuat }
+
+public enum ChatLuong { Dat, Loi }
+
+/// <summary>Đơn mua (Bảng 2.14 dòng 1). Bước Chờ nhận hàng, Chờ kiểm đếm tính từ phiếu nhập, không lưu.</summary>
+public enum TrangThaiDonMua { Nhap, ChuaThucHien, DangThucHien, HoanThanh, DaHuy }
+
+/// <summary>Phiếu nhập, phiếu xuất ghi sổ (Bảng 2.14 dòng 5).</summary>
+public enum TrangThaiPhieu { LuuTam, HoanTat, DaHuy }
+
+public enum LoaiPhieuNhap { MuaHang, NhapKhac, TonDauKy }
