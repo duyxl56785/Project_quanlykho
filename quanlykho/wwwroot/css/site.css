@@ -111,7 +111,7 @@ main { padding: var(--khoang-4) var(--khoang-3); }
 .bang-du-lieu { background: var(--mau-be-mat); border: 1px solid var(--mau-vien); border-radius: var(--bo-goc); overflow: hidden; }
 .bang-du-lieu .table { --bs-table-bg: transparent; }
 .bang-du-lieu thead th { background: #f8fafc; color: var(--mau-chu-phu); font-size: var(--co-chu-nho); font-weight: 600; white-space: nowrap; }
-.bang-du-lieu td.so, .bang-du-lieu th.so { text-align: right; font-variant-numeric: tabular-nums; }
+td.so, th.so { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .phan-trang {
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--khoang-2);
   padding: var(--khoang-2) var(--khoang-3); border-top: 1px solid var(--mau-vien); font-size: var(--co-chu-nho);
