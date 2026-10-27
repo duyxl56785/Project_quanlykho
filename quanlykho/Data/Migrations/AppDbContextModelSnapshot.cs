@@ -34,6 +34,8 @@ namespace quanlykho.Data.Migrations
 
             modelBuilder.HasSequence("MaChungTu_LX");
 
+            modelBuilder.HasSequence("MaChungTu_ND");
+
             modelBuilder.HasSequence("MaChungTu_PN");
 
             modelBuilder.HasSequence("MaChungTu_PX");

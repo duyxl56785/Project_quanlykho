@@ -161,6 +161,12 @@ main { padding: var(--khoang-4) var(--khoang-3); }
 .man-hinh-quet .danh-sach-quet .list-group-item { min-height: 3.5rem; display: flex; align-items: center; gap: var(--khoang-2); }
 .man-hinh-quet .so-luong-lon { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-left: auto; }
 
+/* ---------- Trang không menu (đăng nhập) ---------- */
+
+.trang-don { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--khoang-3); }
+.trang-don-the { width: 100%; max-width: 26rem; padding: var(--khoang-4); }
+.ten-he-thong-don { color: var(--mau-chinh); font-weight: 700; font-size: 1.125rem; margin-bottom: var(--khoang-3); }
+
 /* ---------- Styleguide ---------- */
 
 .o-mau { display: flex; align-items: center; gap: var(--khoang-2); }

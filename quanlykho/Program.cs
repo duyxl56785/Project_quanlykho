@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using quanlykho.Common;
 using quanlykho.Common.Loi;
+using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Data.Seed;
 using quanlykho.Domain;
+using quanlykho.Features.QuanLyNguoiDung;
+using quanlykho.Features.TaiKhoan;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +32,10 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MaChungTu>();
 builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();
 builder.Services.AddScoped<DuLieuThu>();
+builder.Services.AddPhanQuyen();
+builder.Services.AddScoped<GhiNhatKy>();
+builder.Services.AddScoped<TaiKhoanService>();
+builder.Services.AddScoped<NguoiDungService>();
 
 var app = builder.Build();
 
@@ -67,16 +74,17 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 });
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.MapStaticAssets().AllowAnonymous();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.MapKiemTraCsdl();
+app.MapKiemTraCsdl().AllowAnonymous();
 
 
 app.Run();

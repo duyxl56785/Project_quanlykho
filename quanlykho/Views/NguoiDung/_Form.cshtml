@@ -1,0 +1,54 @@
+@using quanlykho.Common.PhanQuyen
+@model quanlykho.Features.QuanLyNguoiDung.NguoiDungForm
+@* Trường dùng chung cho Thêm và Sửa người dùng. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Ten" class="form-label bat-buoc"></label>
+        <input asp-for="Ten" class="form-control" />
+        <span asp-validation-for="Ten"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label bat-buoc"></label>
+        <input asp-for="Email" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="SoDienThoai" class="form-label"></label>
+        <input asp-for="SoDienThoai" class="form-control" inputmode="tel" />
+        <span asp-validation-for="SoDienThoai"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="VaiTro" class="form-label bat-buoc"></label>
+        <select asp-for="VaiTro" class="form-select" data-chon-vai>
+            @foreach (var v in Enum.GetValues<VaiTro>())
+            {
+                <option value="@v" selected="@(v == Model.VaiTro)">@Vai.TenHienThi(v)</option>
+            }
+        </select>
+    </div>
+    <fieldset class="col-12" data-chon-kho>
+        <legend class="form-label fs-6 bat-buoc">Kho được giao</legend>
+        <div class="thanh-nut">
+            @foreach (var kho in Model.DanhSachKho)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="Kho" value="@kho.Ma" id="kho-@kho.Ma" checked="@Model.Kho.Contains(kho.Ma)" />
+                    <label class="form-check-label" for="kho-@kho.Ma">@kho.Ma – @kho.Ten</label>
+                </div>
+            }
+        </div>
+        <div class="form-text">Quản lý kho và thủ kho chỉ làm việc trên kho được giao. Quản trị viên và nhân viên bán hàng thấy mọi kho.</div>
+    </fieldset>
+</div>
+
+<script>
+    // Ẩn chọn kho khi vai không cần kho được giao.
+    (() => {
+        const vai = document.querySelector("[data-chon-vai]");
+        const kho = document.querySelector("[data-chon-kho]");
+        const capNhat = () => { kho.hidden = !["QuanLyKho", "ThuKho"].includes(vai.value); };
+        vai.addEventListener("change", capNhat);
+        capNhat();
+    })();
+</script>

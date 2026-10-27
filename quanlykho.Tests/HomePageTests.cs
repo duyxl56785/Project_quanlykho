@@ -8,7 +8,7 @@ public class HomePageTests(UngDungFactory factory) : IClassFixture<UngDungFactor
     [Fact]
     public async Task TrangChu_TraVe200()
     {
-        var client = factory.CreateClient();
+        var client = factory.TaoClient();
 
         var response = await client.GetAsync("/");
 
