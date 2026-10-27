@@ -47,6 +47,7 @@ builder.Services.AddScoped<DonMuaService>();
 builder.Services.AddScoped<PhieuNhapService>();
 builder.Services.AddScoped<ViTriService>();
 builder.Services.AddScoped<KhoService>();
+builder.Services.AddScoped<OPhuHop>();
 
 var app = builder.Build();
 

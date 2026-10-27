@@ -68,8 +68,11 @@ public class ViTriController(ViTriService service) : Controller
 }
 
 [ApiController, Authorize(Roles = Vai.TrongKho), Route("api/vi-tri")]
-public class ViTriApiController(ViTriService service) : ControllerBase
+public class ViTriApiController(ViTriService service, OPhuHop oPhuHop) : ControllerBase
 {
+    [HttpGet("o-phu-hop")]
+    public async Task<IActionResult> TimO(string maLo, decimal soLuong, string? maKho = null) => Ok(await oPhuHop.TimAsync(maLo, soLuong, maKho));
+
     [HttpGet("cay")]
     public async Task<IActionResult> Cay(string maKho)
     {
