@@ -1,7 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using quanlykho.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
 
 var app = builder.Build();
 
@@ -24,6 +29,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+app.MapGet("/health/db", async (AppDbContext db) =>
+    await db.Database.CanConnectAsync() ? Results.Ok("OK") : Results.StatusCode(503));
 
 
 app.Run();
