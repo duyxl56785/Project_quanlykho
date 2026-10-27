@@ -17,7 +17,15 @@ dotnet build quanlykho.slnx
 dotnet run --project quanlykho
 ```
 
-Chưa có dự án test và `docker-compose.yml`. Trên máy này PostgreSQL chạy ở cổng 5433 qua `docker-compose.override.yml` (file riêng, đã nằm trong `.gitignore`, không commit).
+```bash
+docker compose up -d          # bật PostgreSQL (container quanlykho-db)
+docker compose down           # tắt, giữ dữ liệu; thêm -v là xóa dữ liệu
+dotnet tool restore           # lần đầu: cài dotnet-ef
+```
+
+Kiểm tra kết nối CSDL: `GET /health/db` (200 khi kết nối được, 503 khi không). Chưa có dự án test.
+
+Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án khác dùng) qua `docker-compose.override.yml` (copy từ `docker-compose.override.example.yml`, đã nằm trong `.gitignore`). Chuỗi kết nối cổng 5434 đặt bằng `dotnet user-secrets` (khóa `ConnectionStrings:QuanLyKho`); `appsettings.Development.json` giữ cổng 5432 mặc định.
 
 ## Kiến trúc
 
