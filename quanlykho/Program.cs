@@ -1,9 +1,12 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using quanlykho.Common;
 using quanlykho.Common.Loi;
 using quanlykho.Data;
+using quanlykho.Data.Seed;
+using quanlykho.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +16,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("QuanLyKho")));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MaChungTu>();
+builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();
+builder.Services.AddScoped<DuLieuThu>();
 
 var app = builder.Build();
+
+// dotnet run --project quanlykho -- --seed: migrate, nạp dữ liệu thử rồi thoát.
+if (args.Contains("--seed"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<DuLieuThu>().NapAsync();
+    app.Logger.LogInformation("Đã nạp dữ liệu thử.");
+    return;
+}
 
 if (app.Configuration.GetValue<bool>("Csdl:TuDongMigrate"))
 {
