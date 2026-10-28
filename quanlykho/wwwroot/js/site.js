@@ -107,6 +107,27 @@ const QuanLyKho = (() => {
         }
     });
 
+    // ---------- Nội dung nạp sau: <div data-tai="/url"> nhận HTML; nút data-tai-lai nạp lại phần trong cùng .the, data-tai-lai-tat-ca nạp lại hết ----------
+    const mauDangTai = '<div class="dang-tai" role="status"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>Đang tải…</span></div>';
+    async function taiNoiDung(vung) {
+        vung.innerHTML = mauDangTai;
+        try {
+            const r = await fetch(vung.dataset.tai, { headers: { Accept: "text/html" } });
+            // Hết phiên thì máy chủ chuyển sang trang đăng nhập: tải lại cả trang thay vì nhét trang đó vào thẻ.
+            if (r.redirected) return window.location.reload();
+            if (!r.ok) throw new Error();
+            vung.innerHTML = await r.text();
+        } catch {
+            vung.innerHTML = '<div class="alert alert-danger mb-0" role="alert">Không tải được số liệu. Bấm Làm mới để thử lại.</div>';
+        }
+    }
+    document.querySelectorAll("[data-tai]").forEach(taiNoiDung);
+    document.addEventListener("click", (e) => {
+        if (e.target.closest("[data-tai-lai-tat-ca]")) document.querySelectorAll("[data-tai]").forEach(taiNoiDung);
+        const nut = e.target.closest("[data-tai-lai]");
+        if (nut) nut.closest(".the").querySelectorAll("[data-tai]").forEach(taiNoiDung);
+    });
+
     // ---------- Phiếu có dòng hàng ----------
     // <tbody data-dong-hang> + <template> chứa một dòng với tên "Dong[__i__].X"; nút data-them-dong="#idTbody", nút data-xoa-dong trong dòng.
     function danhSoLai(tbody) {

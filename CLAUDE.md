@@ -123,6 +123,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
   - View Component `OChonKho`: `@await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = ... })`.
   - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
   - Gọi API từ JS: `QuanLyKho.goiApi(url, { method, body, khoaChongLap })` tự gửi `Idempotency-Key` và token chống CSRF, trả `{ ok, status, duLieu, loi }`.
+  - Nội dung nạp sau: `<div data-tai="/url">` nhận HTML (partial view) kèm trạng thái đang tải và lỗi; nút `data-tai-lai` nạp lại phần trong cùng `.the`, `data-tai-lai-tat-ca` nạp lại hết (mẫu: `Views/TongQuan`).
   - Menu bên trái khai ở `Common/GiaoDien/Menu.cs`; làm xong màn hình nào thì điền `Url` cho mục đó.
 - Form cần dữ liệu phụ (danh sách để chọn) đặt dữ liệu đó trong model (ví dụ `DanhSachNhom`, `DanhSachKho`) và nạp trước khi gọi Service, để `XuLyLoiFilter` hiện lại view khi lỗi nghiệp vụ. View phải trùng tên action (`Them`, `Sua`), phần chung đặt ở partial `_Form`.
 - Mọi POST, PUT, DELETE (cả API) kiểm token chống CSRF (`AutoValidateAntiforgeryToken`); form Razor có sẵn token, fetch dùng `goiApi`.
