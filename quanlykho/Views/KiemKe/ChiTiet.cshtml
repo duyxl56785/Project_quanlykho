@@ -1,0 +1,188 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.KiemKe
+@model KiemKeChiTiet
+@{
+    ViewData["Title"] = $"Phiếu kiểm kê {Model.Ma}";
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+    var dangKiem = Model.TrangThai == TrangThaiKiemKe.DangKiemKe;
+    var dem = dangKiem && Model.LaThanhVien;
+    var phamVi = Model.PhamVi switch { PhamViKiemKe.ViTri => "Theo vị trí", PhamViKiemKe.Lo => "Theo lô", _ => "Toàn kho" };
+}
+
+<div class="@(dem ? "man-hinh-quet" : null)">
+    <div class="tieu-de-trang">
+        <h1>Phiếu kiểm kê @Model.Ma</h1>
+        <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+        <a class="btn btn-outline-secondary" asp-action="Index">Danh sách</a>
+    </div>
+
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-4"><div class="text-secondary small">Kho, ngày kiểm</div>@Model.MaKho – @Model.TenKho · @Ngay(Model.NgayKiem)</div>
+            <div class="col-md-4">
+                <div class="text-secondary small">Phạm vi</div>@phamVi
+                @if (Model.DoiTuong.Count > 0)
+                {
+                    <div class="small text-secondary">@string.Join(", ", Model.DoiTuong)</div>
+                }
+            </div>
+            <div class="col-md-4"><div class="text-secondary small">Người lập</div>@Model.NguoiLap · @NgayGio(Model.NgayLap)</div>
+            <div class="col-md-4"><div class="text-secondary small">Thành viên</div>@string.Join(", ", Model.ThanhVien.Select(t => t.Ten))</div>
+            @if (!string.IsNullOrEmpty(Model.MucDich))
+            {
+                <div class="col-md-4"><div class="text-secondary small">Mục đích</div>@Model.MucDich</div>
+            }
+            @if (Model.ThoiDiemBatDau is not null)
+            {
+                <div class="col-md-4"><div class="text-secondary small">Bắt đầu, ô đang khóa</div>@NgayGio(Model.ThoiDiemBatDau) · @Model.CacO.Count ô</div>
+            }
+        </div>
+    </div>
+
+    @if (dem)
+    {
+        <div class="the">
+            <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã ô để lọc, quét mã lô để nhập số đếm", "Quét ô K01-… hoặc lô L…")' />
+            <form class="row g-2 mt-1 align-items-end" method="post" asp-action="ThemDong" asp-route-ma="@Model.Ma">
+                <div class="col-sm-5">
+                    <label class="form-label" for="themO">Hàng ngoài danh sách: ô</label>
+                    <select class="form-select" id="themO" name="maViTri" required>
+                        @foreach (var o in Model.CacO)
+                        {
+                            <option value="@o">@o</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label" for="themHang">Mã lô, mã hàng</label>
+                    <input class="form-control" id="themHang" name="maHang" required />
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label" for="themSo">Số đếm</label>
+                    <input class="form-control text-end" id="themSo" name="soLuongThucTe" type="number" min="0" step="any" required />
+                </div>
+                <div class="col-sm-2"><button type="submit" class="btn btn-outline-primary w-100">Thêm</button></div>
+            </form>
+        </div>
+    }
+
+    <form method="post" asp-action="Dem" asp-route-ma="@Model.Ma">
+        <div class="the">
+            <div class="d-flex align-items-center mb-2">
+                <h2 class="mb-0 me-auto">Sổ sách và số đếm</h2>
+                @if (dangKiem)
+                {
+                    <span class="text-secondary small">Chưa đếm @Model.ChuaDem · chênh lệch @Model.CoChenhLech dòng</span>
+                }
+            </div>
+            @if (Model.Dong.Count == 0)
+            {
+                <partial name="_TrangRong" model='Model.TrangThai == TrangThaiKiemKe.ChuaThucHien ? "Số sổ sách được chốt khi bắt đầu kiểm kê." : "Phạm vi không có hàng trên sổ sách."' />
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="bangDem">
+                        <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Sổ sách</th><th class="so">Thực tế</th><th class="so">Chênh lệch</th><th>Người đếm</th></tr></thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Dong.Count; i++)
+                            {
+                                var d = Model.Dong[i];
+                                <tr data-o="@d.MaViTri" data-lo="@d.MaLo">
+                                    <td class="small">@d.MaViTri</td>
+                                    <td>@(d.MaLo ?? "—")@if (d.NgoaiDanhSach) { <div class="small text-secondary">ngoài danh sách</div> }</td>
+                                    <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                                    <td>@Ngay(d.HanDung)</td>
+                                    <td class="so">@So(d.SoSach) @d.DonViTinh</td>
+                                    <td class="so">
+                                        @if (dem)
+                                        {
+                                            <input type="hidden" name="dem[@i].STT" value="@d.STT" />
+                                            <input class="form-control text-end" name="dem[@i].SoLuongThucTe" type="number" min="0" step="any"
+                                                   value="@d.ThucTe?.ToString("G29")" aria-label="Số đếm dòng @d.STT" />
+                                        }
+                                        else
+                                        {
+                                            @So(d.ThucTe)
+                                        }
+                                    </td>
+                                    <td class="so @(d.ChenhLech is < 0 ? "text-danger fw-semibold" : d.ChenhLech is > 0 ? "text-primary fw-semibold" : null)">
+                                        @(d.ChenhLech is null ? "" : d.ChenhLech > 0 ? $"+{So(d.ChenhLech)}" : So(d.ChenhLech))
+                                    </td>
+                                    <td>@d.NguoiDem</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        @if (dem && Model.Dong.Count > 0)
+        {
+            <div class="thanh-nut mb-3"><button type="submit" class="btn btn-primary flex-grow-1">Lưu số đếm</button></div>
+        }
+    </form>
+
+    @if (Model.CoChenhLech > 0 && dangKiem)
+    {
+        <p class="text-secondary">Dòng chênh lệch cần được phân loại và duyệt điều chỉnh (sinh chứng từ qua cổng ghi tồn) trước khi hoàn thành; không sửa thẳng số tồn.</p>
+    }
+
+    <div class="thanh-nut">
+        @if (quanLy && Model.TrangThai == TrangThaiKiemKe.ChuaThucHien)
+        {
+            <form method="post" asp-action="BatDau" asp-route-ma="@Model.Ma" class="d-flex flex-wrap gap-2 align-items-center"
+                  data-xac-nhan="Bắt đầu kiểm kê? Các ô trong phạm vi bị khóa: không nhập, xuất, xếp, chuyển cho tới khi hoàn thành.">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="xacNhanGiuHang" value="true" id="xacNhanGiuHang" />
+                    <label class="form-check-label" for="xacNhanGiuHang">Đồng ý khóa cả ô đang giữ hàng cho đơn chưa xuất</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Bắt đầu kiểm kê</button>
+            </form>
+        }
+        @if (quanLy && dangKiem)
+        {
+            <form method="post" asp-action="HoanThanh" asp-route-ma="@Model.Ma" data-xac-nhan="Hoàn thành kiểm kê @Model.Ma và mở khóa ô?">
+                <button type="submit" class="btn btn-primary" disabled="@(Model.ChuaDem > 0 || Model.CoChenhLech > 0)">Hoàn thành kiểm kê</button>
+            </form>
+        }
+        @if (quanLy && Model.TrangThai is TrangThaiKiemKe.ChuaThucHien or TrangThaiKiemKe.DangKiemKe)
+        {
+            <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy phiếu kiểm kê @Model.Ma và mở khóa ô?">
+                <button type="submit" class="btn btn-outline-danger">Hủy phiếu</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (dem)
+{
+    <script>
+        (() => {
+            const tienToO = @Json.Serialize(Model.MaKho + "-");
+            const oQuet = document.getElementById("oQuet");
+            const dong = [...document.querySelectorAll("#bangDem tr[data-o]")];
+            const themO = document.getElementById("themO");
+            oQuet.addEventListener("quet-ma", (e) => {
+                const ma = e.detail;
+                if (ma.startsWith(tienToO)) {
+                    const co = dong.filter((tr) => tr.dataset.o === ma);
+                    dong.forEach((tr) => tr.hidden = tr.dataset.o !== ma);
+                    if ([...themO.options].some((o) => o.value === ma)) themO.value = ma;
+                    return QuanLyKho.baoQuet(oQuet, co.length ? `Ô ${ma}: ${co.length} dòng; quét mã lô để nhập số đếm.` : `Ô ${ma} trống trên sổ sách; hàng tìm thấy nhập ở mục Hàng ngoài danh sách.`, true);
+                }
+                const tr = dong.find((x) => !x.hidden && x.dataset.lo === ma) ?? dong.find((x) => x.dataset.lo === ma);
+                if (tr) {
+                    tr.hidden = false;
+                    const o = tr.querySelector('input[type="number"]');
+                    o.focus();
+                    o.select();
+                    return QuanLyKho.baoQuet(oQuet, `Lô ${ma}: nhập số đếm rồi bấm Lưu số đếm.`, true);
+                }
+                document.getElementById("themHang").value = ma;
+                document.getElementById("themSo").focus();
+                QuanLyKho.baoQuet(oQuet, `${ma} không có trên sổ sách: nhập số đếm rồi bấm Thêm.`, false);
+            });
+        })();
+    </script>
+}

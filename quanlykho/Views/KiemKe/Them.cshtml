@@ -1,0 +1,95 @@
+@using quanlykho.Features.KiemKe
+@model KiemKeForm
+@{ ViewData["Title"] = "Lập phiếu kiểm kê"; }
+
+<div class="tieu-de-trang"><h1>Lập phiếu kiểm kê</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho kiểm kê</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = Model.MaKho, danhSach = Model.DanhSachKho })
+    </div>
+    <div class="thanh-loc-nut thanh-nut"><button class="btn btn-outline-secondary" type="submit">Đổi kho</button></div>
+</form>
+
+<form method="post" asp-action="Them">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <input type="hidden" asp-for="MaKho" />
+
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <span class="form-label d-block bat-buoc">Phạm vi kiểm (kho @Model.MaKho)</span>
+                <div class="btn-group w-100" role="group" aria-label="Phạm vi kiểm">
+                    @foreach (var (gt, ten) in new[] { (PhamViKiemKe.ToanKho, "Toàn kho"), (PhamViKiemKe.ViTri, "Theo vị trí"), (PhamViKiemKe.Lo, "Theo lô") })
+                    {
+                        <input type="radio" class="btn-check" name="PhamVi" id="pv-@gt" value="@gt" checked="@(Model.PhamVi == gt)" />
+                        <label class="btn btn-outline-primary" for="pv-@gt">@ten</label>
+                    }
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="NgayKiem" class="form-label"></label>
+                <input asp-for="NgayKiem" class="form-control" type="date" />
+            </div>
+            <div class="col-12" data-pham-vi="ViTri">
+                <label class="form-label bat-buoc" for="dtViTri">Vị trí cần kiểm (chọn kệ, hàng hay phòng là kiểm mọi ô bên dưới)</label>
+                <select class="form-select" id="dtViTri" name="DoiTuong" multiple size="8">
+                    @foreach (var v in Model.DanhSachViTri)
+                    {
+                        <option value="@v.Ma" selected="@Model.DoiTuong.Contains(v.Ma)">@v.Ten</option>
+                    }
+                </select>
+                <div class="form-text">Giữ Ctrl để chọn nhiều.</div>
+            </div>
+            <div class="col-12" data-pham-vi="Lo">
+                <label class="form-label bat-buoc" for="dtLo">Lô cần kiểm (khóa mọi ô đang chứa lô)</label>
+                <select class="form-select" id="dtLo" name="DoiTuong" multiple size="8">
+                    @foreach (var l in Model.DanhSachLo)
+                    {
+                        <option value="@l.Ma" selected="@Model.DoiTuong.Contains(l.Ma)">@l.Ten</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label asp-for="MucDich" class="form-label"></label>
+                <input asp-for="MucDich" class="form-control" placeholder="Kiểm định kỳ cuối tháng" />
+            </div>
+            <fieldset class="col-12">
+                <legend class="form-label fs-6 bat-buoc">Thành viên (được nhập số đếm)</legend>
+                @if (Model.DanhSachNguoi.Count == 0)
+                {
+                    <p class="text-secondary">Kho chưa có quản lý kho hay thủ kho đang hoạt động.</p>
+                }
+                <div class="row g-2">
+                    @foreach (var n in Model.DanhSachNguoi)
+                    {
+                        <div class="col-md-6 form-check">
+                            <input class="form-check-input" type="checkbox" name="ThanhVien" value="@n.Ma" id="tv-@n.Ma" checked="@Model.ThanhVien.Contains(n.Ma)" />
+                            <label class="form-check-label" for="tv-@n.Ma">@n.Ma – @n.Ten</label>
+                        </div>
+                    }
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="thanh-nut">
+        <button type="submit" class="btn btn-primary">Lập phiếu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const capNhat = () => {
+            const chon = document.querySelector('[name="PhamVi"]:checked').value;
+            document.querySelectorAll("[data-pham-vi]").forEach((k) => {
+                k.hidden = k.dataset.phamVi !== chon;
+                k.querySelector("select").disabled = k.hidden;
+            });
+        };
+        document.querySelectorAll('[name="PhamVi"]').forEach((r) => r.addEventListener("change", capNhat));
+        capNhat();
+    })();
+</script>
