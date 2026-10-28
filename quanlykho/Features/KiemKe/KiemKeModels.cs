@@ -8,8 +8,11 @@ public record KiemKeDong(string Ma, string MaKho, PhamViKiemKe PhamVi, DateOnly 
 
 public record DongKiemKe(int STT, string MaViTri, string? MaLo, string MaBienThe, string TenHang, string DonViTinh, DateOnly? HanDung,
     decimal SoSach, decimal? ThucTe, bool NgoaiDanhSach, string? NguoiDem,
-    LoaiChenhLech? Loai, string? KetLuan, string? NguoiDuyet, string? MaChungTuXuLy)
+    LoaiChenhLech? Loai, string? KetLuan, string? NguoiDuyet, string? MaChungTuXuLy, List<DonViChon>? DonVi = null)
 {
+    /// <summary>Đơn vị lớn nhất khi hàng có đơn vị quy đổi, để đếm theo thùng và số lẻ.</summary>
+    public DonViChon? DonViLon => DonVi is { Count: > 1 } ? DonVi.MaxBy(d => d.HeSo) : null;
+
     /// <summary>Thực tế − sổ sách; null khi chưa đếm.</summary>
     public decimal? ChenhLech => ThucTe - SoSach;
     public bool ChoXuLy => ChenhLech is not null and not 0 && NguoiDuyet is null;
@@ -74,8 +77,11 @@ public class KiemKeForm
 public class DongDemForm
 {
     public int STT { get; set; }
+    /// <summary>Số lẻ theo đơn vị tính chính (hoặc cả số khi không đếm theo thùng).</summary>
     public decimal? SoLuongThucTe { get; set; }
+    /// <summary>Số đơn vị lớn nhất (thùng); thực tế = SoLon × hệ số + SoLuongThucTe.</summary>
+    public decimal? SoLon { get; set; }
 }
 
-/// <summary>Hàng ngoài danh sách: Ma là mã lô, mã biến thể hoặc mã vạch.</summary>
-public record ThemDongKiemKe(string MaViTri, string Ma, decimal SoLuongThucTe);
+/// <summary>Hàng ngoài danh sách: Ma là mã lô, mã biến thể hoặc mã vạch; SoLon là số đơn vị lớn nhất (thùng) cộng thêm vào số lẻ.</summary>
+public record ThemDongKiemKe(string MaViTri, string Ma, decimal SoLuongThucTe, decimal SoLon = 0);
