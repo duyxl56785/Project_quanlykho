@@ -56,4 +56,6 @@ public class ChiTietPhieuNhap
     /// <summary>Cột tính lưu sẵn = SoLuongGoc × DonGia.</summary>
     public decimal ThanhTien { get; private set; }
     public ChatLuong ChatLuong { get; set; }
+    /// <summary>Ô ghi tồn khi xác nhận (phiếu tồn đầu kỳ); null là ô mặc định khu tiếp nhận hoặc cách ly theo chất lượng.</summary>
+    public string? MaViTri { get; set; }
 }

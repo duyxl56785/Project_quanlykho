@@ -289,13 +289,13 @@ public class NhapExcelService(AppDbContext db, NguoiDungHienTai nguoiDung, GhiNh
         return new(sanPham, bienThe, nhaCungCap, loi.OrderBy(x => x.Sheet == SheetSanPham ? 0 : x.Sheet == SheetBienThe ? 1 : 2).ThenBy(x => x.Dong).ToList());
     }
 
-    private record DongDoc(int Dong, string[] O)
+    internal record DongDoc(int Dong, string[] O)
     {
         public string this[int i] => O[i];
     }
 
     /// <summary>Đọc một sheet theo tiêu đề cột (bỏ dấu *, không phân biệt hoa thường); thiếu sheet hoặc cột bắt buộc là lỗi cả tệp.</summary>
-    private static List<DongDoc> Bang(XLWorkbook wb, string ten, Cot[] cot, List<LoiDong> loi)
+    internal static List<DongDoc> Bang(XLWorkbook wb, string ten, Cot[] cot, List<LoiDong> loi)
     {
         if (!wb.TryGetWorksheet(ten, out var ws))
         {
@@ -319,16 +319,17 @@ public class NhapExcelService(AppDbContext db, NguoiDungHienTai nguoiDung, GhiNh
         return ketQua;
     }
 
-    private static string ChuoiO(IXLCell c) => c.Value.Type switch
+    internal static string ChuoiO(IXLCell c) => c.Value.Type switch
     {
         XLDataType.Blank => "",
         XLDataType.Number => c.Value.GetNumber().ToString(CultureInfo.InvariantCulture),
+        XLDataType.DateTime => c.Value.GetDateTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
         _ => c.Value.ToString(CultureInfo.InvariantCulture).Trim(),
     };
 
     private static string ChuanTieuDe(string s) => s.Replace("*", "").Trim().ToLowerInvariant();
 
-    private static string BoDau(string s) => s.Trim().ToLowerInvariant() switch
+    internal static string BoDau(string s) => s.Trim().ToLowerInvariant() switch
     {
         "thường" => "thuong",
         "lạnh" => "lanh",
@@ -343,7 +344,7 @@ public class NhapExcelService(AppDbContext db, NguoiDungHienTai nguoiDung, GhiNh
 
     private static string DuongDanTam(string maBam) => Path.Combine(ThuMucTam, maBam + ".xlsx");
 
-    private static void TaoSheet(XLWorkbook wb, string ten, Cot[] cot)
+    internal static void TaoSheet(XLWorkbook wb, string ten, Cot[] cot)
     {
         var ws = wb.AddWorksheet(ten);
         for (var i = 0; i < cot.Length; i++)
@@ -354,7 +355,7 @@ public class NhapExcelService(AppDbContext db, NguoiDungHienTai nguoiDung, GhiNh
     }
 
     /// <summary>Gom lỗi của một dòng.</summary>
-    private sealed class Kiem(string sheet, int dong, List<LoiDong> loi)
+    internal sealed class Kiem(string sheet, int dong, List<LoiDong> loi)
     {
         public bool CoLoi { get; private set; }
 

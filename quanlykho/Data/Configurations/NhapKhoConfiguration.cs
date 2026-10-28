@@ -96,5 +96,7 @@ public class ChiTietPhieuNhapConfiguration : IEntityTypeConfiguration<ChiTietPhi
         b.Property(x => x.ThanhTien).Tien()
             .HasComputedColumnSql("round(\"SoLuongGoc\" * \"DonGia\", 2)", stored: true);
         b.HasOne<Lo>().WithMany().HasForeignKey(x => x.MaLo);
+        b.Property(x => x.MaViTri).HasMaxLength(MaViTri);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaViTri);
     }
 }

@@ -49,7 +49,7 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         {
             var l = lo[c.MaLo];
             return new DongPhieuNhap(c.STT, c.MaLo, l.MaBienThe, DonMuaService.MoTaHang(l.Ten, l.ThuocTinh), c.TenDonVi, c.SoLuongGoc, l.HanDung, c.ChatLuong,
-                xemGia ? c.DonGia : null, xemGia ? c.ThanhTien : null, c.HeSo, c.SoLuongThucNhan, l.DonViTinh);
+                xemGia ? c.DonGia : null, xemGia ? c.ThanhTien : null, c.HeSo, c.SoLuongThucNhan, l.DonViTinh, c.MaViTri);
         }).ToList();
 
         var tenNhaCungCap = p.MaDonMua is null ? null
@@ -182,7 +182,7 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         await tx.CommitAsync();
     }
 
-    /// <summary>Ghi tồn: dòng Đạt vào ô mặc định khu tiếp nhận, dòng Lỗi vào ô mặc định khu cách ly.</summary>
+    /// <summary>Ghi tồn: dòng có ô chỉ định (tồn đầu kỳ) vào ô đó; dòng khác Đạt vào ô mặc định khu tiếp nhận, Lỗi vào ô mặc định khu cách ly.</summary>
     public async Task<KetQuaGhi> XacNhanAsync(string ma, string? khoaChongLap)
     {
         if (string.IsNullOrWhiteSpace(khoaChongLap))
@@ -206,7 +206,8 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
 
         p.TrangThai = TrangThaiPhieu.HoanTat;
         p.NguoiXacNhan = nguoiDung.Ma;
-        var ghi = dong.Select(c => new DongGhiTon(c.MaLo, O(c.ChatLuong == ChatLuong.Dat ? LoaiKhu.TiepNhan : LoaiKhu.CachLy), c.SoLuongThucNhan)).ToList();
+        // shortcut: sức chứa ô của dòng tồn đầu kỳ chỉ kiểm lúc nhập tệp, chưa kiểm lại lúc xác nhận; cần khi phiếu để lâu mà ô đã nhận thêm hàng.
+        var ghi = dong.Select(c => new DongGhiTon(c.MaLo, c.MaViTri ?? O(c.ChatLuong == ChatLuong.Dat ? LoaiKhu.TiepNhan : LoaiKhu.CachLy), c.SoLuongThucNhan)).ToList();
         if (await congGhiTon.GhiAsync(khoaChongLap, LoaiChungTu, ma, ghi) == KetQuaGhi.DaGhiTruocDo)
             throw new XungDotException("Khóa chống ghi lặp đã dùng cho thao tác khác, vui lòng tải lại trang.");
         if (p.MaDonMua is not null)
@@ -245,6 +246,8 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         else
         {
             p.TrangThai = TrangThaiPhieu.DaHuy;
+            // Phiếu tồn đầu kỳ chưa ghi tồn bị hủy thì cho nhập lại cùng tệp.
+            db.TepDaNhap.RemoveRange(db.TepDaNhap.Where(t => t.MaChungTu == ma));
             await db.SaveChangesAsync();
         }
         if (p.MaDonMua is not null)

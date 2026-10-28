@@ -420,6 +420,10 @@ namespace quanlykho.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("MaViTri")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
                     b.Property<decimal>("SoLuongGoc")
                         .HasPrecision(14, 3)
                         .HasColumnType("numeric(14,3)");
@@ -442,6 +446,8 @@ namespace quanlykho.Data.Migrations
                     b.HasKey("MaPhieuNhap", "STT");
 
                     b.HasIndex("MaLo");
+
+                    b.HasIndex("MaViTri");
 
                     b.ToTable("ChiTietPhieuNhap", t =>
                         {
@@ -1599,6 +1605,10 @@ namespace quanlykho.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("MaChungTu")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("NguoiNhap")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1937,6 +1947,11 @@ namespace quanlykho.Data.Migrations
                         .HasForeignKey("MaPhieuNhap")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.ViTri", null)
+                        .WithMany()
+                        .HasForeignKey("MaViTri")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("quanlykho.Domain.ChiTietPhieuXuat", b =>

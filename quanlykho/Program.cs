@@ -72,6 +72,7 @@ builder.Services.AddScoped<TongQuanService>();
 builder.Services.AddScoped<BaoCaoService>();
 builder.Services.AddScoped<NhatKyService>();
 builder.Services.AddScoped<NhapExcelService>();
+builder.Services.AddScoped<NhapTonDauKyService>();
 
 var app = builder.Build();
 

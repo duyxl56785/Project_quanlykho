@@ -1,0 +1,67 @@
+@using quanlykho.Features.NhapExcel
+@model TonDauKyTrang
+@{
+    ViewData["Title"] = "Nhập tồn đầu kỳ";
+    const int HienToiDa = 200;
+}
+
+<div class="tieu-de-trang">
+    <h1>Nhập tồn đầu kỳ</h1>
+    <a class="btn btn-outline-primary" asp-action="MauTonDauKy">Tải tệp mẫu</a>
+</div>
+
+@if (Model.Kho.Count == 0)
+{
+    <partial name="_TrangRong" model='"Bạn chưa được giao kho nào."' />
+}
+else
+{
+    <form class="the" method="post" asp-action="NhapTonDauKy" enctype="multipart/form-data">
+        <h2>Tải tệp tồn đầu kỳ của một kho</h2>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="maKho">Kho</label>
+                @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = Model.MaKho, danhSach = Model.Kho })
+            </div>
+            <div class="col-md-5">
+                <label class="form-label bat-buoc" for="tep">Tệp .xlsx theo mẫu (tối đa 5 MB)</label>
+                <input class="form-control" id="tep" name="tep" type="file" accept=".xlsx" required />
+            </div>
+            <div class="col-md-3"><button type="submit" class="btn btn-primary w-100">Kiểm tra và sinh phiếu</button></div>
+        </div>
+        <p class="form-text mb-0">
+            Hệ thống kiểm lỗi mọi dòng (gồm sức chứa ô). Hết lỗi thì sinh phiếu nhập Tồn đầu kỳ ở trạng thái Lưu tạm; quản lý kho kiểm tra rồi bấm Xác nhận mới ghi tồn vào đúng ô trong tệp.
+            Một tệp chỉ nhập được một lần.
+        </p>
+    </form>
+}
+
+@if (Model.KetQua is { } kq)
+{
+    <div class="the">
+        <h2>Kết quả kiểm tra: @kq.TenTep</h2>
+        @if (kq.DaNhapLuc is { } luc)
+        {
+            <div class="alert alert-warning mb-0" role="alert">Tệp này đã được nhập lúc @NgayGio(luc); không nhập lại được.</div>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">Tệp còn @kq.Loi.Count lỗi nên chưa sinh phiếu. Sửa các dòng dưới đây trong Excel rồi tải lên lại.</div>
+            <div class="table-responsive the-cuon">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th class="so">Dòng</th><th>Lỗi</th></tr></thead>
+                    <tbody>
+                        @foreach (var l in kq.Loi.Take(HienToiDa))
+                        {
+                            <tr><td class="so">@(l.Dong == 0 ? "" : l.Dong)</td><td>@l.NoiDung</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (kq.Loi.Count > HienToiDa)
+            {
+                <p class="text-secondary mt-2 mb-0">Còn @(kq.Loi.Count - HienToiDa) lỗi nữa chưa hiện.</p>
+            }
+        }
+    </div>
+}
