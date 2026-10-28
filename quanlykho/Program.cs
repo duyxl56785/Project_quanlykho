@@ -13,6 +13,7 @@ using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Data.Seed;
 using quanlykho.Domain;
+using quanlykho.Features.BaoCao;
 using quanlykho.Features.DanhMuc;
 using quanlykho.Features.DieuChuyen;
 using quanlykho.Features.KiemKe;
@@ -65,6 +66,7 @@ builder.Services.AddScoped<PhieuXuatService>();
 builder.Services.AddScoped<DieuChuyenService>();
 builder.Services.AddScoped<KiemKeService>();
 builder.Services.AddScoped<TongQuanService>();
+builder.Services.AddScoped<BaoCaoService>();
 
 var app = builder.Build();
 

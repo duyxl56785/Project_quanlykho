@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Báo cáo";
+    (string Action, string Ten, string MoTa)[] baoCao =
+    [
+        ("TongHop", "Tổng hợp tồn kho", "Tồn từng kho cạnh tổng các kho; tách hàng khả dụng, ở khu tiếp nhận, cách ly và đang vận chuyển."),
+        ("TheoLo", "Tồn theo lô và hạn dùng", "Từng lô của hàng có theo dõi hạn dùng, sắp theo hạn dùng."),
+        ("TheoViTri", "Tồn theo vị trí", "Hàng đang nằm ở từng ô; lọc theo khu hoặc đầu mã vị trí (kệ, dãy)."),
+        ("NhapXuatTon", "Nhập xuất tồn theo kỳ", "Tồn đầu kỳ, nhập, xuất, tồn cuối kỳ theo kho và biến thể, tính từ sổ biến động."),
+        ("TheKho", "Thẻ kho", "Sổ biến động của một biến thể theo thời gian với số dư lũy kế; lọc theo kho, lô, vị trí."),
+    ];
+}
+
+<div class="tieu-de-trang"><h1>Báo cáo</h1></div>
+
+<div class="row g-3">
+    @foreach (var b in baoCao)
+    {
+        <div class="col-md-6">
+            <a class="the d-block h-100 mb-0 text-decoration-none" asp-action="@b.Action">
+                <h2>@b.Ten</h2>
+                <p class="text-secondary mb-0">@b.MoTa</p>
+            </a>
+        </div>
+    }
+</div>
+<p class="text-secondary mt-3">Báo cáo chỉ đọc, chỉ gồm các kho bạn được giao; số lượng theo đơn vị tính chính.</p>

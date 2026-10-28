@@ -1,0 +1,67 @@
+@using quanlykho.Features.BaoCao
+@model TongHopTrang
+@{
+    ViewData["Title"] = "Tổng hợp tồn kho";
+    var nhieuKho = Model.Kho.Count > 1;
+}
+
+<div class="tieu-de-trang"><h1>Tổng hợp tồn kho</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+<partial name="_Loc" model="new ThanhLocBaoCao(Model.Loc, Model.DanhSach)" />
+
+<bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có hàng nào còn tồn khớp bộ lọc.">
+    <thead>
+        <tr>
+            <th>Hàng</th>
+            @foreach (var k in Model.Kho)
+            {
+                <th class="so">@k</th>
+            }
+            @if (nhieuKho)
+            {
+                <th class="so">Tổng các kho</th>
+            }
+            <th class="so">Khả dụng</th><th class="so">Khu tiếp nhận</th><th class="so">Khu cách ly</th><th class="so">Đang vận chuyển</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Trang.Muc)
+        {
+            <tr>
+                <td class="cot-chinh"><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang (@d.DonViTinh)</div></td>
+                @foreach (var k in Model.Kho)
+                {
+                    <td class="so">@So(d.TheoKho[k])</td>
+                }
+                @if (nhieuKho)
+                {
+                    <td class="so tong-cong">@So(d.Tong)</td>
+                }
+                <td class="so">@So(d.KhaDung)</td>
+                <td class="so">@So(d.TiepNhan)</td>
+                <td class="so">@So(d.CachLy)</td>
+                <td class="so">@So(d.VanChuyen)</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="tong-cong">
+            <td>Tổng cộng (mọi trang)</td>
+            @foreach (var k in Model.Kho)
+            {
+                <td class="so">@So(Model.TongCong.TheoKho[k])</td>
+            }
+            @if (nhieuKho)
+            {
+                <td class="so">@So(Model.TongCong.Tong)</td>
+            }
+            <td class="so">@So(Model.TongCong.KhaDung)</td>
+            <td class="so">@So(Model.TongCong.TiepNhan)</td>
+            <td class="so">@So(Model.TongCong.CachLy)</td>
+            <td class="so">@So(Model.TongCong.VanChuyen)</td>
+        </tr>
+    </tfoot>
+</bang-du-lieu>
+<p class="text-secondary mt-2">
+    Cột kho là toàn bộ tồn trong kho (mọi khu, kể cả hàng đã giữ, hết hạn). Khả dụng chỉ tính hàng ở khu lưu trữ, chưa hết hạn, không kiểm kê, trừ phần đã giữ.
+    Đang vận chuyển là phần chưa nhận của phiếu chuyển kho đi hoặc đến các kho đang xem, không nằm trong tồn kho nào; tổng hệ thống = tổng các kho + đang vận chuyển.
+</p>

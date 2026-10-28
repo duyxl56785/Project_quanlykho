@@ -1,0 +1,36 @@
+@using quanlykho.Features.BaoCao
+@using quanlykho.Features.Kho
+@model BaoCaoTrang<DongTheoViTri>
+@{
+    ViewData["Title"] = "Tồn theo vị trí";
+}
+
+<div class="tieu-de-trang"><h1>Tồn theo vị trí</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+<partial name="_Loc" model="new ThanhLocBaoCao(Model.Loc, Model.DanhSach, Khu: true)" />
+
+<bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có hàng nào ở vị trí khớp bộ lọc.">
+    <thead>
+        <tr><th>Ô</th><th>Khu</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Tồn</th><th class="so">Đã giữ</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Trang.Muc)
+        {
+            <tr>
+                <td class="small fw-semibold">
+                    @d.MaViTri
+                    @if (d.MaPhieuKiemKe is not null)
+                    {
+                        <div class="text-danger">Đang kiểm kê @d.MaPhieuKiemKe</div>
+                    }
+                </td>
+                <td>@CapViTri.TenKhu(d.LoaiKhu)</td>
+                <td>@d.MaLo</td>
+                <td>@d.MaBienThe<div class="small text-secondary">@d.TenHang (@d.DonViTinh)</div></td>
+                <td>@Ngay(d.HanDung)</td>
+                <td class="so">@So(d.SoLuong)</td>
+                <td class="so">@So(d.DaGiu)</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="TheKho" asp-route-MaBienThe="@d.MaBienThe" asp-route-MaLo="@d.MaLo" asp-route-MaViTri="@d.MaViTri">Thẻ kho</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

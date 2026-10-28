@@ -23,12 +23,12 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         if (!string.IsNullOrWhiteSpace(maKho)) q = q.Where(d => d.MaKho == maKho);
         if (tuNgay is not null)
         {
-            var tu = BatDauNgay(tuNgay.Value);
+            var tu = DinhDang.BatDauNgay(tuNgay.Value);
             q = q.Where(d => d.NgayTao >= tu);
         }
         if (denNgay is not null)
         {
-            var den = BatDauNgay(denNgay.Value.AddDays(1));
+            var den = DinhDang.BatDauNgay(denNgay.Value.AddDays(1));
             q = q.Where(d => d.NgayTao < den);
         }
         if (trangThai is not null) q = q.Where(d => d.TrangThai == trangThai);
@@ -231,12 +231,6 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
 
     private static string? Buoc(TrangThaiDonMua trangThai, List<TienDoDong> dong) =>
         trangThai != TrangThaiDonMua.DangThucHien ? null : dong.Any(d => d.DangNhan > 0) ? ChoKiemDem : ChoNhanHang;
-
-    private static DateTimeOffset BatDauNgay(DateOnly ngay)
-    {
-        var gioDau = ngay.ToDateTime(TimeOnly.MinValue);
-        return new DateTimeOffset(gioDau, DinhDang.GioVietNam.GetUtcOffset(gioDau)).ToUniversalTime();
-    }
 
     public static string MoTaHang(string ten, Dictionary<string, string> thuocTinh) =>
         thuocTinh.Count == 0 ? ten : $"{ten} {string.Join(" ", thuocTinh.Values)}";

@@ -1,0 +1,45 @@
+@using quanlykho.Features.BaoCao
+@model NhapXuatTonTrang
+@{
+    ViewData["Title"] = "Nhập xuất tồn theo kỳ";
+}
+
+<div class="tieu-de-trang"><h1>Nhập xuất tồn theo kỳ</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+<partial name="_Loc" model="new ThanhLocBaoCao(Model.Loc, Model.DanhSach, Ky: true)" />
+
+<bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có biến động hay tồn nào trong kỳ khớp bộ lọc.">
+    <thead>
+        <tr><th>Kho</th><th>Hàng</th><th class="so">Tồn đầu kỳ</th><th class="so">Nhập</th><th class="so">Xuất</th><th class="so">Tồn cuối kỳ</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Trang.Muc)
+        {
+            <tr>
+                <td>@d.MaKho</td>
+                <td class="cot-chinh"><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang (@d.DonViTinh)</div></td>
+                <td class="so">@So(d.DauKy)</td>
+                <td class="so">@So(d.Nhap)</td>
+                <td class="so">@So(d.Xuat)</td>
+                <td class="so tong-cong">@So(d.CuoiKy)</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="TheKho" asp-route-MaBienThe="@d.MaBienThe" asp-route-MaKho="@d.MaKho"
+                       asp-route-TuNgay="@Model.Loc.TuNgay?.ToString("yyyy-MM-dd")" asp-route-DenNgay="@Model.Loc.DenNgay?.ToString("yyyy-MM-dd")">Thẻ kho</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="tong-cong">
+            <td colspan="2">Tổng cộng (mọi trang)</td>
+            <td class="so">@So(Model.TongCong.DauKy)</td>
+            <td class="so">@So(Model.TongCong.Nhap)</td>
+            <td class="so">@So(Model.TongCong.Xuat)</td>
+            <td class="so">@So(Model.TongCong.CuoiKy)</td>
+            <td></td>
+        </tr>
+    </tfoot>
+</bang-du-lieu>
+<p class="text-secondary mt-2">
+    Từ @Ngay(Model.Loc.TuNgay) đến hết @Ngay(Model.Loc.DenNgay). Tồn đầu kỳ là tổng biến động trước ngày bắt đầu. Mỗi chứng từ tính số ròng trong một kho:
+    xếp hàng, chuyển vị trí trong cùng kho không thành nhập, xuất; chuyển kho là xuất ở kho đi và nhập ở kho đến khi nhận.
+</p>
