@@ -18,10 +18,11 @@ public record KetQuaXep(string MaChuyen, bool DaGhiTruocDo);
 /// <summary>Hàng đang chờ xếp: một lô tại một ô khu tiếp nhận.</summary>
 public record HangChoXep(string MaLo, string MaBienThe, string? MaVach, string TenHang, string DonViTinh, DateOnly? HanDung, string MaViTri, decimal SoLuong);
 
-/// <summary>Xếp hàng từ khu tiếp nhận vào ô lưu trữ (Hình 2.10, Bảng 2.33).</summary>
+/// <summary>Xếp hàng từ khu tiếp nhận vào ô lưu trữ (Hình 2.10, Bảng 2.33); cùng luồng chuyển hàng giữa hai ô lưu trữ trong một kho (FR16).</summary>
 public class XepHangService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungTu maChungTu, CongGhiTon congGhiTon, TimeProvider gio)
 {
     public const string LoaiChungTu = "XepHang";
+    public const string LoaiChuyen = "ChuyenTrongKho";
 
     public async Task<List<HangChoXep>> ChoXepAsync(string maKho)
     {
@@ -38,6 +39,22 @@ public class XepHangService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChung
             .ToList();
     }
 
+    /// <summary>Hàng chuyển được ở một ô lưu trữ: phần chưa giữ của từng lô; ô không phải ô lưu trữ của kho thì trả rỗng.</summary>
+    public async Task<List<HangChoXep>> HangTaiOAsync(string maKho, string maViTri)
+    {
+        await nguoiDung.DamBaoQuyenKhoAsync(maKho);
+        return (await db.TonKho.Where(t => t.MaViTri == maViTri && t.SoLuong > t.SoLuongDaGiu)
+                .Join(db.ViTri.Where(v => v.MaKho == maKho && v.LoaiKhu == LoaiKhu.LuuTru), t => t.MaViTri, v => v.MaViTri, (t, v) => t)
+                .Join(db.Lo, t => t.MaLo, l => l.MaLo, (t, l) => new
+                {
+                    t.MaLo, l.MaBienThe, l.BienThe.MaVach, l.BienThe.SanPham.Ten, l.BienThe.ThuocTinh, l.BienThe.SanPham.DonViTinh, l.HanDung,
+                    t.MaViTri, ConLai = t.SoLuong - t.SoLuongDaGiu,
+                })
+                .OrderBy(x => x.MaLo).ToListAsync())
+            .Select(x => new HangChoXep(x.MaLo, x.MaBienThe, x.MaVach, DonMuaService.MoTaHang(x.Ten, x.ThuocTinh), x.DonViTinh, x.HanDung, x.MaViTri, x.ConLai))
+            .ToList();
+    }
+
     public async Task<KetQuaXep> XepAsync(XepHangYeuCau yc, string? khoaChongLap)
     {
         if (string.IsNullOrWhiteSpace(khoaChongLap) || khoaChongLap.Length > 56)
@@ -49,8 +66,9 @@ public class XepHangService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChung
 
         var di = await db.ViTri.AsNoTracking().SingleOrDefaultAsync(v => v.MaViTri == yc.MaViTriDi) ?? throw new NghiepVuException($"Không có vị trí {yc.MaViTriDi}.");
         await nguoiDung.DamBaoQuyenKhoAsync(di.MaKho);
-        if (di.LoaiKhu != LoaiKhu.TiepNhan || di.Cap != CapViTri.CapCuoi)
-            throw new NghiepVuException($"Chỉ xếp hàng đang ở ô khu tiếp nhận; {di.MaViTri} không phải.");
+        if (di.LoaiKhu is not (LoaiKhu.TiepNhan or LoaiKhu.LuuTru) || di.Cap != CapViTri.CapCuoi)
+            throw new NghiepVuException($"Chỉ xếp hàng ở ô khu tiếp nhận hoặc chuyển hàng ở ô khu lưu trữ; {di.MaViTri} không phải.");
+        var (loaiChuyen, loaiChungTu) = di.LoaiKhu == LoaiKhu.TiepNhan ? (LoaiChuyenViTri.XepHang, LoaiChungTu) : (LoaiChuyenViTri.ChuyenTrongKho, LoaiChuyen);
 
         await using var tx = await db.Database.BeginTransactionAsync();
         try
@@ -64,7 +82,7 @@ public class XepHangService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChung
 
         var daGhi = await db.SoBienDong.Where(s => s.MaKhoaChongLap == khoaChongLap + "#1").Select(s => new { s.LoaiChungTu, s.MaChungTu }).SingleOrDefaultAsync();
         if (daGhi is not null)
-            return daGhi.LoaiChungTu == LoaiChungTu ? new KetQuaXep(daGhi.MaChungTu, true)
+            return daGhi.LoaiChungTu == loaiChungTu ? new KetQuaXep(daGhi.MaChungTu, true)
                 : throw new NghiepVuException("Khóa chống ghi lặp đã dùng cho thao tác khác.");
 
         var den = await db.ViTri.AsNoTracking().SingleOrDefaultAsync(v => v.MaViTri == yc.MaViTri) ?? throw new NghiepVuException($"Không có vị trí {yc.MaViTri}.");
@@ -100,10 +118,11 @@ public class XepHangService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChung
         var ma = await maChungTu.TaoAsync("CV");
         db.ChuyenViTri.Add(new ChuyenViTri
         {
-            MaChuyen = ma, Loai = LoaiChuyenViTri.XepHang, MaKho = den.MaKho, MaLo = yc.MaLo, MaViTriDi = di.MaViTri, MaViTriDen = den.MaViTri,
+            MaChuyen = ma, Loai = loaiChuyen, MaKho = den.MaKho, MaLo = yc.MaLo, MaViTriDi = di.MaViTri, MaViTriDen = den.MaViTri,
             SoLuong = yc.SoLuong, ThoiDiem = gio.GetUtcNow(), NguoiThucHien = nguoiDung.Ma,
         });
-        if (await congGhiTon.GhiAsync(khoaChongLap, LoaiChungTu, ma, [new(yc.MaLo, di.MaViTri, -yc.SoLuong), new(yc.MaLo, den.MaViTri, yc.SoLuong)]) == KetQuaGhi.DaGhiTruocDo)
+        // Cổng chỉ cho trừ phần chưa giữ ở ô đi nên hàng đang giữ cho đơn không chuyển được.
+        if (await congGhiTon.GhiAsync(khoaChongLap, loaiChungTu, ma, [new(yc.MaLo, di.MaViTri, -yc.SoLuong), new(yc.MaLo, den.MaViTri, yc.SoLuong)]) == KetQuaGhi.DaGhiTruocDo)
             throw new XungDotException("Thao tác vừa được ghi bởi một yêu cầu khác, vui lòng tải lại trang.");
         await tx.CommitAsync();
         return new KetQuaXep(ma, false);

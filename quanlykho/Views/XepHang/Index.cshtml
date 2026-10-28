@@ -1,39 +1,53 @@
 @using quanlykho.Features.XepHang
 @model List<HangChoXep>
 @{
-    ViewData["Title"] = "Xếp hàng vào vị trí";
+    // Chuyển vị trí trong kho dùng chung màn hình: nguồn là một ô lưu trữ thay vì khu tiếp nhận.
+    var chuyen = ViewData.ContainsKey("MaViTriDi");
+    var maViTriDi = (string?)ViewData["MaViTriDi"];
+    ViewData["Title"] = chuyen ? "Chuyển vị trí trong kho" : "Xếp hàng vào vị trí";
     var kho = (List<LuaChon>)ViewData["Kho"]!;
     var maKho = (string?)ViewData["MaKho"];
+    var dongTu = chuyen ? "chuyển" : "xếp";
 }
 
-<div class="tieu-de-trang"><h1>Xếp hàng vào vị trí</h1></div>
+<div class="tieu-de-trang"><h1>@ViewData["Title"]</h1></div>
 
 <form class="thanh-loc" method="get">
     <div>
         <label class="form-label" for="maKho">Kho</label>
         @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = maKho, danhSach = kho })
     </div>
+    @if (chuyen)
+    {
+        <div>
+            <label class="form-label" for="maViTri">Ô đang chứa hàng</label>
+            <input class="form-control" id="maViTri" name="maViTri" value="@maViTriDi" placeholder="Quét hoặc gõ mã ô lưu trữ rồi Enter" autofocus="@(Model.Count == 0)" />
+        </div>
+    }
     <div class="thanh-loc-nut thanh-nut"><button class="btn btn-primary" type="submit">Xem</button></div>
 </form>
 
 @if (Model.Count == 0)
 {
-    <partial name="_TrangRong" model='maKho is null ? "Bạn chưa được giao kho nào." : "Không còn hàng nào ở khu tiếp nhận chờ xếp."' />
+    <partial name="_TrangRong" model='maKho is null ? "Bạn chưa được giao kho nào."
+        : !chuyen ? "Không còn hàng nào ở khu tiếp nhận chờ xếp."
+        : string.IsNullOrEmpty(maViTriDi) ? "Quét mã ô lưu trữ đang chứa hàng cần chuyển."
+        : $"Ô {maViTriDi} không có hàng chuyển được: ô trống, không phải ô lưu trữ của kho {maKho}, hoặc hàng đã giữ hết cho đơn."' />
 }
 else
 {
     <div class="man-hinh-quet">
         <div class="the">
-            <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã lô, rồi quét mã ô", "Quét hoặc gõ mã lô (L…) hay mã ô (K01-…) rồi Enter")' />
+            <partial name="_OQuetMa" model='new OQuetMa("oQuet", $"Quét mã lô, rồi quét mã ô cần {dongTu} đến", "Quét hoặc gõ mã lô (L…) hay mã ô (K01-…) rồi Enter")' />
         </div>
 
         <div class="the" id="khungXep" hidden>
-            <h2>Đang xếp</h2>
+            <h2>Đang @dongTu</h2>
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="text-secondary small">Lô</div>
                     <span class="fw-semibold" data-lo-ma></span> · <span data-lo-ten></span>
-                    <div class="small text-secondary">Tại <span data-lo-o></span>, chờ xếp <span data-lo-con></span></div>
+                    <div class="small text-secondary">Tại <span data-lo-o></span>, còn @dongTu được <span data-lo-con></span></div>
                 </div>
                 <div class="col-md-6">
                     <div class="text-secondary small">Ô đích</div>
@@ -41,13 +55,13 @@ else
                     <div class="small text-secondary" data-o-qmax></div>
                 </div>
                 <div class="col-sm-6 col-lg-4">
-                    <label class="form-label bat-buoc" for="soLuong">Số lượng xếp <span class="text-secondary" data-lo-dvt></span></label>
+                    <label class="form-label bat-buoc" for="soLuong">Số lượng @dongTu <span class="text-secondary" data-lo-dvt></span></label>
                     <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" />
                 </div>
                 <div class="col-12">
                     <div class="alert alert-danger mb-2" role="alert" id="loiXep" hidden></div>
                     <div class="thanh-nut">
-                        <button type="button" class="btn btn-primary flex-grow-1" id="nutXep" disabled>Xếp vào ô</button>
+                        <button type="button" class="btn btn-primary flex-grow-1" id="nutXep" disabled>@(chuyen ? "Chuyển sang ô" : "Xếp vào ô")</button>
                         <button type="button" class="btn btn-outline-secondary" id="nutBo">Bỏ chọn</button>
                     </div>
                 </div>
@@ -68,10 +82,10 @@ else
         </div>
 
         <div class="the">
-            <h2>Hàng chờ xếp ở khu tiếp nhận</h2>
+            <h2>@(chuyen ? $"Hàng tại ô {maViTriDi}" : "Hàng chờ xếp ở khu tiếp nhận")</h2>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead><tr><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th>Ô tiếp nhận</th><th class="so">Chờ xếp</th><th></th></tr></thead>
+                    <thead><tr><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th>@(chuyen ? "Ô" : "Ô tiếp nhận")</th><th class="so">@(chuyen ? "Chuyển được" : "Chờ xếp")</th><th></th></tr></thead>
                     <tbody id="choXep">
                         @foreach (var h in Model)
                         {
@@ -93,6 +107,8 @@ else
     <script>
         (() => {
             const maKho = @Json.Serialize(maKho);
+            const dongTu = @Json.Serialize(dongTu);
+            const chuyen = @Json.Serialize(chuyen);
             const oQuet = document.getElementById("oQuet");
             const khungXep = document.getElementById("khungXep");
             const khungO = document.getElementById("khungO");
@@ -118,10 +134,10 @@ else
                 o = ma;
                 const tim = cacO.find((x) => x.maViTri === ma);
                 dat("[data-o-ma]", ma);
-                dat("[data-o-qmax]", tim ? `Xếp tối đa ${so(tim.qMax)} ${lo.dvt}` : "Ô không có trong danh sách phù hợp; máy chủ sẽ kiểm tra lại.");
+                dat("[data-o-qmax]", tim ? `Tối đa ${so(tim.qMax)} ${lo.dvt}` : "Ô không có trong danh sách phù hợp; máy chủ sẽ kiểm tra lại.");
                 if (tim && +soLuong.value > tim.qMax) soLuong.value = tim.qMax;
                 capNhatNut();
-                QuanLyKho.baoQuet(oQuet, `Ô ${ma}: kiểm tra số lượng rồi bấm Xếp vào ô.`, true);
+                QuanLyKho.baoQuet(oQuet, `Ô ${ma}: kiểm tra số lượng rồi bấm ${nutXep.textContent}.`, true);
             };
 
             const taiO = async () => {
@@ -138,7 +154,7 @@ else
                     loi.hidden = false;
                     return;
                 }
-                cacO = kq.duLieu;
+                cacO = kq.duLieu.filter((x) => x.maViTri !== lo.viTri);
                 const tbody = bangO.querySelector("tbody");
                 tbody.replaceChildren(...cacO.map((x) => {
                     const tr = document.createElement("tr");
@@ -177,7 +193,7 @@ else
                 loiXep.hidden = true;
                 khungXep.hidden = false;
                 capNhatNut();
-                QuanLyKho.baoQuet(oQuet, `Lô ${lo.ma}: quét mã ô cần xếp vào.`, true);
+                QuanLyKho.baoQuet(oQuet, `Lô ${lo.ma}: quét mã ô cần ${dongTu} đến.`, true);
                 taiO();
             };
 
@@ -189,7 +205,9 @@ else
             oQuet.addEventListener("quet-ma", (e) => {
                 const tr = document.querySelector(`#choXep tr[data-lo="${CSS.escape(e.detail)}"]`);
                 if (tr) return chonLo(tr);
-                if (!lo) return QuanLyKho.baoQuet(oQuet, `Mã ${e.detail} không phải lô đang chờ xếp ở kho này. Quét mã lô trước.`, false);
+                // Chuyển vị trí: chưa chọn lô mà quét mã khác thì coi là đổi sang ô nguồn khác.
+                if (!lo && chuyen) return location.search = new URLSearchParams({ maKho, maViTri: e.detail });
+                if (!lo) return QuanLyKho.baoQuet(oQuet, `Mã ${e.detail} không phải lô ${dongTu} được trong danh sách. Quét mã lô trước.`, false);
                 chonO(e.detail);
             });
 
@@ -221,7 +239,7 @@ else
                 } else {
                     lo.tr.remove();
                 }
-                const thongBao = `Đã xếp ${so(sl)} ${lo.dvt} lô ${lo.ma} vào ô ${o} (${kq.duLieu.maChuyen}).`;
+                const thongBao = `Đã ${dongTu} ${so(sl)} ${lo.dvt} lô ${lo.ma} vào ô ${o} (${kq.duLieu.maChuyen}).`;
                 boChon();
                 QuanLyKho.baoQuet(oQuet, thongBao, true);
             });
