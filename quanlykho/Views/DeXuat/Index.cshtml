@@ -1,0 +1,116 @@
+@using quanlykho.Features.NhapKho
+@model DeXuatTrang
+@{
+    ViewData["Title"] = "Đề xuất nhập bổ sung";
+    var deXuat = Model.Dong.Where(d => d.KetQua.KetLuan == KetLuanG3.DeXuat).ToList();
+    var khac = Model.Dong.Where(d => d.KetQua.KetLuan != KetLuanG3.DeXuat).ToList();
+}
+
+<div class="tieu-de-trang"><h1>Đề xuất nhập bổ sung</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = Model.MaKho, danhSach = Model.DanhSachKho })
+    </div>
+    <div class="thanh-loc-nut thanh-nut"><button class="btn btn-primary" type="submit">Tính lại</button></div>
+</form>
+
+<p class="text-secondary">
+    Đề xuất khi tồn khả dụng A không quá điểm đặt hàng d × L + m; số lượng = d × (L + @Model.SoNgayDuHang) − A − số đang chờ nhập, làm tròn lên.
+    d là nhu cầu trung bình mỗi ngày từ phiếu xuất bán hoàn tất (tối đa 90 ngày gần nhất, cần ít nhất 14 ngày lịch sử), L là thời gian chờ hàng, m là tồn tối thiểu.
+    Đây chỉ là gợi ý: đơn tạo ra ở trạng thái Nháp, quản lý kho kiểm tra rồi xác nhận.
+</p>
+
+@if (deXuat.Count == 0)
+{
+    <partial name="_TrangRong" model='$"Kho {Model.MaKho} chưa có mặt hàng nào cần nhập bổ sung."' />
+}
+else
+{
+    <form method="post" asp-action="TaoDon">
+        <input type="hidden" name="MaKho" value="@Model.MaKho" />
+        <div class="the">
+            <h2>Cần nhập (@deXuat.Count)</h2>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Chọn</th><th>Hàng, cơ sở tính (A, d, L, m)</th><th class="so">Số nhập</th><th>Nhà cung cấp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < deXuat.Count; i++)
+                        {
+                            var d = deXuat[i];
+                            <tr>
+                                <td>
+                                    <input class="form-check-input" type="checkbox" name="Dong[@i].Chon" value="true" checked aria-label="Chọn @d.DauVao.MaBienThe" />
+                                    <input type="hidden" name="Dong[@i].Chon" value="false" />
+                                    <input type="hidden" name="Dong[@i].MaBienThe" value="@d.DauVao.MaBienThe" />
+                                </td>
+                                <td class="cot-chinh">
+                                    <span class="fw-semibold">@d.DauVao.MaBienThe</span> · @d.TenHang
+                                    <div class="small text-secondary">@d.KetQua.LyDo</div>
+                                </td>
+                                <td class="so">
+                                    <input class="form-control text-end" name="Dong[@i].SoLuong" type="number" min="0.001" step="any" inputmode="decimal"
+                                           value="@d.KetQua.SoDeXuat.ToString("G29")" aria-label="Số nhập @d.DauVao.MaBienThe" />
+                                    <div class="small text-secondary">Đề xuất @So(d.KetQua.SoDeXuat) @d.DonViTinh</div>
+                                </td>
+                                <td>
+                                    <select class="form-select" name="Dong[@i].MaNhaCungCap" aria-label="Nhà cung cấp @d.DauVao.MaBienThe">
+                                        <option value="">Chọn…</option>
+                                        @foreach (var n in Model.DanhSachNhaCungCap)
+                                        {
+                                            <option value="@n.Ma" selected="@(n.Ma == d.MaNhaCungCap)">@n.Ten</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="the">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary w-100">Tạo đơn mua nháp từ dòng đã chọn</button>
+                    <div class="form-text">Mỗi nhà cung cấp một đơn; đơn giá lấy theo lần mua gần nhất, sửa được trên đơn nháp.</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="LyDoBoQua">Lý do bỏ qua</label>
+                    <input class="form-control" id="LyDoBoQua" name="LyDoBoQua" maxlength="500" placeholder="Sắp ngừng kinh doanh, đã đặt ngoài hệ thống…" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100" formaction="@Url.Action("BoQua")"
+                            data-xac-nhan="Ghi bỏ qua các dòng đã chọn? Không tạo đơn mua.">Bỏ qua</button>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+@if (khac.Count > 0)
+{
+    <div class="the">
+        <h2>Không đề xuất (@khac.Count)</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Hàng</th><th class="so">A</th><th class="so">m</th><th>Lý do</th></tr></thead>
+                <tbody>
+                    @foreach (var d in khac)
+                    {
+                        <tr>
+                            <td class="cot-chinh"><span class="fw-semibold">@d.DauVao.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                            <td class="so">@So(d.DauVao.KhaDung)</td>
+                            <td class="so">@So(d.DauVao.ToiThieu)</td>
+                            <td class="small">@d.KetQua.LyDo</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
