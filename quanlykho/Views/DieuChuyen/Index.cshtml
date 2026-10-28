@@ -1,0 +1,58 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.DieuChuyen
+@model TrangDuLieu<DieuChuyenDong>
+@{
+    ViewData["Title"] = "Chuyển kho";
+    dynamic loc = ViewData["Loc"]!;
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Chuyển kho</h1>
+    @if (quanLy)
+    {
+        <a class="btn btn-primary" asp-action="Them">Lập phiếu điều chuyển</a>
+    }
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho (đi hoặc đến)</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = kho })
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiDieuChuyen>())
+            {
+                <option value="@t" selected="@(t == (TrangThaiDieuChuyen?)loc.trangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có phiếu điều chuyển nào.">
+    <thead>
+        <tr><th>Mã phiếu</th><th>Kho đi → kho đến</th><th>Ngày chuyển</th><th>Phương tiện</th><th class="so">Số dòng</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@p.Ma</td>
+                <td>@p.MaKhoDi → @p.MaKhoDen</td>
+                <td>@Ngay(p.NgayChuyen)</td>
+                <td>@p.PhuongTien</td>
+                <td class="so">@p.SoDong</td>
+                <td><partial name="_HuyHieuTrangThai" model="p.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@p.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

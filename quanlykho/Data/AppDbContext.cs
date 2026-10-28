@@ -27,6 +27,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DongLayHang> DongLayHang => Set<DongLayHang>();
     public DbSet<PhieuXuat> PhieuXuat => Set<PhieuXuat>();
     public DbSet<ChiTietPhieuXuat> ChiTietPhieuXuat => Set<ChiTietPhieuXuat>();
+    public DbSet<PhieuDieuChuyen> PhieuDieuChuyen => Set<PhieuDieuChuyen>();
+    public DbSet<ChiTietDieuChuyen> ChiTietDieuChuyen => Set<ChiTietDieuChuyen>();
+    public DbSet<PhieuKiemKe> PhieuKiemKe => Set<PhieuKiemKe>();
+    public DbSet<ThanhVienKiemKe> ThanhVienKiemKe => Set<ThanhVienKiemKe>();
+    public DbSet<ChiTietKiemKe> ChiTietKiemKe => Set<ChiTietKiemKe>();
     public DbSet<Lo> Lo => Set<Lo>();
     public DbSet<TonKho> TonKho => Set<TonKho>();
     public DbSet<SoBienDong> SoBienDong => Set<SoBienDong>();
@@ -52,6 +57,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         c.Properties<LoaiGoiY>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<TrangThaiLenhXuat>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<LoaiPhieuXuat>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiDieuChuyen>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<TrangThaiKiemKe>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<PhamViKiemKe>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<LoaiChenhLech>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<XuLyChenhLech>().HaveConversion<string>().HaveMaxLength(20);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

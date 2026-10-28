@@ -75,11 +75,11 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 ## Giai đoạn 4. Chuyển kho và kiểm kê
 
-- [ ] Chuyển kho hai bước (FR07, S5-01)
+- [x] Chuyển kho hai bước (FR07, S5-01) — c40920e
   - Xong khi: kho đi lưu thì trừ tồn, phiếu Chờ nhập kho; kho đến nhận, xếp; nhận thiếu thì Nhận một phần và sinh chênh lệch; tổng tồn toàn hệ thống trước và sau bằng nhau (Hình 2.7).
-- [ ] Kiểm kê (FR08, S5-02)
+- [x] Kiểm kê (FR08, S5-02) — f201de6
   - Xong khi: lập yêu cầu, phiếu, chọn phạm vi; vị trí đang kiểm bị khóa với mọi thao tác; nhập số đếm, hệ thống tính chênh lệch; không sửa thẳng tồn (Hình 2.8).
-- [ ] Duyệt điều chỉnh tồn (S5-03)
+- [x] Duyệt điều chỉnh tồn (S5-03) — 45d3399
   - Xong khi: chênh lệch chuyển kho (nhập lại, ghi giảm hao hụt) và chênh lệch kiểm kê (6 loại) đều phải phân loại, có lý do, có người duyệt, sinh chứng từ qua cổng; đạt kịch bản chuyển kho nhận thiếu và kiểm kê lệch.
 
 ## Giai đoạn 5. Hỗ trợ quyết định, theo dõi, nhập Excel

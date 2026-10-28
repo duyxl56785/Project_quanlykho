@@ -32,3 +32,17 @@ public enum LoaiGoiY { LayHang, NhapBoSung }
 public enum TrangThaiLenhXuat { ChuaThucHien, ChoLayHang, ChoKiemTra, ChoXacNhan, HoanThanh }
 
 public enum LoaiPhieuXuat { XuatBan, XuatKhac, TraNhaCungCap }
+
+/// <summary>Phiếu điều chuyển (Bảng 2.14 dòng 8): hàng đang vận chuyển từ lúc Chờ nhập kho; chỉ hủy khi chưa nhận.</summary>
+public enum TrangThaiDieuChuyen { LuuTam, ChoNhapKho, NhanMotPhan, HoanThanh, DaHuy }
+
+/// <summary>Phiếu kiểm kê (Bảng 2.14 dòng 6).</summary>
+public enum TrangThaiKiemKe { ChuaThucHien, DangKiemKe, HoanThanh, DaHuy }
+
+public enum PhamViKiemKe { ToanKho, ViTri, Lo }
+
+/// <summary>Sáu loại chênh lệch kiểm kê (quy tắc 10).</summary>
+public enum LoaiChenhLech { Thieu, Thua, HuHong, HetHan, SaiViTri, SaiBienThe }
+
+/// <summary>Cách xử lý phần nhận thiếu của phiếu điều chuyển.</summary>
+public enum XuLyChenhLech { NhapKhoDen, NhapLaiKhoDi, GhiGiamHaoHut }

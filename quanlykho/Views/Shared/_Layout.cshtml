@@ -38,7 +38,10 @@
                                 }
                                 else
                                 {
-                                    <a class="nav-link @(DangMo(muc.Url) ? "active" : "")" href="@muc.Url" aria-current="@(DangMo(muc.Url) ? "page" : null)">@muc.Ten</a>
+                                    <a class="nav-link @(DangMo(muc.Url) ? "active" : "")" href="@muc.Url" aria-current="@(DangMo(muc.Url) ? "page" : null)">@muc.Ten@if (muc.Dem is not null)
+                                    {
+                                        <span class="dem-viec" data-dem="@muc.Dem" hidden></span>
+                                    }</a>
                                 }
                             </li>
                         }

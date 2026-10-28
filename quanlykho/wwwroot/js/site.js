@@ -46,7 +46,8 @@ const QuanLyKho = (() => {
         const ma = o.value.trim();
         o.value = "";
         if (ma) o.dispatchEvent(new CustomEvent("quet-ma", { detail: ma, bubbles: true }));
-        o.focus();
+        // Màn hình đã chuyển con trỏ sang ô số lượng thì giữ nguyên.
+        if (document.activeElement === o || document.activeElement === document.body) o.focus();
     });
 
     let amThanh = null;
@@ -68,7 +69,7 @@ const QuanLyKho = (() => {
         khung.classList.toggle("dang-loi", !thanhCong);
         khung.querySelector(".thong-bao-quet").textContent = thongDiep;
         bip(thanhCong ? 880 : 220);
-        o.focus();
+        if (document.activeElement === document.body) o.focus();
     }
 
     // ---------- Gọi API ----------
@@ -95,6 +96,16 @@ const QuanLyKho = (() => {
             return { ok: false, status: 0, duLieu: null, loi: "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại." };
         }
     }
+
+    // ---------- Số việc chờ trên menu: <span data-dem="/api/..."> ----------
+    document.querySelectorAll("[data-dem]").forEach(async (o) => {
+        const kq = await goiApi(o.dataset.dem);
+        if (kq.ok && kq.duLieu?.so > 0) {
+            o.textContent = kq.duLieu.so;
+            o.setAttribute("aria-label", `${kq.duLieu.so} việc đang chờ`);
+            o.hidden = false;
+        }
+    });
 
     // ---------- Phiếu có dòng hàng ----------
     // <tbody data-dong-hang> + <template> chứa một dòng với tên "Dong[__i__].X"; nút data-them-dong="#idTbody", nút data-xoa-dong trong dòng.
