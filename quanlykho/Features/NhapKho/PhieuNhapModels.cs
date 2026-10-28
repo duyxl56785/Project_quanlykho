@@ -9,7 +9,7 @@ public record PhieuNhapDong(string Ma, LoaiPhieuNhap LoaiPhieu, string? MaDonMua
 /// <summary>Đơn giá, thành tiền là null khi người xem không được thấy giá (thủ kho).</summary>
 /// <param name="SoLuong">Theo đơn vị của dòng (TenDonVi); SoLuongChinh theo đơn vị tính chính, là số đã ghi tồn.</param>
 public record DongPhieuNhap(int STT, string MaLo, string MaBienThe, string TenHang, string TenDonVi, decimal SoLuong, DateOnly? HanDung, ChatLuong ChatLuong, decimal? DonGia, decimal? ThanhTien,
-    int HeSo, decimal SoLuongChinh, string DonViChinh);
+    int HeSo, decimal SoLuongChinh, string DonViChinh, string? MaViTri = null);
 
 /// <summary>Hàng nhận được trên màn hình quét; ConNhan (đơn vị chính) chỉ có với phiếu từ đơn mua; DonVi gồm đơn vị chính và đơn vị quy đổi.</summary>
 public record HangNhan(string MaBienThe, string? MaVach, string TenHang, string TenDonVi, bool TheoDoiHanDung, decimal? ConNhan, List<DonViChon> DonVi,

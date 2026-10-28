@@ -118,7 +118,10 @@
                             <tr>
                                 <td>@d.STT</td>
                                 <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
-                                <td>@d.MaLo</td>
+                                <td>@d.MaLo@if (d.MaViTri is not null)
+                                    {
+                                        <div class="small text-secondary">vào ô @d.MaViTri</div>
+                                    }</td>
                                 <td class="so">@So(d.SoLuong) @d.TenDonVi@if (d.HeSo > 1)
                                     {
                                         <div class="small text-secondary">= @So(d.SoLuongChinh) @d.DonViChinh</div>

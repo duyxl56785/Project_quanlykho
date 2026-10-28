@@ -24,4 +24,6 @@ public class TepDaNhap
     public int SoDong { get; set; }
     public DateTimeOffset ThoiDiem { get; set; }
     public string NguoiNhap { get; set; } = "";
+    /// <summary>Phiếu sinh từ tệp (tồn đầu kỳ); hủy phiếu Lưu tạm thì bỏ dòng này để nhập lại được.</summary>
+    public string? MaChungTu { get; set; }
 }
