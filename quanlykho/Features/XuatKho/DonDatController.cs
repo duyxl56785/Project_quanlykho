@@ -7,7 +7,7 @@ using quanlykho.Features.Kho;
 namespace quanlykho.Features.XuatKho;
 
 [Authorize(Roles = Vai.XemDonDat), Route("DonDat")]
-public class DonDatController(DonDatService service) : Controller
+public class DonDatController(DonDatService service, GiuHangService giuHang) : Controller
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(string? tuKhoa, string? maKho, TrangThaiDonDat? trangThai, int trang = 1)
@@ -64,12 +64,29 @@ public class DonDatController(DonDatService service) : Controller
         TempData["ThongBao"] = $"Đã hủy đơn {ma}.";
         return RedirectToAction(nameof(ChiTiet), new { ma });
     }
+    [HttpPost("Duyet"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> Duyet(List<string> ma)
+    {
+        await giuHang.DuyetAsync(ma);
+        TempData["ThongBao"] = $"Đã duyệt và giữ hàng cho {string.Join(", ", ma)}.";
+        return ma.Count == 1 ? RedirectToAction(nameof(ChiTiet), new { ma = ma[0] }) : RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("{ma}/BoGiu"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> BoGiu(string ma)
+    {
+        await giuHang.BoGiuAsync(ma);
+        TempData["ThongBao"] = $"Đã bỏ giữ hàng của đơn {ma}; đơn quay lại Chờ duyệt.";
+        return RedirectToAction(nameof(ChiTiet), new { ma });
+    }
 }
+
+public record DonDatApiDuyet(List<string> Ma);
 
 public record DonDatApiTao(string MaKho, string MaNoiNhan, DateOnly? HanGiao, string? GhiChu, List<DongDonDatForm> Dong, bool GuiDuyet = false);
 
 [ApiController, Authorize(Roles = Vai.XemDonDat), Route("api/don-dat")]
-public class DonDatApiController(DonDatService service) : ControllerBase
+public class DonDatApiController(DonDatService service, GiuHangService giuHang) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> DanhSach(string? maKho, TrangThaiDonDat? trangThai, int trang = 1)
@@ -102,6 +119,20 @@ public class DonDatApiController(DonDatService service) : ControllerBase
     public async Task<IActionResult> Huy(string ma)
     {
         await service.HuyAsync(ma);
+        return NoContent();
+    }
+
+    [HttpPost("duyet"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> Duyet(DonDatApiDuyet body)
+    {
+        await giuHang.DuyetAsync(body.Ma);
+        return NoContent();
+    }
+
+    [HttpPost("{ma}/bo-giu"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> BoGiu(string ma)
+    {
+        await giuHang.BoGiuAsync(ma);
         return NoContent();
     }
 }

@@ -64,3 +64,23 @@ public class LichSuGoiYConfiguration : IEntityTypeConfiguration<LichSuGoiY>
         b.HasIndex(x => new { x.Loai, x.ThoiDiem });
     }
 }
+
+public class GiuHangConfiguration : IEntityTypeConfiguration<GiuHang>
+{
+    public void Configure(EntityTypeBuilder<GiuHang> b)
+    {
+        b.ToTable(t => t.Check("SoLuong", "\"SoLuong\" > 0"));
+        b.HasKey(x => new { x.MaDonDat, x.MaLo, x.MaViTri });
+        b.Property(x => x.MaDonDat).HasMaxLength(Ma);
+        b.Property(x => x.MaLo).HasMaxLength(Ma);
+        b.Property(x => x.MaViTri).HasMaxLength(MaViTri);
+        b.Property(x => x.SoLuong).SoLuong();
+        b.Property(x => x.NguoiGiu).HasMaxLength(Ma);
+        b.HasOne<DonDatHang>().WithMany().HasForeignKey(x => x.MaDonDat);
+        b.HasOne<Lo>().WithMany().HasForeignKey(x => x.MaLo);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaViTri);
+        b.HasOne<LichSuGoiY>().WithMany().HasForeignKey(x => x.MaGoiY);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiGiu);
+        b.HasIndex(x => new { x.MaLo, x.MaViTri });
+    }
+}

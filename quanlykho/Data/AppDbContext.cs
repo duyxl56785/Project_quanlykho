@@ -21,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DonDatHang> DonDatHang => Set<DonDatHang>();
     public DbSet<ChiTietDonDat> ChiTietDonDat => Set<ChiTietDonDat>();
     public DbSet<LichSuGoiY> LichSuGoiY => Set<LichSuGoiY>();
+    public DbSet<GiuHang> GiuHang => Set<GiuHang>();
     public DbSet<Lo> Lo => Set<Lo>();
     public DbSet<TonKho> TonKho => Set<TonKho>();
     public DbSet<SoBienDong> SoBienDong => Set<SoBienDong>();

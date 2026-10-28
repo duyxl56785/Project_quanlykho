@@ -55,6 +55,7 @@ builder.Services.AddScoped<XepHangService>();
 builder.Services.AddScoped<TonKhaDung>();
 builder.Services.AddScoped<DonDatService>();
 builder.Services.AddScoped<GoiYService>();
+builder.Services.AddScoped<GiuHangService>();
 
 var app = builder.Build();
 

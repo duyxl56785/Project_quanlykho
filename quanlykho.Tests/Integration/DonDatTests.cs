@@ -36,7 +36,9 @@ public class DonDatTests(CsdlFixture csdl) : IAsyncLifetime
     {
         await using var db = CsdlFixture.TaoDbContext(_chuoi);
         var hienTai = NguoiThu.HienTai(db, ma, vai);
-        return await lam(new DonDatService(db, hienTai, new MaChungTu(db), NguoiThu.NhatKy(db, hienTai), Ton(db, ma, vai), Gio));
+        var nhatKy = NguoiThu.NhatKy(db, hienTai);
+        var giu = new GiuHangService(db, hienTai, new CongGhiTon(db, hienTai, Gio), new GoiYService(db, hienTai, Ton(db, ma, vai), Gio), nhatKy, Gio);
+        return await lam(new DonDatService(db, hienTai, new MaChungTu(db), nhatKy, Ton(db, ma, vai), giu, Gio));
     }
 
     private Task Voi(Func<DonDatService, Task> lam, string ma = "ND007", string vai = Vai.BanHang) => Voi(async s => { await lam(s); return 0; }, ma, vai);
@@ -134,7 +136,7 @@ public class DonDatTests(CsdlFixture csdl) : IAsyncLifetime
 
         await using var db = CsdlFixture.TaoDbContext(_chuoi);
         await db.DonDatHang.Where(x => x.MaDonDat == ma).ExecuteUpdateAsync(s => s.SetProperty(x => x.TrangThai, TrangThaiDonDat.DaDuyet));
-        Assert.Contains("bỏ giữ", (await Assert.ThrowsAsync<NghiepVuException>(() => Voi(s => s.HuyAsync(ma)))).Message);
+        Assert.Contains("quản lý kho", (await Assert.ThrowsAsync<KhongCoQuyenException>(() => Voi(s => s.HuyAsync(ma)))).Message);
     }
 
     [Fact]
