@@ -103,6 +103,7 @@ public class TepDaNhapConfiguration : IEntityTypeConfiguration<TepDaNhap>
         b.Property(x => x.TenTep).HasMaxLength(255);
         b.Property(x => x.Loai).HasMaxLength(Ma);
         b.Property(x => x.NguoiNhap).HasMaxLength(Ma);
+        b.Property(x => x.MaChungTu).HasMaxLength(Ma);
         b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiNhap);
     }
 }

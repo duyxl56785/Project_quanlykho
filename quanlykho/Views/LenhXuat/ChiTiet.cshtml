@@ -44,7 +44,7 @@
                 <div class="col-sm-6 col-lg-4"><div class="text-secondary small">Ô</div><span class="fw-semibold" data-chon-o>Chưa quét</span></div>
                 <div class="col-sm-6 col-lg-4"><div class="text-secondary small">Hàng</div><span class="fw-semibold" data-chon-hang>Chưa quét</span></div>
                 <div class="col-sm-6 col-lg-4">
-                    <label class="form-label" for="soLuong">Số lượng lấy</label>
+                    <label class="form-label" for="soLuong">Số lượng lấy <span class="text-secondary" data-don-vi-lay></span></label>
                     <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" />
                 </div>
                 <div class="col-12">
@@ -175,7 +175,9 @@
             const soLuong = document.getElementById("soLuong");
             const nutLay = document.getElementById("nutLay");
             const loi = document.getElementById("loiLay");
-            let o = null, hang = null;
+            // Mã vạch thùng: số nhập theo thùng, máy chủ quy về đơn vị chính.
+            const maVachDonVi = @Json.Serialize(Model.MaVachDonVi ?? []);
+            let o = null, hang = null, donVi = null;
 
             const hien = (sel, text) => document.querySelector(sel).textContent = text;
             const capNhat = () => nutLay.disabled = !(o && hang);
@@ -192,10 +194,12 @@
                 }
                 if (!o) return QuanLyKho.baoQuet(oQuet, "Quét mã ô trước, rồi mới quét hàng.", false);
                 hang = e.detail;
-                hien("[data-chon-hang]", hang);
+                donVi = maVachDonVi[hang] ?? null;
+                hien("[data-chon-hang]", donVi ? `${hang} (1 ${donVi.ten} = ${donVi.heSo})` : hang);
+                hien("[data-don-vi-lay]", donVi ? `(${donVi.ten})` : "");
                 const giu = goiY.filter((g) => g.maLo === hang && g.maViTri === o).reduce((s, g) => s + g.soLuong, 0);
                 const lay = daLay.filter((d) => d.maLo === hang && d.maViTri === o).reduce((s, d) => s + d.soLuong, 0);
-                soLuong.value = giu - lay > 0 ? giu - lay : "";
+                soLuong.value = donVi ? 1 : (giu - lay > 0 ? giu - lay : "");
                 capNhat();
                 QuanLyKho.baoQuet(oQuet, giu ? `Theo gợi ý lấy ${QuanLyKho.dinhDangSo.format(giu - lay)}; kiểm số rồi bấm Lấy.` : "Nhập số lượng rồi bấm Lấy.", true);
                 soLuong.focus();
@@ -206,7 +210,7 @@
                 loi.hidden = true;
                 nutLay.disabled = true;
                 const kq = await QuanLyKho.goiApi(`/api/lenh-xuat/${encodeURIComponent(ma)}/lay`, {
-                    method: "POST", body: { maViTri: o, ma: hang, soLuong: +soLuong.value },
+                    method: "POST", body: { maViTri: o, ma: hang, soLuong: +soLuong.value, tenDonVi: donVi?.ten ?? null },
                 });
                 if (kq.ok) return location.reload();
                 loi.textContent = kq.loi;

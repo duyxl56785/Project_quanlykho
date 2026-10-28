@@ -31,7 +31,8 @@ public record BaoCaoTrang<T>(LocBaoCao Loc, DanhSachLoc DanhSach, TrangDuLieu<T>
 
 /// <param name="TheoKho">Tồn (mọi khu) của từng kho đang xem.</param>
 /// <param name="VanChuyen">Phần chưa nhận của phiếu điều chuyển đi hoặc đến các kho đang xem; không nằm trong TonKho.</param>
-public record DongTongHop(string MaBienThe, string TenHang, string DonViTinh, Dictionary<string, decimal> TheoKho, decimal KhaDung, decimal TiepNhan, decimal CachLy, decimal VanChuyen)
+public record DongTongHop(string MaBienThe, string TenHang, string DonViTinh, Dictionary<string, decimal> TheoKho, decimal KhaDung, decimal TiepNhan, decimal CachLy, decimal VanChuyen,
+    List<DonViChon>? DonVi = null)
 {
     public decimal Tong => TheoKho.Values.Sum();
 }
@@ -39,12 +40,12 @@ public record DongTongHop(string MaBienThe, string TenHang, string DonViTinh, Di
 public record TongHopTrang(LocBaoCao Loc, DanhSachLoc DanhSach, List<string> Kho, TrangDuLieu<DongTongHop> Trang, DongTongHop TongCong);
 
 public record DongTheoLo(string MaKho, string MaLo, string MaBienThe, string TenHang, string DonViTinh, DateOnly? HanDung, DateTimeOffset NgayNhap,
-    decimal SoLuong, decimal DaGiu, decimal KhaDung, decimal TiepNhan, decimal CachLy);
+    decimal SoLuong, decimal DaGiu, decimal KhaDung, decimal TiepNhan, decimal CachLy, List<DonViChon>? DonVi = null);
 
 public record DongTheoViTri(string MaViTri, LoaiKhu? LoaiKhu, string MaLo, string MaBienThe, string TenHang, string DonViTinh, DateOnly? HanDung,
-    decimal SoLuong, decimal DaGiu, string? MaPhieuKiemKe);
+    decimal SoLuong, decimal DaGiu, string? MaPhieuKiemKe, List<DonViChon>? DonVi = null);
 
-public record DongNhapXuatTon(string MaKho, string MaBienThe, string TenHang, string DonViTinh, decimal DauKy, decimal Nhap, decimal Xuat)
+public record DongNhapXuatTon(string MaKho, string MaBienThe, string TenHang, string DonViTinh, decimal DauKy, decimal Nhap, decimal Xuat, List<DonViChon>? DonVi = null)
 {
     public decimal CuoiKy => DauKy + Nhap - Xuat;
 }
@@ -54,7 +55,8 @@ public record NhapXuatTonTrang(LocBaoCao Loc, DanhSachLoc DanhSach, TrangDuLieu<
 public record DongTheKho(DateTimeOffset ThoiDiem, string LoaiChungTu, string MaChungTu, string MaLo, string MaViTri, decimal Nhap, decimal Xuat, decimal Ton, string NguoiThucHien);
 
 /// <param name="DauKy">Tổng biến động trước ngày bắt đầu.</param>
-public record TheKhoTrang(LocBaoCao Loc, DanhSachLoc DanhSach, string? TenHang, string? DonViTinh, decimal DauKy, decimal CuoiKy, TrangDuLieu<DongTheKho> Trang);
+public record TheKhoTrang(LocBaoCao Loc, DanhSachLoc DanhSach, string? TenHang, string? DonViTinh, decimal DauKy, decimal CuoiKy, TrangDuLieu<DongTheKho> Trang,
+    List<DonViChon>? DonVi = null);
 
 public static class TenChungTu
 {

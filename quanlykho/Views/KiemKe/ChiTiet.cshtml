@@ -1,3 +1,4 @@
+@using quanlykho.Features.DanhMuc
 @using quanlykho.Common.PhanQuyen
 @using quanlykho.Features.KiemKe
 @model KiemKeChiTiet
@@ -47,7 +48,7 @@
         <div class="the">
             <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã ô để lọc, quét mã lô để nhập số đếm", "Quét ô K01-… hoặc lô L…")' />
             <form class="row g-2 mt-1 align-items-end" method="post" asp-action="ThemDong" asp-route-ma="@Model.Ma">
-                <div class="col-sm-5">
+                <div class="col-sm-3">
                     <label class="form-label" for="themO">Hàng ngoài danh sách: ô</label>
                     <select class="form-select" id="themO" name="maViTri" required>
                         @foreach (var o in Model.CacO)
@@ -61,8 +62,12 @@
                     <input class="form-control" id="themHang" name="maHang" required />
                 </div>
                 <div class="col-sm-2">
-                    <label class="form-label" for="themSo">Số đếm</label>
-                    <input class="form-control text-end" id="themSo" name="soLuongThucTe" type="number" min="0" step="any" required />
+                    <label class="form-label" for="themSo">Số đếm (đơn vị chính)</label>
+                    <input class="form-control text-end" id="themSo" name="soLuongThucTe" type="number" min="0" step="any" value="0" required />
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label" for="themSoLon">Cộng số thùng</label>
+                    <input class="form-control text-end" id="themSoLon" name="soLon" type="number" min="0" step="1" value="0" />
                 </div>
                 <div class="col-sm-2"><button type="submit" class="btn btn-outline-primary w-100">Thêm</button></div>
             </form>
@@ -96,17 +101,40 @@
                                     <td>@(d.MaLo ?? "—")@if (d.NgoaiDanhSach) { <div class="small text-secondary">ngoài danh sách</div> }</td>
                                     <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
                                     <td>@Ngay(d.HanDung)</td>
-                                    <td class="so">@So(d.SoSach) @d.DonViTinh</td>
+                                    <td class="so">@So(d.SoSach) @d.DonViTinh@if (QuyDoiDonVi.HienThiNeuCo(d.DonVi, d.SoSach) is { } qdSo)
+                                        {
+                                            <div class="small text-secondary">@qdSo</div>
+                                        }</td>
                                     <td class="so">
                                         @if (dem && d.NguoiDuyet is null)
                                         {
                                             <input type="hidden" name="dem[@i].STT" value="@d.STT" />
-                                            <input class="form-control text-end" name="dem[@i].SoLuongThucTe" type="number" min="0" step="any"
-                                                   value="@d.ThucTe?.ToString("G29")" aria-label="Số đếm dòng @d.STT" />
+                                            @if (d.DonViLon is { } lon)
+                                            {
+                                                // Đếm theo thùng và số lẻ; máy chủ cộng lại theo đơn vị chính.
+                                                var soLon = d.ThucTe is { } tt ? Math.Floor(tt / lon.HeSo) : (decimal?)null;
+                                                <div class="input-group">
+                                                    <input class="form-control text-end" name="dem[@i].SoLon" type="number" min="0" step="1"
+                                                           value="@soLon?.ToString("G29")" aria-label="Số @lon.Ten dòng @d.STT" />
+                                                    <span class="input-group-text">@lon.Ten</span>
+                                                    <input class="form-control text-end" name="dem[@i].SoLuongThucTe" type="number" min="0" step="any"
+                                                           value="@((d.ThucTe - soLon * lon.HeSo)?.ToString("G29"))" aria-label="Số @d.DonViTinh lẻ dòng @d.STT" />
+                                                    <span class="input-group-text">@d.DonViTinh</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <input class="form-control text-end" name="dem[@i].SoLuongThucTe" type="number" min="0" step="any"
+                                                       value="@d.ThucTe?.ToString("G29")" aria-label="Số đếm dòng @d.STT" />
+                                            }
                                         }
                                         else
                                         {
                                             @So(d.ThucTe)
+                                            @if (d.ThucTe is { } thucTe && QuyDoiDonVi.HienThiNeuCo(d.DonVi, thucTe) is { } qdTt)
+                                            {
+                                                <div class="small text-secondary">@qdTt</div>
+                                            }
                                         }
                                     </td>
                                     <td class="so @(d.ChenhLech is < 0 ? "text-danger fw-semibold" : d.ChenhLech is > 0 ? "text-primary fw-semibold" : null)">

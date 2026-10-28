@@ -65,7 +65,7 @@ public class DonMuaController(DonMuaService service) : Controller
     }
 }
 
-public record DonMuaApiDong(string MaBienThe, decimal SoLuong, decimal DonGia);
+public record DonMuaApiDong(string MaBienThe, decimal SoLuong, decimal DonGia, string? TenDonVi = null);
 
 public record DonMuaApiTao(string MaNhaCungCap, string MaKho, string? GhiChu, List<DonMuaApiDong> Dong);
 
@@ -107,7 +107,7 @@ public class DonMuaApiController(DonMuaService service, NguoiDungHienTai nguoiDu
         var ma = await service.TaoAsync(new DonMuaForm
         {
             MaNhaCungCap = body.MaNhaCungCap, MaKho = body.MaKho, GhiChu = body.GhiChu,
-            Dong = body.Dong.Select(d => new DongDonMuaForm { MaBienThe = d.MaBienThe, SoLuong = d.SoLuong, DonGia = d.DonGia }).ToList(),
+            Dong = body.Dong.Select(d => new DongDonMuaForm { MaBienThe = d.MaBienThe, TenDonVi = d.TenDonVi, SoLuong = d.SoLuong, DonGia = d.DonGia }).ToList(),
         });
         return CreatedAtAction(nameof(ChiTiet), new { ma }, new { ma });
     }

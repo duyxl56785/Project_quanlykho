@@ -3,6 +3,7 @@ using quanlykho.Common.GiaoDien;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.XuatKho;
 
@@ -14,7 +15,7 @@ namespace quanlykho.Features.BaoCao;
 /// </summary>
 public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDung tonKhaDung)
 {
-    private record HangBaoCao(string Ten, string DonViTinh, bool TheoDoiHanDung);
+    private record HangBaoCao(string Ten, string DonViTinh, bool TheoDoiHanDung, List<DonViChon> DonVi);
 
     private record DongTon(string MaKho, LoaiKhu? LoaiKhu, string MaViTri, string? MaPhieuKiemKe, string MaLo, string MaBienThe, DateOnly? HanDung, DateTimeOffset NgayNhap,
         decimal SoLuong, decimal DaGiu);
@@ -39,7 +40,7 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
 
         var dong = ma.Select(m => new DongTongHop(m, hang[m].Ten, hang[m].DonViTinh,
                 kho.ToDictionary(k => k, k => ton[m].Where(t => t.MaKho == k).Sum(t => t.SoLuong)),
-                khaDung.GetValueOrDefault(m), Khu(ton[m], LoaiKhu.TiepNhan), Khu(ton[m], LoaiKhu.CachLy), vanChuyen.GetValueOrDefault(m)))
+                khaDung.GetValueOrDefault(m), Khu(ton[m], LoaiKhu.TiepNhan), Khu(ton[m], LoaiKhu.CachLy), vanChuyen.GetValueOrDefault(m), hang[m].DonVi))
             .Where(d => d.Tong != 0 || d.VanChuyen != 0)
             .OrderBy(d => d.MaBienThe, StringComparer.Ordinal).ToList();
         var tong = new DongTongHop("", "Tổng cộng", "", kho.ToDictionary(k => k, k => dong.Sum(d => d.TheoKho[k])),
@@ -61,7 +62,7 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
             {
                 var t = g.First();
                 return new DongTheoLo(t.MaKho, t.MaLo, t.MaBienThe, hang[t.MaBienThe].Ten, hang[t.MaBienThe].DonViTinh, t.HanDung, t.NgayNhap,
-                    g.Sum(x => x.SoLuong), g.Sum(x => x.DaGiu), khaDung.GetValueOrDefault(g.Key), Khu(g, LoaiKhu.TiepNhan), Khu(g, LoaiKhu.CachLy));
+                    g.Sum(x => x.SoLuong), g.Sum(x => x.DaGiu), khaDung.GetValueOrDefault(g.Key), Khu(g, LoaiKhu.TiepNhan), Khu(g, LoaiKhu.CachLy), hang[t.MaBienThe].DonVi);
             })
             .OrderBy(d => d.HanDung).ThenBy(d => d.MaKho).ThenBy(d => d.MaLo, StringComparer.Ordinal);
         return new(loc, await DanhSachLocAsync(), TrangDuLieu<DongTheoLo>.Tao(dong, trang));
@@ -75,7 +76,7 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
         var dong = (await TonAsync(kho, hang.Keys.ToList()))
             .Where(t => (loc.LoaiKhu is null || t.LoaiKhu == loc.LoaiKhu) && (string.IsNullOrWhiteSpace(loc.MaViTri) || t.MaViTri.StartsWith(loc.MaViTri.Trim(), StringComparison.OrdinalIgnoreCase)))
             .OrderBy(t => t.MaViTri, StringComparer.Ordinal).ThenBy(t => t.MaLo, StringComparer.Ordinal)
-            .Select(t => new DongTheoViTri(t.MaViTri, t.LoaiKhu, t.MaLo, t.MaBienThe, hang[t.MaBienThe].Ten, hang[t.MaBienThe].DonViTinh, t.HanDung, t.SoLuong, t.DaGiu, t.MaPhieuKiemKe));
+            .Select(t => new DongTheoViTri(t.MaViTri, t.LoaiKhu, t.MaLo, t.MaBienThe, hang[t.MaBienThe].Ten, hang[t.MaBienThe].DonViTinh, t.HanDung, t.SoLuong, t.DaGiu, t.MaPhieuKiemKe, hang[t.MaBienThe].DonVi));
         return new(loc, await DanhSachLocAsync(), TrangDuLieu<DongTheoViTri>.Tao(dong, trang));
     }
 
@@ -106,7 +107,7 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
 
         var dong = dauKy.Keys.Union(trongKy.Select(g => g.Key))
             .Select(k => new DongNhapXuatTon(k.MaKho, k.MaBienThe, hang[k.MaBienThe].Ten, hang[k.MaBienThe].DonViTinh, dauKy.GetValueOrDefault(k),
-                trongKy[k].Where(r => r > 0).Sum(), -trongKy[k].Where(r => r < 0).Sum()))
+                trongKy[k].Where(r => r > 0).Sum(), -trongKy[k].Where(r => r < 0).Sum(), hang[k.MaBienThe].DonVi))
             .Where(d => d.DauKy != 0 || d.Nhap != 0 || d.Xuat != 0)
             .OrderBy(d => d.MaKho).ThenBy(d => d.MaBienThe, StringComparer.Ordinal).ToList();
         var tong = new DongNhapXuatTon("", "", "Tổng cộng", "", dong.Sum(d => d.DauKy), dong.Sum(d => d.Nhap), dong.Sum(d => d.Xuat));
@@ -157,7 +158,8 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
             return new DongTheKho(b.ThoiDiem, b.LoaiChungTu, b.MaChungTu, b.MaLo, b.MaViTri, Math.Max(b.SoLuongThayDoi, 0), Math.Max(-b.SoLuongThayDoi, 0), ton,
                 ten.GetValueOrDefault(b.NguoiThucHien, b.NguoiThucHien));
         }).ToList();
-        return new TheKhoTrang(loc, danhSach, DonMuaService.MoTaHang(hang.Ten, hang.ThuocTinh), hang.DonViTinh, dauKy, ton, TrangDuLieu<DongTheKho>.Tao(dong, trang));
+        return new TheKhoTrang(loc, danhSach, DonMuaService.MoTaHang(hang.Ten, hang.ThuocTinh), hang.DonViTinh, dauKy, ton, TrangDuLieu<DongTheKho>.Tao(dong, trang),
+            await new QuyDoiDonVi(db).DonViAsync(maBienThe));
     }
 
     private class DongBienDong
@@ -231,8 +233,9 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
                 nhom.AddRange(con[nhom[i]]);
             q = q.Where(b => nhom.Contains(b.SanPham.MaNhom));
         }
-        return (await q.Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh, b.SanPham.TheoDoiHanDung }).ToListAsync())
-            .ToDictionary(b => b.MaBienThe, b => new HangBaoCao(DonMuaService.MoTaHang(b.Ten, b.ThuocTinh), b.DonViTinh, b.TheoDoiHanDung));
+        var hang = await q.Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh, b.SanPham.TheoDoiHanDung }).ToListAsync();
+        var donVi = await new QuyDoiDonVi(db).BangAsync(hang.Select(b => b.MaBienThe));
+        return hang.ToDictionary(b => b.MaBienThe, b => new HangBaoCao(DonMuaService.MoTaHang(b.Ten, b.ThuocTinh), b.DonViTinh, b.TheoDoiHanDung, donVi[b.MaBienThe]));
     }
 
     /// <summary>Báo cáo là trang GET chỉ đọc: lỗi bộ lọc hiện ngay trên trang thay vì ném lỗi nghiệp vụ.</summary>

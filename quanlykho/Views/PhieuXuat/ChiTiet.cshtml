@@ -53,7 +53,10 @@
                         <td>@d.MaLo</td>
                         <td>@Ngay(d.HanDung)</td>
                         <td class="small">@d.MaViTri</td>
-                        <td class="so">@So(d.SoLuong) @d.TenDonVi</td>
+                        <td class="so">@So(d.SoLuongGoc) @d.TenDonVi@if (d.HeSo > 1)
+                            {
+                                <div class="small text-secondary">= @So(d.SoLuong) @d.DonViChinh</div>
+                            }</td>
                     </tr>
                 }
             </tbody>

@@ -50,6 +50,7 @@ builder.Services.AddScoped<GhiNhatKy>();
 builder.Services.AddScoped<CongGhiTon>();
 builder.Services.AddScoped<TaiKhoanService>();
 builder.Services.AddScoped<NguoiDungService>();
+builder.Services.AddScoped<QuyDoiDonVi>();
 builder.Services.AddScoped<DanhMucService>();
 builder.Services.AddScoped<DoiTacService>();
 builder.Services.AddScoped<DonMuaService>();
@@ -71,6 +72,7 @@ builder.Services.AddScoped<TongQuanService>();
 builder.Services.AddScoped<BaoCaoService>();
 builder.Services.AddScoped<NhatKyService>();
 builder.Services.AddScoped<NhapExcelService>();
+builder.Services.AddScoped<NhapTonDauKyService>();
 
 var app = builder.Build();
 

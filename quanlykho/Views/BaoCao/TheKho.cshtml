@@ -1,4 +1,5 @@
 @using quanlykho.Features.BaoCao
+@using quanlykho.Features.DanhMuc
 @model TheKhoTrang
 @{
     ViewData["Title"] = "Thẻ kho";
@@ -20,7 +21,7 @@ else
         <div class="row g-3">
             <div class="col-md-6"><div class="text-secondary small">Hàng</div><span class="fw-semibold">@Model.Loc.MaBienThe</span> · @Model.TenHang (@Model.DonViTinh)</div>
             <div class="col-6 col-md-3"><div class="text-secondary small">Tồn đầu kỳ</div><span class="fw-semibold">@So(Model.DauKy)</span></div>
-            <div class="col-6 col-md-3"><div class="text-secondary small">Tồn cuối kỳ</div><span class="fw-semibold">@So(Model.CuoiKy)</span></div>
+            <div class="col-6 col-md-3"><div class="text-secondary small">Tồn cuối kỳ</div><span class="fw-semibold">@So(Model.CuoiKy)</span> <span class="small text-secondary">@QuyDoiDonVi.HienThiNeuCo(Model.DonVi, Model.CuoiKy)</span></div>
         </div>
     </div>
     <bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có biến động nào trong kỳ.">

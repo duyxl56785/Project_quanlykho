@@ -1,4 +1,5 @@
 @using quanlykho.Features.BaoCao
+@using quanlykho.Features.DanhMuc
 @model TongHopTrang
 @{
     ViewData["Title"] = "Tổng hợp tồn kho";
@@ -34,9 +35,15 @@
                 }
                 @if (nhieuKho)
                 {
-                    <td class="so tong-cong">@So(d.Tong)</td>
+                    <td class="so tong-cong">@So(d.Tong)@if (QuyDoiDonVi.HienThiNeuCo(d.DonVi, d.Tong) is { } qd)
+                    {
+                        <div class="small text-secondary fw-normal">@qd</div>
+                    }</td>
                 }
-                <td class="so">@So(d.KhaDung)</td>
+                <td class="so">@So(d.KhaDung)@if (QuyDoiDonVi.HienThiNeuCo(d.DonVi, d.KhaDung) is { } qdKd)
+                    {
+                        <div class="small text-secondary fw-normal">@qdKd</div>
+                    }</td>
                 <td class="so">@So(d.TiepNhan)</td>
                 <td class="so">@So(d.CachLy)</td>
                 <td class="so">@So(d.VanChuyen)</td>

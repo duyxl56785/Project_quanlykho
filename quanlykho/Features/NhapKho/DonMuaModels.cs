@@ -6,7 +6,8 @@ namespace quanlykho.Features.NhapKho;
 
 public record DonMuaDong(string Ma, string NhaCungCap, string MaKho, DateTimeOffset NgayTao, decimal TongTien, TrangThaiDonMua TrangThai, string? Buoc);
 
-public record TienDoDong(string MaBienThe, string TenHang, string TenDonVi, int HeSo, decimal SoLuongDat, decimal DonGia, decimal DaNhan, decimal DangNhan)
+/// <param name="DonViChinh">Đơn vị tính chính; DaNhan, DangNhan, ChuaNhan theo đơn vị này.</param>
+public record TienDoDong(string MaBienThe, string TenHang, string TenDonVi, int HeSo, decimal SoLuongDat, decimal DonGia, decimal DaNhan, decimal DangNhan, string DonViChinh)
 {
     public decimal SoDatChinh => SoLuongDat * HeSo;
     public decimal ChuaNhan => Math.Max(0, SoDatChinh - DaNhan);
@@ -23,6 +24,8 @@ public record DonMuaChiTiet(string Ma, string MaNhaCungCap, string TenNhaCungCap
 public class DongDonMuaForm
 {
     public string MaBienThe { get; set; } = "";
+    /// <summary>Trống là đơn vị tính chính; SoLuong và DonGia theo đơn vị này.</summary>
+    public string? TenDonVi { get; set; }
     public decimal SoLuong { get; set; }
     public decimal DonGia { get; set; }
 }
@@ -45,4 +48,6 @@ public class DonMuaForm
     public List<LuaChon> DanhSachNhaCungCap { get; set; } = [];
     public List<LuaChon> DanhSachKho { get; set; } = [];
     public List<LuaChon> DanhSachBienThe { get; set; } = [];
+    /// <summary>Đơn vị của từng biến thể cho ô chọn đơn vị trên dòng.</summary>
+    public Dictionary<string, List<DonViChon>> DonViHang { get; set; } = [];
 }

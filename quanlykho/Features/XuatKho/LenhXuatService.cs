@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.Kho;
 using quanlykho.Features.NhapKho;
 using static quanlykho.Common.GiaoDien.DinhDang;
@@ -50,7 +51,9 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
             await db.PhieuXuat.Where(p => p.MaLenh == ma).Select(p => p.MaPhieuXuat).FirstOrDefaultAsync(),
             l.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongYeuCauXuat(c.MaBienThe, DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh),
                 hang[c.MaBienThe].DonViTinh, c.SoLuongYeuCau, daLay.Where(d => d.MaBienThe == c.MaBienThe).Sum(d => d.SoLuong))).ToList(),
-            goiYLay, daLay);
+            goiYLay, daLay,
+            (await db.DonViQuyDoi.Where(d => maHang.Contains(d.MaBienThe) && d.MaVach != null && d.TrangThai == TrangThaiSuDung.DangSuDung).ToListAsync())
+                .ToDictionary(d => d.MaVach!, d => new DonViChon(d.TenDonVi, d.HeSo)));
     }
 
     /// <summary>Thủ kho đang hoạt động được giao kho này, để phân công lệnh.</summary>
@@ -74,13 +77,16 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
         if ((await ThuKhoAsync(don.MaKho)).All(t => t.Ma != yc.NguoiThucHien))
             throw new NghiepVuException("Người thực hiện phải là thủ kho đang hoạt động được giao kho này.");
 
+        // Lệnh xuất làm việc theo đơn vị tính chính (số còn phải xuất có thể lẻ so với thùng).
+        var maHang = don.ChiTiet.Select(c => c.MaBienThe).ToList();
+        var donViChinh = await db.BienThe.Where(b => maHang.Contains(b.MaBienThe)).Select(b => new { b.MaBienThe, b.SanPham.DonViTinh }).ToDictionaryAsync(b => b.MaBienThe, b => b.DonViTinh);
         var l = new LenhXuat
         {
             MaLenh = await maChungTu.TaoAsync("LX"), MaDonDat = don.MaDonDat, MaKho = don.MaKho, NguoiLap = nguoiDung.Ma, NgayLap = gio.GetUtcNow(),
             NguoiThucHien = yc.NguoiThucHien, TrangThai = TrangThaiLenhXuat.ChuaThucHien,
             ChiTiet = don.ChiTiet.Where(c => c.SoLuongDat * c.HeSo > c.SoLuongDaXuat).Select(c => new ChiTietLenhXuat
             {
-                MaBienThe = c.MaBienThe, TenDonVi = c.TenDonVi, HeSo = 1,
+                MaBienThe = c.MaBienThe, TenDonVi = donViChinh[c.MaBienThe], HeSo = 1,
                 SoLuongGoc = c.SoLuongDat * c.HeSo - c.SoLuongDaXuat, SoLuongYeuCau = c.SoLuongDat * c.HeSo - c.SoLuongDaXuat,
             }).ToList(),
         };
@@ -98,6 +104,16 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
     /// </summary>
     public async Task<long> LayHangAsync(string ma, LayHangYeuCau yc)
     {
+        // Thủ kho có thể đếm theo thùng; mọi so sánh, giữ hàng, ghi tồn theo đơn vị chính.
+        var quyDoi = new QuyDoiDonVi(db);
+        var theoMaVach = await quyDoi.TraMaVachAsync(yc.Ma);
+        if (theoMaVach is not null)
+            yc = yc with { Ma = theoMaVach.MaBienThe, TenDonVi = string.IsNullOrWhiteSpace(yc.TenDonVi) ? theoMaVach.TenDonVi : yc.TenDonVi };
+        if (!string.IsNullOrWhiteSpace(yc.TenDonVi))
+        {
+            var maBienThe = await db.Lo.Where(l => l.MaLo == yc.Ma).Select(l => l.MaBienThe).FirstOrDefaultAsync() ?? yc.Ma;
+            yc = yc with { SoLuong = (await quyDoi.QuyVeChinhAsync(maBienThe, yc.TenDonVi, yc.SoLuong)).SoLuong };
+        }
         if (yc.SoLuong <= 0)
             throw new NghiepVuException("Số lượng lấy phải lớn hơn 0.");
         await using var tx = await db.Database.BeginTransactionAsync();

@@ -6,8 +6,9 @@ namespace quanlykho.Features.DieuChuyen;
 
 public record DieuChuyenDong(string Ma, string MaKhoDi, string MaKhoDen, DateOnly NgayChuyen, string? PhuongTien, int SoDong, TrangThaiDieuChuyen TrangThai);
 
+/// <param name="SoLuong">Theo đơn vị tính chính (DonViChinh), cùng SoLuongNhan; SoLuongGoc theo TenDonVi chọn khi lập.</param>
 public record DongDieuChuyen(int STT, string MaLo, string MaBienThe, string TenHang, string MaViTriDi, DateOnly? HanDung, string TenDonVi, decimal SoLuong, decimal? SoLuongNhan,
-    XuLyChenhLech? CachXuLy, string? LyDoXuLy)
+    XuLyChenhLech? CachXuLy, string? LyDoXuLy, decimal SoLuongGoc = 0, int HeSo = 1, string DonViChinh = "")
 {
     public decimal? ChenhLech => SoLuongNhan is null ? null : SoLuong - SoLuongNhan;
     public bool ChoXuLy => ChenhLech > 0 && CachXuLy is null;
@@ -30,6 +31,8 @@ public class DongDieuChuyenForm
 {
     /// <summary>"MaLo|MaViTri" chọn từ tồn khả dụng của kho đi.</summary>
     public string LoO { get; set; } = "";
+    /// <summary>Trống là đơn vị tính chính.</summary>
+    public string? TenDonVi { get; set; }
     public decimal SoLuong { get; set; }
 }
 
@@ -62,6 +65,8 @@ public class DieuChuyenForm
     public List<LuaChon> DanhSachKhoDi { get; set; } = [];
     public List<LuaChon> DanhSachKhoDen { get; set; } = [];
     public List<LuaChon> DanhSachTon { get; set; } = [];
+    /// <summary>Đơn vị theo từng lựa chọn "MaLo|MaViTri" của DanhSachTon.</summary>
+    public Dictionary<string, List<DonViChon>> DonViHang { get; set; } = [];
 }
 
 public class DongNhanForm

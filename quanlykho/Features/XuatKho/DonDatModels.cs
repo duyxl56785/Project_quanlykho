@@ -6,7 +6,9 @@ namespace quanlykho.Features.XuatKho;
 
 public record DonDatDong(string Ma, string MaKho, string NoiNhan, string NguoiTao, DateTimeOffset NgayTao, DateOnly? HanGiao, int SoDong, TrangThaiDonDat TrangThai);
 
-public record DongDonDat(string MaBienThe, string TenHang, string TenDonVi, int HeSo, decimal SoLuongDat, decimal SoLuongDaXuat, decimal KhaDung)
+/// <param name="KhaDungQuyDoi">Khả dụng quy ra đơn vị lớn nhất ("9 thùng 19 chai").</param>
+public record DongDonDat(string MaBienThe, string TenHang, string TenDonVi, int HeSo, decimal SoLuongDat, decimal SoLuongDaXuat, decimal KhaDung,
+    string DonViChinh, string KhaDungQuyDoi)
 {
     public decimal SoDatChinh => SoLuongDat * HeSo;
 }
@@ -22,6 +24,8 @@ public record HangDaGiu(int ThuTu, string MaBienThe, string MaLo, string MaViTri
 public class DongDonDatForm
 {
     public string MaBienThe { get; set; } = "";
+    /// <summary>Trống là đơn vị tính chính.</summary>
+    public string? TenDonVi { get; set; }
     public decimal SoLuong { get; set; }
 }
 
@@ -46,4 +50,5 @@ public class DonDatForm
     public List<LuaChon> DanhSachKho { get; set; } = [];
     public List<LuaChon> DanhSachNoiNhan { get; set; } = [];
     public List<LuaChon> DanhSachBienThe { get; set; } = [];
+    public Dictionary<string, List<DonViChon>> DonViHang { get; set; } = [];
 }

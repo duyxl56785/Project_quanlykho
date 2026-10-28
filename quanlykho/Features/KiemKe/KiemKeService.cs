@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.Kho;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.XuatKho;
@@ -39,6 +40,7 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var maHang = p.ChiTiet.Select(c => c.MaBienThe).Distinct().ToList();
         var hang = await db.BienThe.Where(b => maHang.Contains(b.MaBienThe))
             .Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh }).ToDictionaryAsync(b => b.MaBienThe);
+        var donVi = await new QuyDoiDonVi(db).BangAsync(maHang);
         var maLo = p.ChiTiet.Where(c => c.MaLo != null).Select(c => c.MaLo!).Distinct().ToList();
         var han = await db.Lo.Where(l => maLo.Contains(l.MaLo)).ToDictionaryAsync(l => l.MaLo, l => l.HanDung);
         var maNguoi = p.ThanhVien.Select(t => t.MaNguoiDung).Append(p.NguoiLap)
@@ -50,7 +52,7 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             p.ChiTiet.OrderBy(c => c.MaViTri, StringComparer.Ordinal).ThenBy(c => c.STT).Select(c => new DongKiemKe(c.STT, c.MaViTri, c.MaLo, c.MaBienThe,
                 DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh), hang[c.MaBienThe].DonViTinh,
                 c.MaLo is null ? null : han[c.MaLo], c.SoLuongSoSach, c.SoLuongThucTe, c.NgoaiDanhSach, c.NguoiDem is null ? null : ten[c.NguoiDem],
-                c.LoaiChenhLech, c.KetLuan, c.NguoiDuyet is null ? null : ten[c.NguoiDuyet], c.MaChungTuXuLy)).ToList(),
+                c.LoaiChenhLech, c.KetLuan, c.NguoiDuyet is null ? null : ten[c.NguoiDuyet], c.MaChungTuXuLy, donVi[c.MaBienThe])).ToList(),
             await db.ViTri.Where(v => v.MaPhieuKiemKe == ma).OrderBy(v => v.MaViTri).Select(v => v.MaViTri).ToListAsync(),
             p.ThanhVien.Any(t => t.MaNguoiDung == nguoiDung.Ma),
             await db.ViTri.Where(v => v.MaKho == p.MaKho && v.Cap == CapViTri.CapCuoi).OrderBy(v => v.MaViTri).Select(v => v.MaViTri).ToListAsync());
@@ -162,16 +164,18 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         await using var tx = await db.Database.BeginTransactionAsync();
         var p = await KhoaPhieuThanhVienAsync(ma);
         var theoStt = p.ChiTiet.ToDictionary(c => c.STT);
-        foreach (var d in dem.Where(d => d.SoLuongThucTe is not null))
+        var donVi = await new QuyDoiDonVi(db).BangAsync(p.ChiTiet.Select(c => c.MaBienThe));
+        foreach (var d in dem.Where(d => d.SoLuongThucTe is not null || d.SoLon is not null))
         {
             var c = theoStt.GetValueOrDefault(d.STT) ?? throw new NghiepVuException($"Không có dòng {d.STT}.");
             if (d.SoLuongThucTe < 0)
                 throw new NghiepVuException($"Dòng {d.STT}: số đếm không được âm.");
-            if (c.SoLuongThucTe == d.SoLuongThucTe)
+            var thucTe = QuyDoiDonVi.CongDonViLon(donVi[c.MaBienThe], d.SoLon ?? 0, d.SoLuongThucTe ?? 0, c.MaBienThe);
+            if (c.SoLuongThucTe == thucTe)
                 continue;
             if (c.NguoiDuyet is not null)
                 throw new NghiepVuException($"Dòng {d.STT} đã duyệt điều chỉnh, không sửa số đếm.");
-            (c.SoLuongThucTe, c.NguoiDem, c.ThoiDiemDem) = (d.SoLuongThucTe, nguoiDung.Ma, gio.GetUtcNow());
+            (c.SoLuongThucTe, c.NguoiDem, c.ThoiDiemDem) = (thucTe, nguoiDung.Ma, gio.GetUtcNow());
         }
         await db.SaveChangesAsync();
         await tx.CommitAsync();
@@ -197,7 +201,8 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var stt = p.ChiTiet.Select(c => c.STT).DefaultIfEmpty().Max() + 1;
         p.ChiTiet.Add(new ChiTietKiemKe
         {
-            STT = stt, MaViTri = yc.MaViTri, MaLo = lo?.MaLo, MaBienThe = bienThe, SoLuongSoSach = 0, SoLuongThucTe = yc.SoLuongThucTe,
+            STT = stt, MaViTri = yc.MaViTri, MaLo = lo?.MaLo, MaBienThe = bienThe, SoLuongSoSach = 0,
+            SoLuongThucTe = QuyDoiDonVi.CongDonViLon(await new QuyDoiDonVi(db).DonViAsync(bienThe), yc.SoLon, yc.SoLuongThucTe, bienThe),
             NgoaiDanhSach = true, NguoiDem = nguoiDung.Ma, ThoiDiemDem = gio.GetUtcNow(),
         });
         await db.SaveChangesAsync();

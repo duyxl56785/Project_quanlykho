@@ -1,4 +1,5 @@
 @using quanlykho.Features.BaoCao
+@using quanlykho.Features.DanhMuc
 @model NhapXuatTonTrang
 @{
     ViewData["Title"] = "Nhập xuất tồn theo kỳ";
@@ -20,7 +21,10 @@
                 <td class="so">@So(d.DauKy)</td>
                 <td class="so">@So(d.Nhap)</td>
                 <td class="so">@So(d.Xuat)</td>
-                <td class="so tong-cong">@So(d.CuoiKy)</td>
+                <td class="so tong-cong">@So(d.CuoiKy)@if (QuyDoiDonVi.HienThiNeuCo(d.DonVi, d.CuoiKy) is { } qd)
+                    {
+                        <div class="small text-secondary fw-normal">@qd</div>
+                    }</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-secondary" asp-action="TheKho" asp-route-MaBienThe="@d.MaBienThe" asp-route-MaKho="@d.MaKho"
                        asp-route-TuNgay="@Model.Loc.TuNgay?.ToString("yyyy-MM-dd")" asp-route-DenNgay="@Model.Loc.DenNgay?.ToString("yyyy-MM-dd")">Thẻ kho</a>

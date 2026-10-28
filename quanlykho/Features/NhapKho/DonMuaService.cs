@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 
 namespace quanlykho.Features.NhapKho;
 
@@ -52,12 +53,12 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
 
         var nhan = await SoNhanAsync(ma);
         var tenHang = await db.BienThe.Where(b => d.ChiTiet.Select(c => c.MaBienThe).Contains(b.MaBienThe))
-            .Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh }).ToListAsync();
+            .Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh }).ToListAsync();
         var dong = d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c =>
         {
             var h = tenHang.Single(x => x.MaBienThe == c.MaBienThe);
             var n = nhan.GetValueOrDefault(c.MaBienThe);
-            return new TienDoDong(c.MaBienThe, MoTaHang(h.Ten, h.ThuocTinh), c.TenDonVi, c.HeSo, c.SoLuongDat, c.DonGia, n.DaNhan, n.DangNhan);
+            return new TienDoDong(c.MaBienThe, MoTaHang(h.Ten, h.ThuocTinh), c.TenDonVi, c.HeSo, c.SoLuongDat, c.DonGia, n.DaNhan, n.DangNhan, h.DonViTinh);
         }).ToList();
         var phieu = await db.PhieuNhap.Where(p => p.MaDonMua == ma && p.TrangThai != TrangThaiPhieu.DaHuy)
             .OrderBy(p => p.MaPhieuNhap).Select(p => p.MaPhieuNhap).ToListAsync();
@@ -80,6 +81,7 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
                 .Where(b => b.TrangThai == TrangThaiSuDung.DangSuDung && b.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
                 .OrderBy(b => b.MaBienThe).Select(b => new { b.MaBienThe, b.SanPham.Ten, b.SanPham.DonViTinh, b.ThuocTinh }).ToListAsync())
             .Select(b => new LuaChon(b.MaBienThe, $"{MoTaHang(b.Ten, b.ThuocTinh)} ({b.DonViTinh})")).ToList();
+        form.DonViHang = await new QuyDoiDonVi(db).BangAsync(form.DanhSachBienThe.Select(b => b.Ma));
         return form;
     }
 
@@ -91,7 +93,7 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         return await NapDanhSachAsync(new DonMuaForm
         {
             Ma = d.MaDonMua, MaNhaCungCap = d.MaNhaCungCap, MaKho = d.MaKho, GhiChu = d.GhiChu,
-            Dong = d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonMuaForm { MaBienThe = c.MaBienThe, SoLuong = c.SoLuongDat, DonGia = c.DonGia }).ToList(),
+            Dong = d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonMuaForm { MaBienThe = c.MaBienThe, TenDonVi = c.TenDonVi, SoLuong = c.SoLuongDat, DonGia = c.DonGia }).ToList(),
         });
     }
 
@@ -215,17 +217,19 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             throw new NghiepVuException("Đơn giá không được âm.");
 
         var ma = dong.Select(d => d.MaBienThe).ToList();
-        var bienThe = await db.BienThe.Where(b => ma.Contains(b.MaBienThe)
+        var dangDung = await db.BienThe.Where(b => ma.Contains(b.MaBienThe)
                 && b.TrangThai == TrangThaiSuDung.DangSuDung && b.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
-            .Select(b => new { b.MaBienThe, b.SanPham.DonViTinh })
-            .ToDictionaryAsync(b => b.MaBienThe, b => b.DonViTinh);
-        var thieu = ma.FirstOrDefault(m => !bienThe.ContainsKey(m));
+            .Select(b => b.MaBienThe).ToListAsync();
+        var thieu = ma.FirstOrDefault(m => !dangDung.Contains(m));
         if (thieu is not null)
             throw new NghiepVuException($"Biến thể {thieu} không có hoặc đã ngừng sử dụng.");
 
-        return dong.Select(d => new ChiTietDonMua
+        // Dòng lưu đơn vị, hệ số tại thời điểm lập; số đặt và đơn giá theo đơn vị đã chọn (quy tắc 15).
+        var donVi = await new QuyDoiDonVi(db).BangAsync(ma);
+        return dong.Select(d =>
         {
-            MaBienThe = d.MaBienThe, TenDonVi = bienThe[d.MaBienThe], HeSo = 1, SoLuongDat = d.SoLuong, DonGia = d.DonGia,
+            var q = QuyDoiDonVi.QuyVeChinh(donVi[d.MaBienThe], d.TenDonVi, d.SoLuong, d.MaBienThe);
+            return new ChiTietDonMua { MaBienThe = d.MaBienThe, TenDonVi = q.TenDonVi, HeSo = q.HeSo, SoLuongDat = d.SoLuong, DonGia = d.DonGia };
         }).ToList();
     }
 
