@@ -45,6 +45,7 @@ builder.Services.AddScoped<MaChungTu>();
 builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();
 builder.Services.AddScoped<DuLieuThu>();
 builder.Services.AddScoped<PhieuNhapMau>();
+builder.Services.AddScoped<LichSuXuat>();
 builder.Services.AddPhanQuyen();
 builder.Services.AddScoped<GhiNhatKy>();
 builder.Services.AddScoped<CongGhiTon>();
@@ -83,6 +84,7 @@ if (args.Contains("--seed"))
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<DuLieuThu>().NapAsync();
     await scope.ServiceProvider.GetRequiredService<PhieuNhapMau>().NapAsync();
+    await scope.ServiceProvider.GetRequiredService<LichSuXuat>().NapAsync();
     app.Logger.LogInformation("Đã nạp dữ liệu thử.");
     return;
 }
