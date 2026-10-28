@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Local Docker overrides (e.g. PostgreSQL host port)
 docker-compose.override.yml
+
+# Bản sao lưu CSDL (scripts/sao-luu.ps1)
+backups/
