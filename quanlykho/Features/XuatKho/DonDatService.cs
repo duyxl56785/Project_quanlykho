@@ -13,7 +13,7 @@ namespace quanlykho.Features.XuatKho;
 /// Đơn đặt hàng (mục 2.2, Bảng 2.14 dòng 2). Nhân viên bán hàng tạo, gửi duyệt, chỉ thấy đơn của mình;
 /// quản lý kho thấy đơn của kho được giao; quản trị viên thấy mọi đơn.
 /// </summary>
-public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungTu maChungTu, GhiNhatKy nhatKy, TonKhaDung tonKhaDung, TimeProvider gio)
+public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungTu maChungTu, GhiNhatKy nhatKy, TonKhaDung tonKhaDung, GiuHangService giuHang, TimeProvider gio)
 {
     public async Task<TrangDuLieu<DonDatDong>> DanhSachAsync(string? tuKhoa, string? maKho, TrangThaiDonDat? trangThai, int trang)
     {
@@ -38,11 +38,14 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var khaDung = await tonKhaDung.TruyVan().Where(k => k.MaKho == d.MaKho && maHang.Contains(k.MaBienThe))
             .GroupBy(k => k.MaBienThe).Select(g => new { g.Key, Tong = g.Sum(k => k.KhaDung) }).ToDictionaryAsync(x => x.Key, x => x.Tong);
         var noiNhan = await db.NoiNhan.Where(n => n.MaNoiNhan == d.MaNoiNhan).Select(n => new { n.Ten, n.DiaChi }).SingleAsync();
+        var daGiu = await db.GiuHang.Where(g => g.MaDonDat == ma).OrderBy(g => g.ThuTu)
+            .Join(db.Lo, g => g.MaLo, l => l.MaLo, (g, l) => new HangDaGiu(g.ThuTu, l.MaBienThe, g.MaLo, g.MaViTri, l.HanDung, g.SoLuong))
+            .ToListAsync();
         return new DonDatChiTiet(d.MaDonDat, d.MaKho, await db.ViTri.Where(v => v.MaViTri == d.MaKho).Select(v => v.Ten).SingleAsync(),
             d.MaNoiNhan, noiNhan.Ten, noiNhan.DiaChi, d.NguoiTao, await db.NguoiDung.Where(n => n.MaNguoiDung == d.NguoiTao).Select(n => n.Ten).SingleAsync(),
             d.NgayTao, d.HanGiao, d.TrangThai, d.GhiChu,
             d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonDat(c.MaBienThe, DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh),
-                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe))).ToList());
+                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe))).ToList(), daGiu);
     }
 
     public async Task<DonDatForm> NapDanhSachAsync(DonDatForm form)
@@ -108,15 +111,18 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         await db.SaveChangesAsync();
     }
 
-    /// <summary>Hủy trước khi xuất. Đơn đã duyệt (đã giữ hàng) hủy ở nhiệm vụ duyệt và giữ hàng, vì phải bỏ giữ cùng lúc.</summary>
+    /// <summary>Hủy trước khi xuất; đơn đã duyệt thì bỏ giữ hàng cùng lúc.</summary>
     public async Task HuyAsync(string ma)
     {
         var d = await (await PhamViAsync()).SingleOrDefaultAsync(x => x.MaDonDat == ma)
             ?? throw new NghiepVuException($"Không có đơn đặt hàng {ma} hoặc bạn không được xem đơn này.");
+        if (d.TrangThai == TrangThaiDonDat.DaDuyet)
+        {
+            await giuHang.HuyDonDaDuyetAsync(ma);
+            return;
+        }
         if (d.TrangThai is not (TrangThaiDonDat.Nhap or TrangThaiDonDat.ChoDuyet))
-            throw new NghiepVuException(d.TrangThai is TrangThaiDonDat.DaHuy ? "Đơn đã hủy."
-                : d.TrangThai is TrangThaiDonDat.DaDuyet ? "Đơn đã duyệt và giữ hàng; quản lý kho bỏ giữ rồi mới hủy được."
-                : "Đơn đã xuất kho, không hủy được.");
+            throw new NghiepVuException(d.TrangThai is TrangThaiDonDat.DaHuy ? "Đơn đã hủy." : "Đơn đã xuất kho, không hủy được.");
         d.TrangThai = TrangThaiDonDat.DaHuy;
         nhatKy.Ghi("HuyDonDat", nameof(DonDatHang), ma, maKho: d.MaKho);
         await db.SaveChangesAsync();

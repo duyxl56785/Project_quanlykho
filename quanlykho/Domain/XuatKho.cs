@@ -46,3 +46,18 @@ public class LichSuGoiY
     /// <summary>Chứng từ dùng gợi ý (đơn đặt khi giữ hàng, lệnh xuất khi lấy hàng, đơn mua ở G3).</summary>
     public string? MaChungTu { get; set; }
 }
+
+/// <summary>Hàng giữ cho đơn đặt khi duyệt: đơn nào giữ bao nhiêu ở lô, ô nào; số giữ đã cộng vào TonKho.SoLuongDaGiu qua cổng ghi tồn.</summary>
+public class GiuHang
+{
+    public string MaDonDat { get; set; } = "";
+    public string MaLo { get; set; } = "";
+    public string MaViTri { get; set; } = "";
+    /// <summary>Theo đơn vị tính chính.</summary>
+    public decimal SoLuong { get; set; }
+    /// <summary>Thứ tự ghé do G1 sắp theo mã ô.</summary>
+    public int ThuTu { get; set; }
+    public long? MaGoiY { get; set; }
+    public DateTimeOffset ThoiDiem { get; set; }
+    public string NguoiGiu { get; set; } = "";
+}

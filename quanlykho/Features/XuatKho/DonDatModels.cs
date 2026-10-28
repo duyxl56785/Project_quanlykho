@@ -12,10 +12,12 @@ public record DongDonDat(string MaBienThe, string TenHang, string TenDonVi, int 
 }
 
 public record DonDatChiTiet(string Ma, string MaKho, string TenKho, string MaNoiNhan, string TenNoiNhan, string? DiaChiNhan, string MaNguoiTao, string NguoiTao,
-    DateTimeOffset NgayTao, DateOnly? HanGiao, TrangThaiDonDat TrangThai, string? GhiChu, List<DongDonDat> Dong)
+    DateTimeOffset NgayTao, DateOnly? HanGiao, TrangThaiDonDat TrangThai, string? GhiChu, List<DongDonDat> Dong, List<HangDaGiu> DaGiu)
 {
     public bool SuaDuoc => TrangThai is TrangThaiDonDat.Nhap or TrangThaiDonDat.ChoDuyet;
 }
+
+public record HangDaGiu(int ThuTu, string MaBienThe, string MaLo, string MaViTri, DateOnly? HanDung, decimal SoLuong);
 
 public class DongDonDatForm
 {

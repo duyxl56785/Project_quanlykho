@@ -5,6 +5,7 @@
     ViewData["Title"] = $"Đơn đặt hàng {Model.Ma}";
     var laNguoiTao = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.MaNguoiTao || User.IsInRole(Vai.QuanTri);
     var choDatHang = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.BanHang);
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
 }
 
 <div class="tieu-de-trang">
@@ -47,7 +48,7 @@
                         <td>@d.TenDonVi</td>
                         <td class="so">@So(d.SoLuongDat)</td>
                         <td class="so">@So(d.SoLuongDaXuat)</td>
-                        <td class="so @(d.KhaDung < d.SoDatChinh - d.SoLuongDaXuat ? "text-danger fw-semibold" : null)">@So(d.KhaDung)</td>
+                        <td class="so @(Model.SuaDuoc && d.KhaDung < d.SoDatChinh - d.SoLuongDaXuat ? "text-danger fw-semibold" : null)">@So(d.KhaDung)</td>
                     </tr>
                 }
             </tbody>
@@ -58,6 +59,32 @@
         <p class="text-danger mt-2 mb-0">Có dòng khả dụng ít hơn số đặt (chữ đỏ): đơn sẽ không duyệt được nếu kho chưa có thêm hàng.</p>
     }
 </div>
+
+@if (Model.DaGiu.Count > 0)
+{
+    <div class="the">
+        <h2>Hàng đã giữ</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>#</th><th>Hàng</th><th>Lô</th><th>Hạn dùng</th><th>Ô</th><th class="so">Giữ</th></tr></thead>
+                <tbody>
+                    @foreach (var g in Model.DaGiu)
+                    {
+                        <tr>
+                            <td>@g.ThuTu</td>
+                            <td>@g.MaBienThe</td>
+                            <td>@g.MaLo</td>
+                            <td>@Ngay(g.HanDung)</td>
+                            <td class="small">@g.MaViTri</td>
+                            <td class="so">@So(g.SoLuong)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="text-secondary mt-2 mb-0">Lô, ô do gợi ý G1 chọn: hết hạn trước xuất trước, rồi nhập trước xuất trước, ít kệ phải ghé.</p>
+    </div>
+}
 
 <div class="thanh-nut">
     @if (Model.SuaDuoc && laNguoiTao && choDatHang)
@@ -70,9 +97,22 @@
             </form>
         }
     }
-    @if (Model.SuaDuoc)
+    @if (quanLy && Model.TrangThai == TrangThaiDonDat.ChoDuyet)
     {
-        <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy đơn đặt hàng @Model.Ma?">
+        <form method="post" asp-action="Duyet" data-xac-nhan="Duyệt đơn @Model.Ma và giữ hàng theo lô, ô do G1 chọn?">
+            <input type="hidden" name="ma" value="@Model.Ma" />
+            <button type="submit" class="btn btn-primary">Duyệt và giữ hàng</button>
+        </form>
+    }
+    @if (quanLy && Model.TrangThai == TrangThaiDonDat.DaDuyet)
+    {
+        <form method="post" asp-action="BoGiu" asp-route-ma="@Model.Ma" data-xac-nhan="Bỏ giữ hàng của đơn @Model.Ma? Hàng trả lại tồn khả dụng, đơn quay lại Chờ duyệt.">
+            <button type="submit" class="btn btn-outline-secondary">Bỏ giữ</button>
+        </form>
+    }
+    @if (Model.SuaDuoc || (quanLy && Model.TrangThai == TrangThaiDonDat.DaDuyet))
+    {
+        <form method="post" asp-action="Huy" asp-route-ma="@Model.Ma" data-xac-nhan="Hủy đơn đặt hàng @Model.Ma?@(Model.TrangThai == TrangThaiDonDat.DaDuyet ? " Hàng đã giữ được trả lại tồn khả dụng." : "")">
             <button type="submit" class="btn btn-outline-danger">Hủy đơn</button>
         </form>
     }
