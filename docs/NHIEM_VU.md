@@ -109,7 +109,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: xuất 5 chai từ lô 10 thùng còn 235 chai; chuyển 2 thùng trừ đúng 48 chai; tổng biến động bằng tồn.
 - [x] Quy đổi ở kiểm kê (S7-02) — f636cdc
   - Xong khi: đếm 9 thùng 19 chai so đúng với sổ sách 235 chai.
-- [ ] Nhập tồn đầu kỳ từ Excel (FR17, S7-06)
+- [x] Nhập tồn đầu kỳ từ Excel (FR17, S7-06) — c375b6a
   - Xong khi: tệp 300 dòng sinh phiếu nhập khác loại Tồn đầu kỳ ở trạng thái Lưu tạm; quản lý kho xác nhận thì ghi đúng tồn; dòng vượt sức chứa bị báo lỗi; nhập lại cùng tệp bị chặn.
 
 ## Giai đoạn 7. Kiểm thử tổng và nghiệm thu
