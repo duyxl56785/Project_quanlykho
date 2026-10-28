@@ -47,7 +47,7 @@
 </form>
 <form id="formDuyet" method="post" asp-action="Duyet"></form>
 
-<bang-du-lieu trang="Model" thong-bao-rong="Không có đơn đặt hàng nào khớp bộ lọc.">
+<bang-du-lieu trang="Model" thong-bao-rong="Không có đơn đặt hàng nào khớp bộ lọc." xep-dong="true">
     <thead>
         <tr><th><span class="visually-hidden">Chọn duyệt</span></th><th>Mã đơn</th><th>Kho</th><th>Nơi nhận</th><th>Người tạo, ngày tạo</th><th>Hạn giao</th><th class="so">Số dòng</th><th>Trạng thái</th><th></th></tr>
     </thead>
@@ -61,13 +61,13 @@
                         <input class="form-check-input" type="checkbox" name="ma" value="@d.Ma" form="formDuyet" aria-label="Chọn duyệt @d.Ma" />
                     }
                 </td>
-                <td class="fw-semibold">@d.Ma</td>
-                <td>@d.MaKho</td>
-                <td>@d.NoiNhan</td>
-                <td>@d.NguoiTao<div class="small text-secondary">@NgayGio(d.NgayTao)</div></td>
-                <td>@Ngay(d.HanGiao)</td>
-                <td class="so">@d.SoDong</td>
-                <td><partial name="_HuyHieuTrangThai" model="d.TrangThai" /></td>
+                <td class="cot-chinh fw-semibold">@d.Ma</td>
+                <td data-nhan="Kho">@d.MaKho</td>
+                <td data-nhan="Nơi nhận">@d.NoiNhan</td>
+                <td data-nhan="Người tạo">@d.NguoiTao<div class="small text-secondary">@NgayGio(d.NgayTao)</div></td>
+                <td data-nhan="Hạn giao">@Ngay(d.HanGiao)</td>
+                <td class="so" data-nhan="Số dòng">@d.SoDong</td>
+                <td data-nhan="Trạng thái"><partial name="_HuyHieuTrangThai" model="d.TrangThai" /></td>
                 <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@d.Ma">Xem</a></td>
             </tr>
         }

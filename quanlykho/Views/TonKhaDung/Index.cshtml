@@ -30,7 +30,7 @@
     </div>
 </form>
 
-<bang-du-lieu trang="Model" thong-bao-rong="Không có hàng nào khớp tìm kiếm.">
+<bang-du-lieu trang="Model" thong-bao-rong="Không có hàng nào khớp tìm kiếm." xep-dong="true">
     <thead>
         <tr>
             <th>Hàng</th><th>Đơn vị</th>
@@ -52,17 +52,17 @@
                     <span class="fw-semibold">@d.MaBienThe</span>
                     <div class="small text-secondary">@d.TenHang@(d.MaVach is null ? "" : $" · {d.MaVach}")</div>
                 </td>
-                <td>@d.DonViTinh</td>
+                <td data-nhan="Đơn vị">@d.DonViTinh</td>
                 @foreach (var k in cot)
                 {
-                    <td class="so">@So(d.TheoKho.GetValueOrDefault(k.Ma))@if (d.DonVi.Count > 1 && d.TheoKho.GetValueOrDefault(k.Ma) >= d.DonVi[^1].HeSo)
+                    <td class="so" data-nhan="Kho @k.Ma">@So(d.TheoKho.GetValueOrDefault(k.Ma))@if (d.DonVi.Count > 1 && d.TheoKho.GetValueOrDefault(k.Ma) >= d.DonVi[^1].HeSo)
                         {
                             <div class="small text-secondary">@QuyDoiDonVi.HienThi(d.DonVi, d.TheoKho.GetValueOrDefault(k.Ma))</div>
                         }</td>
                 }
                 @if (cot.Count > 1)
                 {
-                    <td class="so tong-cong">@So(d.Tong)@if (d.DonVi.Count > 1 && d.Tong >= d.DonVi[^1].HeSo)
+                    <td class="so tong-cong" data-nhan="Tổng các kho">@So(d.Tong)@if (d.DonVi.Count > 1 && d.Tong >= d.DonVi[^1].HeSo)
                         {
                             <div class="small text-secondary fw-normal">@QuyDoiDonVi.HienThi(d.DonVi, d.Tong)</div>
                         }</td>

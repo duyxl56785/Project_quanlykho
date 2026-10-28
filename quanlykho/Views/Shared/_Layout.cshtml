@@ -55,7 +55,7 @@
                 <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#thanhMenu" aria-controls="thanhMenu" aria-label="Mở menu">☰</button>
                 <p class="tieu-de">@ViewData["Title"]</p>
                 <div class="nguoi-dung">
-                    <span>@User.Identity?.Name <span class="d-none d-md-inline">· @vaiHienTai</span></span>
+                    <span class="d-none d-sm-inline">@User.Identity?.Name <span class="d-none d-md-inline">· @vaiHienTai</span></span>
                     <form method="post" asp-controller="TaiKhoan" asp-action="DangXuat" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">Đăng xuất</button>
                     </form>

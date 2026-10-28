@@ -8,12 +8,14 @@ namespace quanlykho.Common.GiaoDien;
 /// <summary>
 /// &lt;bang-du-lieu trang="Model" thong-bao-rong="..."&gt; &lt;thead&gt;...&lt;/thead&gt;&lt;tbody&gt;...&lt;/tbody&gt; &lt;/bang-du-lieu&gt;
 /// Bọc bảng chuẩn của hệ thống: trạng thái rỗng khi không có dòng, phân trang giữ nguyên các tham số lọc trên URL.
+/// xep-dong="true": trên điện thoại mỗi dòng thành một thẻ, ô có data-nhan hiện kèm nhãn cột (CSS .bang-xep-dong).
 /// </summary>
 [HtmlTargetElement("bang-du-lieu")]
 public class BangDuLieuTagHelper(HtmlEncoder encoder) : TagHelper
 {
     public ITrangDuLieu Trang { get; set; } = null!;
     public string ThongBaoRong { get; set; } = "Chưa có dữ liệu.";
+    public bool XepDong { get; set; }
 
     [ViewContext, HtmlAttributeNotBound]
     public ViewContext ViewContext { get; set; } = null!;
@@ -21,7 +23,7 @@ public class BangDuLieuTagHelper(HtmlEncoder encoder) : TagHelper
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", "bang-du-lieu");
+        output.Attributes.SetAttribute("class", XepDong ? "bang-du-lieu bang-xep-dong" : "bang-du-lieu");
 
         if (Trang.TongSo == 0)
         {
