@@ -42,7 +42,20 @@ public class ChiTietKiemKeConfiguration : IEntityTypeConfiguration<ChiTietKiemKe
 {
     public void Configure(EntityTypeBuilder<ChiTietKiemKe> b)
     {
-        b.ToTable(t => t.Check("SoLuong", "\"SoLuongSoSach\" >= 0 AND (\"SoLuongThucTe\" IS NULL OR \"SoLuongThucTe\" >= 0)"));
+        b.ToTable(t =>
+        {
+            t.Check("SoLuong", "\"SoLuongSoSach\" >= 0 AND (\"SoLuongThucTe\" IS NULL OR \"SoLuongThucTe\" >= 0)");
+            t.ChiNhan<LoaiChenhLech>(nameof(ChiTietKiemKe.LoaiChenhLech));
+            t.Check("DaDuyet", "\"NguoiDuyet\" IS NULL OR (\"LoaiChenhLech\" IS NOT NULL AND \"KetLuan\" IS NOT NULL)");
+        });
+        b.Property(x => x.KetLuan).HasMaxLength(500);
+        b.Property(x => x.MaViTriDung).HasMaxLength(MaViTri);
+        b.Property(x => x.MaBienTheDung).HasMaxLength(Ma);
+        b.Property(x => x.NguoiDuyet).HasMaxLength(Ma);
+        b.Property(x => x.MaChungTuXuLy).HasMaxLength(100);
+        b.HasOne<ViTri>().WithMany().HasForeignKey(x => x.MaViTriDung);
+        b.HasOne<BienThe>().WithMany().HasForeignKey(x => x.MaBienTheDung);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiDuyet);
         b.HasKey(x => new { x.MaPhieu, x.STT });
         b.Property(x => x.MaPhieu).HasMaxLength(Ma);
         b.Property(x => x.MaViTri).HasMaxLength(MaViTri);

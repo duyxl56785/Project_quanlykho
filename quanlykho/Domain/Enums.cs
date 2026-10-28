@@ -40,3 +40,9 @@ public enum TrangThaiDieuChuyen { LuuTam, ChoNhapKho, NhanMotPhan, HoanThanh, Da
 public enum TrangThaiKiemKe { ChuaThucHien, DangKiemKe, HoanThanh, DaHuy }
 
 public enum PhamViKiemKe { ToanKho, ViTri, Lo }
+
+/// <summary>Sáu loại chênh lệch kiểm kê (quy tắc 10).</summary>
+public enum LoaiChenhLech { Thieu, Thua, HuHong, HetHan, SaiViTri, SaiBienThe }
+
+/// <summary>Cách xử lý phần nhận thiếu của phiếu điều chuyển.</summary>
+public enum XuLyChenhLech { NhapKhoDen, NhapLaiKhoDi, GhiGiamHaoHut }

@@ -40,4 +40,16 @@ public class ChiTietKiemKe
     public bool NgoaiDanhSach { get; set; }
     public string? NguoiDem { get; set; }
     public DateTimeOffset? ThoiDiemDem { get; set; }
+
+    // Xử lý chênh lệch: quản lý kho phân loại, ghi kết luận và duyệt; NguoiDuyet có giá trị nghĩa là đã xử lý.
+    public LoaiChenhLech? LoaiChenhLech { get; set; }
+    public string? KetLuan { get; set; }
+    /// <summary>Sai vị trí: ô hàng thực sự nằm.</summary>
+    public string? MaViTriDung { get; set; }
+    /// <summary>Sai biến thể: biến thể đúng của hàng.</summary>
+    public string? MaBienTheDung { get; set; }
+    public string? NguoiDuyet { get; set; }
+    public DateTimeOffset? ThoiDiemDuyet { get; set; }
+    /// <summary>Chứng từ sinh ra khi duyệt (phiếu nhập, phiếu xuất, mã chuyển vị trí).</summary>
+    public string? MaChungTuXuLy { get; set; }
 }

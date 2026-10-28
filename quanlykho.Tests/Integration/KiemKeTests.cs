@@ -50,7 +50,7 @@ public class KiemKeTests(CsdlFixture csdl) : IAsyncLifetime
     {
         await using var db = CsdlFixture.TaoDbContext(_chuoi);
         var h = NguoiThu.HienTai(db, ma, vai);
-        return await lam(new KiemKeService(db, h, new MaChungTu(db), new TonKhaDung(db, h, Gio), NguoiThu.NhatKy(db, h), Gio));
+        return await lam(new KiemKeService(db, h, new MaChungTu(db), new TonKhaDung(db, h, Gio), new CongGhiTon(db, h, Gio), NguoiThu.NhatKy(db, h), Gio));
     }
 
     private Task Voi(string ma, string vai, Func<KiemKeService, Task> lam) => Voi(ma, vai, async s => { await lam(s); return 0; });

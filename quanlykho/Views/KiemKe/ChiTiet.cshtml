@@ -34,7 +34,10 @@
             }
             @if (Model.ThoiDiemBatDau is not null)
             {
-                <div class="col-md-4"><div class="text-secondary small">Bắt đầu, ô đang khóa</div>@NgayGio(Model.ThoiDiemBatDau) · @Model.CacO.Count ô</div>
+                <div class="col-md-4">
+                    <div class="text-secondary small">@(dangKiem ? "Bắt đầu, ô đang khóa" : "Bắt đầu, hoàn thành")</div>
+                    @NgayGio(Model.ThoiDiemBatDau) · @(dangKiem ? $"{Model.CacO.Count} ô" : NgayGio(Model.ThoiDiemHoanThanh))
+                </div>
             }
         </div>
     </div>
@@ -83,7 +86,7 @@
             {
                 <div class="table-responsive">
                     <table class="table align-middle mb-0" id="bangDem">
-                        <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Sổ sách</th><th class="so">Thực tế</th><th class="so">Chênh lệch</th><th>Người đếm</th></tr></thead>
+                        <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Sổ sách</th><th class="so">Thực tế</th><th class="so">Chênh lệch</th><th>Người đếm</th><th>Xử lý</th></tr></thead>
                         <tbody>
                             @for (var i = 0; i < Model.Dong.Count; i++)
                             {
@@ -95,7 +98,7 @@
                                     <td>@Ngay(d.HanDung)</td>
                                     <td class="so">@So(d.SoSach) @d.DonViTinh</td>
                                     <td class="so">
-                                        @if (dem)
+                                        @if (dem && d.NguoiDuyet is null)
                                         {
                                             <input type="hidden" name="dem[@i].STT" value="@d.STT" />
                                             <input class="form-control text-end" name="dem[@i].SoLuongThucTe" type="number" min="0" step="any"
@@ -110,6 +113,13 @@
                                         @(d.ChenhLech is null ? "" : d.ChenhLech > 0 ? $"+{So(d.ChenhLech)}" : So(d.ChenhLech))
                                     </td>
                                     <td>@d.NguoiDem</td>
+                                    <td>
+                                        @if (d.Loai is { } loai)
+                                        {
+                                            <span class="fw-semibold">@KiemKeChiTiet.TenLoai(loai)</span>
+                                            <div class="small text-secondary">@d.KetLuan · @d.NguoiDuyet · @d.MaChungTuXuLy</div>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -123,9 +133,79 @@
         }
     </form>
 
-    @if (Model.CoChenhLech > 0 && dangKiem)
+    @if (Model.CoChenhLech > 0 && dangKiem && !quanLy)
     {
-        <p class="text-secondary">Dòng chênh lệch cần được phân loại và duyệt điều chỉnh (sinh chứng từ qua cổng ghi tồn) trước khi hoàn thành; không sửa thẳng số tồn.</p>
+        <p class="text-secondary">Dòng chênh lệch chờ quản lý kho phân loại và duyệt điều chỉnh; không sửa thẳng số tồn.</p>
+    }
+    @if (Model.CoChenhLech > 0 && dangKiem && quanLy)
+    {
+        var choXuLy = Model.Dong.Where(d => d.ChoXuLy).ToList();
+        <form method="post" asp-action="DuyetDieuChinh" asp-route-ma="@Model.Ma"
+              data-xac-nhan="Duyệt điều chỉnh các dòng đã chọn loại? Hệ thống sinh phiếu nhập khác, phiếu xuất khác hoặc chuyển ô qua cổng ghi tồn; không hoàn tác được.">
+            <input type="hidden" name="khoaChongLap" value="@Guid.NewGuid().ToString("N")" />
+            <div class="the">
+                <h2>Xử lý chênh lệch</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="bangXuLy">
+                        <thead><tr><th>Ô, lô, hàng</th><th class="so">Chênh lệch</th><th>Loại</th><th>Kết luận</th><th>Chi tiết</th></tr></thead>
+                        <tbody>
+                            @for (var i = 0; i < choXuLy.Count; i++)
+                            {
+                                var d = choXuLy[i];
+                                var thieu = d.ChenhLech < 0;
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="duyet[@i].STT" value="@d.STT" />
+                                        <span class="small">@d.MaViTri</span><div>@(d.MaLo ?? "—") · @d.MaBienThe</div>
+                                    </td>
+                                    <td class="so @(thieu ? "text-danger" : "text-primary") fw-semibold">@(thieu ? So(d.ChenhLech) : $"+{So(d.ChenhLech)}")</td>
+                                    <td>
+                                        <select class="form-select" name="duyet[@i].Loai" data-loai aria-label="Loại chênh lệch dòng @d.STT">
+                                            <option value="">Chọn loại</option>
+                                            @foreach (var l in thieu
+                                                ? new[] { LoaiChenhLech.Thieu, LoaiChenhLech.HuHong, LoaiChenhLech.HetHan, LoaiChenhLech.SaiViTri, LoaiChenhLech.SaiBienThe }
+                                                : new[] { LoaiChenhLech.Thua, LoaiChenhLech.SaiViTri, LoaiChenhLech.SaiBienThe })
+                                            {
+                                                <option value="@l">@KiemKeChiTiet.TenLoai(l)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="duyet[@i].KetLuan" aria-label="Kết luận dòng @d.STT" /></td>
+                                    <td>
+                                        @if (thieu)
+                                        {
+                                            <input class="form-control" name="duyet[@i].MaViTriDung" list="dsO" placeholder="Ô hàng thực sự nằm" data-chi="SaiViTri" hidden aria-label="Ô đúng dòng @d.STT" />
+                                            <input class="form-control" name="duyet[@i].MaBienTheDung" placeholder="Mã biến thể đúng" data-chi="SaiBienThe" hidden aria-label="Biến thể đúng dòng @d.STT" />
+                                            <span class="small text-secondary" data-chi="HuHong HetHan" hidden>Chuyển sang ô cách ly</span>
+                                        }
+                                        else if (d.MaLo is null)
+                                        {
+                                            <input class="form-control" name="duyet[@i].HanDung" type="date" data-chi="Thua" hidden aria-label="Hạn dùng lô mới dòng @d.STT" />
+                                        }
+                                        <span class="small text-secondary" data-chi="@(thieu ? "" : "SaiViTri SaiBienThe")" hidden>Khớp với dòng thiếu tương ứng</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <datalist id="dsO">
+                    @foreach (var o in Model.OCuaKho)
+                    {
+                        <option value="@o"></option>
+                    }
+                </datalist>
+                <p class="form-text mb-0">Thiếu: phiếu xuất khác. Thừa: phiếu nhập khác (hàng không nhãn lô tạo lô mới). Sai vị trí: chuyển hàng sang ô đúng. Hư hỏng, hết hạn: chuyển sang ô cách ly. Sai biến thể: xuất lô sai, nhập lô mới cho biến thể đúng cùng hạn dùng. Dòng thừa đối ứng của sai vị trí, sai biến thể duyệt cùng lúc với dòng thiếu.</p>
+            </div>
+            <div class="thanh-nut mb-3"><button type="submit" class="btn btn-primary flex-grow-1">Duyệt điều chỉnh</button></div>
+        </form>
+        <script>
+            (() => {
+                const bang = document.getElementById("bangXuLy");
+                const capNhat = (chon) => chon.closest("tr").querySelectorAll("[data-chi]").forEach((o) => o.hidden = !o.dataset.chi.split(" ").includes(chon.value));
+                bang.addEventListener("change", (e) => { if (e.target.matches("[data-loai]")) capNhat(e.target); });
+            })();
+        </script>
     }
 
     <div class="thanh-nut">

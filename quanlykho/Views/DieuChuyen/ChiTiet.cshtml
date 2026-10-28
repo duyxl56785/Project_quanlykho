@@ -75,7 +75,13 @@
                                 </td>
                                 @if (Model.Dong.Any(x => x.ChenhLech > 0))
                                 {
-                                    <td class="so @(d.ChenhLech > 0 ? "text-danger fw-semibold" : null)">@(d.ChenhLech > 0 ? $"−{So(d.ChenhLech)}" : "")</td>
+                                    <td class="so @(d.ChoXuLy ? "text-danger fw-semibold" : null)">
+                                    @(d.ChenhLech > 0 ? $"−{So(d.ChenhLech)}" : "")
+                                    @if (d.CachXuLy is { } cach)
+                                    {
+                                        <div class="small text-secondary">@DongDieuChuyen.TenCach(cach): @d.LyDoXuLy</div>
+                                    }
+                                </td>
                                 }
                             </tr>
                         }
@@ -98,6 +104,42 @@
             </div>
         }
     </form>
+
+    @if (quanLy && Model.TrangThai == TrangThaiDieuChuyen.NhanMotPhan)
+    {
+        <div class="the">
+            <h2>Xử lý chênh lệch</h2>
+            @foreach (var d in Model.Dong.Where(x => x.ChoXuLy))
+            {
+                <form method="post" asp-action="XuLy" asp-route-ma="@Model.Ma" class="row g-2 align-items-end mb-2"
+                      data-xac-nhan="Xử lý phần thiếu @So(d.ChenhLech) @d.TenDonVi của lô @d.MaLo? Không hoàn tác được.">
+                    <input type="hidden" name="stt" value="@d.STT" />
+                    <input type="hidden" name="khoaChongLap" value="@Guid.NewGuid().ToString("N")" />
+                    <div class="col-md-3"><div class="small text-secondary">Dòng @d.STT · @d.MaLo</div><span class="fw-semibold text-danger">Thiếu @So(d.ChenhLech) @d.TenDonVi</span></div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="cach-@d.STT">Cách xử lý</label>
+                        <select class="form-select" id="cach-@d.STT" name="cachXuLy">
+                            @if (Model.LaKhoDen)
+                            {
+                                <option value="@XuLyChenhLech.NhapKhoDen">@DongDieuChuyen.TenCach(XuLyChenhLech.NhapKhoDen)</option>
+                            }
+                            @if (Model.LaKhoDi)
+                            {
+                                <option value="@XuLyChenhLech.NhapLaiKhoDi">@DongDieuChuyen.TenCach(XuLyChenhLech.NhapLaiKhoDi)</option>
+                            }
+                            <option value="@XuLyChenhLech.GhiGiamHaoHut">@DongDieuChuyen.TenCach(XuLyChenhLech.GhiGiamHaoHut)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label bat-buoc" for="lyDo-@d.STT">Lý do</label>
+                        <input class="form-control" id="lyDo-@d.STT" name="lyDo" required placeholder="Tìm thấy trên xe, rơi vỡ dọc đường…" />
+                    </div>
+                    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Xử lý</button></div>
+                </form>
+            }
+            <p class="form-text mb-0">Nhập tại kho đến: hàng tìm thấy, cộng vào khu tiếp nhận kho đến. Nhập lại kho đi: hàng chưa rời kho đi, cộng trả đúng ô cũ. Ghi giảm hao hụt: hàng mất, đóng dòng, tổng tồn giảm đúng số thiếu.</p>
+        </div>
+    }
 
     <div class="thanh-nut">
         @if (Model.LaKhoDi && quanLy && Model.TrangThai == TrangThaiDieuChuyen.LuuTam)

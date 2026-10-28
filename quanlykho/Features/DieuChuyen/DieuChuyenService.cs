@@ -22,6 +22,7 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
     public const string LoaiXuat = "DieuChuyenXuat";
     public const string LoaiNhan = "DieuChuyenNhan";
     public const string LoaiHuy = "HuyDieuChuyen";
+    public const string LoaiXuLy = "XuLyChenhLechDieuChuyen";
 
     public async Task<TrangDuLieu<DieuChuyenDong>> DanhSachAsync(string? maKho, TrangThaiDieuChuyen? trangThai, int trang)
     {
@@ -52,7 +53,7 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
         return new DieuChuyenChiTiet(p.MaPhieu, p.MaKhoDi, tenKho[p.MaKhoDi], p.MaKhoDen, tenKho[p.MaKhoDen], p.NgayChuyen, p.PhuongTien, p.NguoiVanChuyen,
             p.LyDo, tenNguoi[p.NguoiLap], p.NgayLap, p.ThoiDiemXuat, p.NguoiNhan is null ? null : tenNguoi[p.NguoiNhan], p.ThoiDiemNhan, p.TrangThai,
             p.ChiTiet.OrderBy(c => c.STT).Select(c => new DongDieuChuyen(c.STT, c.MaLo, lo[c.MaLo].MaBienThe, DonMuaService.MoTaHang(lo[c.MaLo].Ten, lo[c.MaLo].ThuocTinh),
-                c.MaViTriDi, lo[c.MaLo].HanDung, c.TenDonVi, c.SoLuong, c.SoLuongNhan)).ToList(),
+                c.MaViTriDi, lo[c.MaLo].HanDung, c.TenDonVi, c.SoLuong, c.SoLuongNhan, c.CachXuLy, c.LyDoXuLy)).ToList(),
             kho.Contains(p.MaKhoDi), kho.Contains(p.MaKhoDen));
     }
 
@@ -173,6 +174,51 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
         if (cong.Count == 0)
             await db.SaveChangesAsync();
         else if (await congGhiTon.GhiAsync(khoaChongLap!, LoaiNhan, ma, cong) == KetQuaGhi.DaGhiTruocDo)
+            throw new XungDotException("Thao tác vừa được ghi bởi một yêu cầu khác, vui lòng tải lại trang.");
+        await tx.CommitAsync();
+        return KetQuaGhi.DaGhi;
+    }
+
+    /// <summary>
+    /// Xử lý phần nhận thiếu của một dòng (quản lý kho, có lý do): nhập tại kho đến (tìm thấy hàng, cộng vào ô tiếp nhận kho đến),
+    /// nhập lại kho đi (hàng chưa đi, cộng trả đúng ô cũ) hoặc ghi giảm hao hụt (hàng mất, chỉ đóng dòng; tồn kho đi đã trừ lúc lưu).
+    /// Mọi dòng đủ hoặc đã xử lý thì phiếu Hoàn thành.
+    /// </summary>
+    public async Task<KetQuaGhi> XuLyChenhLechAsync(string ma, XuLyChenhLechYeuCau yc, string? khoaChongLap)
+    {
+        if (nguoiDung.VaiTro is not (VaiTro.QuanTriVien or VaiTro.QuanLyKho))
+            throw new KhongCoQuyenException("Chỉ quản lý kho xử lý chênh lệch điều chuyển.");
+        KiemTraKhoa(khoaChongLap);
+        if (string.IsNullOrWhiteSpace(yc.LyDo))
+            throw new NghiepVuException("Nhập lý do (nguyên nhân) chênh lệch.");
+        await using var tx = await db.Database.BeginTransactionAsync();
+        await db.Database.ExecuteSqlAsync($"""SELECT 1 FROM "PhieuDieuChuyen" WHERE "MaPhieu" = {ma} FOR UPDATE""");
+        var p = await db.PhieuDieuChuyen.Include(x => x.ChiTiet).SingleOrDefaultAsync(x => x.MaPhieu == ma) ?? throw new NghiepVuException($"Không có phiếu điều chuyển {ma}.");
+        var c = p.ChiTiet.SingleOrDefault(x => x.STT == yc.STT) ?? throw new NghiepVuException($"Không có dòng {yc.STT}.");
+        if (c.CachXuLy is not null)
+            return await DaGhiAsync(khoaChongLap, LoaiXuLy, ma) || c.CachXuLy == XuLyChenhLech.GhiGiamHaoHut ? KetQuaGhi.DaGhiTruocDo
+                : throw new NghiepVuException($"Dòng {yc.STT} đã xử lý.");
+        if (p.TrangThai != TrangThaiDieuChuyen.NhanMotPhan || c.SoLuongNhan is null || c.SoLuongNhan >= c.SoLuong)
+            throw new NghiepVuException($"Dòng {yc.STT} không có chênh lệch chờ xử lý.");
+        var thieu = c.SoLuong - c.SoLuongNhan.Value;
+
+        await nguoiDung.DamBaoQuyenKhoAsync(yc.CachXuLy == XuLyChenhLech.NhapLaiKhoDi ? p.MaKhoDi : yc.CachXuLy == XuLyChenhLech.NhapKhoDen ? p.MaKhoDen
+            : (await nguoiDung.KhoDuocGiaoAsync()).Contains(p.MaKhoDi) ? p.MaKhoDi : p.MaKhoDen);
+        var o = yc.CachXuLy switch
+        {
+            XuLyChenhLech.NhapKhoDen => await db.ViTri.Where(v => v.MaKho == p.MaKhoDen && v.LaOMacDinh && v.LoaiKhu == LoaiKhu.TiepNhan).Select(v => v.MaViTri).SingleOrDefaultAsync()
+                ?? throw new NghiepVuException($"Kho {p.MaKhoDen} chưa có ô mặc định khu tiếp nhận."),
+            XuLyChenhLech.NhapLaiKhoDi => c.MaViTriDi,
+            _ => null,
+        };
+        (c.CachXuLy, c.LyDoXuLy, c.NguoiXuLy, c.ThoiDiemXuLy) = (yc.CachXuLy, yc.LyDo.Trim(), nguoiDung.Ma, gio.GetUtcNow());
+        if (p.ChiTiet.All(x => x.SoLuongNhan == x.SoLuong || x.CachXuLy is not null))
+            p.TrangThai = TrangThaiDieuChuyen.HoanThanh;
+        nhatKy.Ghi("XuLyChenhLechDieuChuyen", nameof(PhieuDieuChuyenEntity), ma,
+            new { c.STT, c.MaLo, thieu, cach = yc.CachXuLy.ToString(), lyDo = c.LyDoXuLy }, maKho: o is null ? p.MaKhoDi : yc.CachXuLy == XuLyChenhLech.NhapKhoDen ? p.MaKhoDen : p.MaKhoDi);
+        if (o is null)
+            await db.SaveChangesAsync();
+        else if (await congGhiTon.GhiAsync(khoaChongLap!, LoaiXuLy, ma, [new DongGhiTon(c.MaLo, o, thieu)]) == KetQuaGhi.DaGhiTruocDo)
             throw new XungDotException("Thao tác vừa được ghi bởi một yêu cầu khác, vui lòng tải lại trang.");
         await tx.CommitAsync();
         return KetQuaGhi.DaGhi;

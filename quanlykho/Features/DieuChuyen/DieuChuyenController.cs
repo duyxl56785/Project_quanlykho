@@ -66,6 +66,14 @@ public class DieuChuyenController(DieuChuyenService service, ViTriService viTri)
         return RedirectToAction(nameof(ChiTiet), new { ma });
     }
 
+    [HttpPost("{ma}/XuLy"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> XuLy(string ma, int stt, XuLyChenhLech cachXuLy, string? lyDo, string? khoaChongLap)
+    {
+        await service.XuLyChenhLechAsync(ma, new XuLyChenhLechYeuCau(stt, cachXuLy, lyDo), khoaChongLap);
+        TempData["ThongBao"] = $"Đã xử lý chênh lệch dòng {stt}: {DongDieuChuyen.TenCach(cachXuLy).ToLowerInvariant()}.";
+        return RedirectToAction(nameof(ChiTiet), new { ma });
+    }
+
     [HttpPost("{ma}/Huy"), Authorize(Roles = Vai.QuanLy)]
     public async Task<IActionResult> Huy(string ma)
     {
@@ -112,6 +120,10 @@ public class DieuChuyenApiController(DieuChuyenService service) : ControllerBase
     [HttpPost("{ma}/nhan")]
     public async Task<IActionResult> Nhan(string ma, List<DongNhanForm> body, [FromHeader(Name = "Idempotency-Key")] string? khoaChongLap) =>
         Ok(new { daGhiTruocDo = await service.NhanAsync(ma, body, khoaChongLap) == KetQuaGhi.DaGhiTruocDo });
+
+    [HttpPost("{ma}/xu-ly"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> XuLy(string ma, XuLyChenhLechYeuCau body, [FromHeader(Name = "Idempotency-Key")] string? khoaChongLap) =>
+        Ok(new { daGhiTruocDo = await service.XuLyChenhLechAsync(ma, body, khoaChongLap) == KetQuaGhi.DaGhiTruocDo });
 
     [HttpPost("{ma}/huy"), Authorize(Roles = Vai.QuanLy)]
     public async Task<IActionResult> Huy(string ma)

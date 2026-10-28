@@ -6,10 +6,21 @@ namespace quanlykho.Features.DieuChuyen;
 
 public record DieuChuyenDong(string Ma, string MaKhoDi, string MaKhoDen, DateOnly NgayChuyen, string? PhuongTien, int SoDong, TrangThaiDieuChuyen TrangThai);
 
-public record DongDieuChuyen(int STT, string MaLo, string MaBienThe, string TenHang, string MaViTriDi, DateOnly? HanDung, string TenDonVi, decimal SoLuong, decimal? SoLuongNhan)
+public record DongDieuChuyen(int STT, string MaLo, string MaBienThe, string TenHang, string MaViTriDi, DateOnly? HanDung, string TenDonVi, decimal SoLuong, decimal? SoLuongNhan,
+    XuLyChenhLech? CachXuLy, string? LyDoXuLy)
 {
     public decimal? ChenhLech => SoLuongNhan is null ? null : SoLuong - SoLuongNhan;
+    public bool ChoXuLy => ChenhLech > 0 && CachXuLy is null;
+
+    public static string TenCach(XuLyChenhLech c) => c switch
+    {
+        XuLyChenhLech.NhapKhoDen => "Nhập tại kho đến",
+        XuLyChenhLech.NhapLaiKhoDi => "Nhập lại kho đi",
+        _ => "Ghi giảm hao hụt",
+    };
 }
+
+public record XuLyChenhLechYeuCau(int STT, XuLyChenhLech CachXuLy, string? LyDo);
 
 public record DieuChuyenChiTiet(string Ma, string MaKhoDi, string TenKhoDi, string MaKhoDen, string TenKhoDen, DateOnly NgayChuyen, string? PhuongTien,
     string? NguoiVanChuyen, string? LyDo, string NguoiLap, DateTimeOffset NgayLap, DateTimeOffset? ThoiDiemXuat, string? NguoiNhan, DateTimeOffset? ThoiDiemNhan,

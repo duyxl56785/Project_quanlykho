@@ -7,18 +7,42 @@ namespace quanlykho.Features.KiemKe;
 public record KiemKeDong(string Ma, string MaKho, PhamViKiemKe PhamVi, DateOnly NgayKiem, string? MucDich, int SoDong, TrangThaiKiemKe TrangThai);
 
 public record DongKiemKe(int STT, string MaViTri, string? MaLo, string MaBienThe, string TenHang, string DonViTinh, DateOnly? HanDung,
-    decimal SoSach, decimal? ThucTe, bool NgoaiDanhSach, string? NguoiDem)
+    decimal SoSach, decimal? ThucTe, bool NgoaiDanhSach, string? NguoiDem,
+    LoaiChenhLech? Loai, string? KetLuan, string? NguoiDuyet, string? MaChungTuXuLy)
 {
     /// <summary>Thực tế − sổ sách; null khi chưa đếm.</summary>
     public decimal? ChenhLech => ThucTe - SoSach;
+    public bool ChoXuLy => ChenhLech is not null and not 0 && NguoiDuyet is null;
 }
 
 public record KiemKeChiTiet(string Ma, string MaKho, string TenKho, PhamViKiemKe PhamVi, List<string> DoiTuong, string? MucDich, DateOnly NgayKiem,
     string NguoiLap, DateTimeOffset NgayLap, DateTimeOffset? ThoiDiemBatDau, DateTimeOffset? ThoiDiemHoanThanh, TrangThaiKiemKe TrangThai,
-    List<LuaChon> ThanhVien, List<DongKiemKe> Dong, List<string> CacO, bool LaThanhVien)
+    List<LuaChon> ThanhVien, List<DongKiemKe> Dong, List<string> CacO, bool LaThanhVien, List<string> OCuaKho)
 {
     public int ChuaDem => Dong.Count(d => d.ThucTe is null);
-    public int CoChenhLech => Dong.Count(d => d.ChenhLech is not null and not 0);
+    /// <summary>Dòng chênh lệch chưa được duyệt xử lý.</summary>
+    public int CoChenhLech => Dong.Count(d => d.ChoXuLy);
+
+    public static string TenLoai(LoaiChenhLech l) => l switch
+    {
+        LoaiChenhLech.Thieu => "Thiếu",
+        LoaiChenhLech.Thua => "Thừa",
+        LoaiChenhLech.HuHong => "Hư hỏng",
+        LoaiChenhLech.HetHan => "Hết hạn",
+        LoaiChenhLech.SaiViTri => "Sai vị trí",
+        _ => "Sai biến thể",
+    };
+}
+
+/// <summary>Quản lý kho phân loại một dòng chênh lệch; HanDung dùng khi hàng thừa không có nhãn lô (tạo lô mới).</summary>
+public class DongDuyetForm
+{
+    public int STT { get; set; }
+    public LoaiChenhLech? Loai { get; set; }
+    public string? KetLuan { get; set; }
+    public string? MaViTriDung { get; set; }
+    public string? MaBienTheDung { get; set; }
+    public DateOnly? HanDung { get; set; }
 }
 
 public class KiemKeForm

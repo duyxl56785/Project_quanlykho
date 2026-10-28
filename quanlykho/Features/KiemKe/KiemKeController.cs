@@ -58,6 +58,14 @@ public class KiemKeController(KiemKeService service, ViTriService viTri) : Contr
         return RedirectToAction(nameof(ChiTiet), new { ma });
     }
 
+    [HttpPost("{ma}/DuyetDieuChinh"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> DuyetDieuChinh(string ma, List<DongDuyetForm> duyet, string? khoaChongLap)
+    {
+        await service.DuyetDieuChinhAsync(ma, duyet, khoaChongLap);
+        TempData["ThongBao"] = "Đã duyệt điều chỉnh; chứng từ đã ghi qua cổng ghi tồn.";
+        return RedirectToAction(nameof(ChiTiet), new { ma });
+    }
+
     [HttpPost("{ma}/HoanThanh"), Authorize(Roles = Vai.QuanLy)]
     public async Task<IActionResult> HoanThanh(string ma)
     {
@@ -113,6 +121,10 @@ public class KiemKeApiController(KiemKeService service) : ControllerBase
 
     [HttpPost("{ma}/them-dong")]
     public async Task<IActionResult> ThemDong(string ma, ThemDongKiemKe body) => StatusCode(201, new { stt = await service.ThemDongAsync(ma, body) });
+
+    [HttpPost("{ma}/duyet-dieu-chinh"), Authorize(Roles = Vai.QuanLy)]
+    public async Task<IActionResult> DuyetDieuChinh(string ma, List<DongDuyetForm> body, [FromHeader(Name = "Idempotency-Key")] string? khoaChongLap) =>
+        Ok(new { daGhiTruocDo = await service.DuyetDieuChinhAsync(ma, body, khoaChongLap) == Common.KetQuaGhi.DaGhiTruocDo });
 
     [HttpPost("{ma}/hoan-thanh"), Authorize(Roles = Vai.QuanLy)]
     public async Task<IActionResult> HoanThanh(string ma)
