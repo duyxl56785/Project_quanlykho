@@ -129,7 +129,8 @@ const QuanLyKho = (() => {
     });
 
     // ---------- Ô chọn đơn vị theo hàng: <script type="application/json" data-don-vi-hang> { maBienThe: [{ ten, heSo }] };
-    // trong mỗi dòng select[data-chon-hang] và select[data-don-vi] (partial _OChonDonVi); đổi hàng thì nạp lại đơn vị ----------
+    // trong mỗi dòng (tr hoặc khối [data-dong-don-vi]) có select[data-chon-hang] và select[data-don-vi] (partial _OChonDonVi);
+    // đổi hàng thì nạp lại đơn vị ----------
     const donViHang = JSON.parse(document.querySelector("[data-don-vi-hang]")?.textContent || "{}");
     function napDonVi(dong) {
         const chon = dong.querySelector("[data-don-vi]");
@@ -144,7 +145,7 @@ const QuanLyKho = (() => {
     }
     document.addEventListener("change", (e) => {
         const hang = e.target.closest("[data-chon-hang]");
-        if (hang) napDonVi(hang.closest("tr"));
+        if (hang) napDonVi(hang.closest("tr, [data-dong-don-vi]"));
     });
 
     // ---------- Phiếu có dòng hàng ----------

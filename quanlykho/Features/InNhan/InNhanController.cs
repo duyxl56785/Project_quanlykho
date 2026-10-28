@@ -28,7 +28,7 @@ public class InNhanController(ViTriService viTri, PhieuNhapService phieuNhap) : 
         if (p.TrangThai != TrangThaiPhieu.HoanTat)
             throw new NghiepVuException("Chỉ in nhãn lô của hóa đơn nhập đã xác nhận.");
         var nhan = p.Dong.SelectMany(d => Enumerable.Repeat(new NhanIn(d.MaLo, $"{d.MaBienThe} – {d.TenHang}",
-            string.Join(" · ", new[] { d.HanDung is null ? null : $"HSD {Ngay(d.HanDung)}", $"{So(d.SoLuong)} {d.TenDonVi}" }.OfType<string>())), soBan)).ToList();
+            string.Join(" · ", new[] { d.HanDung is null ? null : $"HSD {Ngay(d.HanDung)}", $"{So(d.SoLuongChinh)} {d.DonViChinh}" + (d.HeSo > 1 ? $" ({So(d.SoLuong)} {d.TenDonVi})" : "") }.OfType<string>())), soBan)).ToList();
         return View("In", new TrangNhan($"In nhãn lô – hóa đơn nhập {p.Ma}", TrangNhan.ChonKho(kho), $"/PhieuNhap/{p.Ma}", nhan));
     }
 }

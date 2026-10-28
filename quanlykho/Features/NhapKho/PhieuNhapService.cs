@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 
 namespace quanlykho.Features.NhapKho;
 
@@ -42,13 +43,13 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         var xemGia = LaQuanLy;
         var maLo = p.ChiTiet.Select(c => c.MaLo).ToList();
         var lo = await db.Lo.Where(l => maLo.Contains(l.MaLo))
-            .Select(l => new { l.MaLo, l.MaBienThe, l.HanDung, l.BienThe.SanPham.Ten, l.BienThe.ThuocTinh })
+            .Select(l => new { l.MaLo, l.MaBienThe, l.HanDung, l.BienThe.SanPham.Ten, l.BienThe.ThuocTinh, l.BienThe.SanPham.DonViTinh })
             .ToDictionaryAsync(l => l.MaLo);
         var dong = p.ChiTiet.OrderBy(c => c.STT).Select(c =>
         {
             var l = lo[c.MaLo];
             return new DongPhieuNhap(c.STT, c.MaLo, l.MaBienThe, DonMuaService.MoTaHang(l.Ten, l.ThuocTinh), c.TenDonVi, c.SoLuongGoc, l.HanDung, c.ChatLuong,
-                xemGia ? c.DonGia : null, xemGia ? c.ThanhTien : null);
+                xemGia ? c.DonGia : null, xemGia ? c.ThanhTien : null, c.HeSo, c.SoLuongThucNhan, l.DonViTinh);
         }).ToList();
 
         var tenNhaCungCap = p.MaDonMua is null ? null
@@ -122,11 +123,15 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         if (f.SoLuong <= 0)
             throw new NghiepVuException("Số thực nhận phải lớn hơn 0.");
         var maQuet = f.Ma?.Trim() ?? "";
+        var quyDoi = new QuyDoiDonVi(db);
+        // Quét mã vạch thùng thì biết luôn biến thể và đơn vị thùng.
+        var theoMaVach = await quyDoi.TraMaVachAsync(maQuet);
+        var maBienThe = theoMaVach?.MaBienThe ?? maQuet;
         var b = await db.BienThe
-            .Where(x => (x.MaBienThe == maQuet || x.MaVach == maQuet)
-                && x.TrangThai == TrangThaiSuDung.DangSuDung && x.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
+            .Where(x => x.MaBienThe == maBienThe && x.TrangThai == TrangThaiSuDung.DangSuDung && x.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
             .Select(x => new { x.MaBienThe, x.SanPham.DonViTinh, x.SanPham.TheoDoiHanDung })
             .FirstOrDefaultAsync() ?? throw new NghiepVuException($"Mã {maQuet} không khớp hàng nào đang sử dụng.");
+        var q = QuyDoiDonVi.QuyVeChinh(await quyDoi.DonViAsync(b.MaBienThe), string.IsNullOrWhiteSpace(f.TenDonVi) ? theoMaVach?.TenDonVi : f.TenDonVi, f.SoLuong, b.MaBienThe);
         if (b.TheoDoiHanDung && f.HanDung is null)
             throw new NghiepVuException($"Hàng {b.MaBienThe} theo dõi hạn dùng: nhập hạn dùng.");
 
@@ -139,9 +144,10 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
                 ?? throw new NghiepVuException($"Hàng {b.MaBienThe} không có trong đơn mua {p.MaDonMua}.");
             var n = (await donMua.SoNhanAsync(p.MaDonMua)).GetValueOrDefault(b.MaBienThe);
             var con = dongDon.SoLuongDat * dongDon.HeSo - n.DaNhan - n.DangNhan;
-            if (f.SoLuong > con)
-                throw new NghiepVuException($"Nhận vượt số chưa nhận của {b.MaBienThe}: còn {DinhDang.So(Math.Max(0, con))} {b.DonViTinh}, đang nhập {DinhDang.So(f.SoLuong)}.");
-            donGia = dongDon.DonGia;
+            if (q.SoLuong > con)
+                throw new NghiepVuException($"Nhận vượt số chưa nhận của {b.MaBienThe}: còn {DinhDang.So(Math.Max(0, con))} {b.DonViTinh}, đang nhập {DinhDang.So(q.SoLuong)} {b.DonViTinh}.");
+            // Giá trên đơn theo đơn vị của đơn; quy sang đơn vị của dòng nhận.
+            donGia = dongDon.HeSo == q.HeSo ? dongDon.DonGia : Math.Round(dongDon.DonGia / dongDon.HeSo * q.HeSo, 2);
         }
         else if (LaQuanLy && f.DonGia is not null)
             donGia = f.DonGia >= 0 ? f.DonGia.Value : throw new NghiepVuException("Đơn giá không được âm.");
@@ -155,8 +161,8 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         db.Lo.Add(lo);
         db.ChiTietPhieuNhap.Add(new ChiTietPhieuNhap
         {
-            MaPhieuNhap = ma, STT = stt, MaLo = lo.MaLo, TenDonVi = b.DonViTinh, HeSo = 1,
-            SoLuongGoc = f.SoLuong, SoLuongThucNhan = f.SoLuong, DonGia = donGia, ChatLuong = f.ChatLuong,
+            MaPhieuNhap = ma, STT = stt, MaLo = lo.MaLo, TenDonVi = q.TenDonVi, HeSo = q.HeSo,
+            SoLuongGoc = f.SoLuong, SoLuongThucNhan = q.SoLuong, DonGia = donGia, ChatLuong = f.ChatLuong,
         });
         await db.SaveChangesAsync();
         await tx.CommitAsync();
@@ -256,8 +262,14 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         var hang = await q.OrderBy(b => b.MaBienThe)
             .Select(b => new { b.MaBienThe, b.MaVach, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh, b.SanPham.TheoDoiHanDung })
             .ToListAsync();
+        var ma = hang.Select(b => b.MaBienThe).ToList();
+        var donVi = await new QuyDoiDonVi(db).BangAsync(ma);
+        var maVachDonVi = (await db.DonViQuyDoi.Where(d => ma.Contains(d.MaBienThe) && d.MaVach != null && d.TrangThai == TrangThaiSuDung.DangSuDung)
+                .Select(d => new { d.MaBienThe, d.MaVach, d.TenDonVi }).ToListAsync())
+            .ToLookup(d => d.MaBienThe);
+        Dictionary<string, string> MaVach(string m) => maVachDonVi[m].ToDictionary(d => d.MaVach!, d => d.TenDonVi);
         if (maDonMua is null)
-            return hang.Select(b => new HangNhan(b.MaBienThe, b.MaVach, DonMuaService.MoTaHang(b.Ten, b.ThuocTinh), b.DonViTinh, b.TheoDoiHanDung, null)).ToList();
+            return hang.Select(b => new HangNhan(b.MaBienThe, b.MaVach, DonMuaService.MoTaHang(b.Ten, b.ThuocTinh), b.DonViTinh, b.TheoDoiHanDung, null, donVi[b.MaBienThe], MaVach(b.MaBienThe))).ToList();
 
         var dat = await db.ChiTietDonMua.Where(c => c.MaDonMua == maDonMua).ToDictionaryAsync(c => c.MaBienThe, c => c.SoLuongDat * c.HeSo);
         var nhan = await donMua.SoNhanAsync(maDonMua);
@@ -265,7 +277,7 @@ public class PhieuNhapService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChu
         {
             var n = nhan.GetValueOrDefault(b.MaBienThe);
             return new HangNhan(b.MaBienThe, b.MaVach, DonMuaService.MoTaHang(b.Ten, b.ThuocTinh), b.DonViTinh, b.TheoDoiHanDung,
-                Math.Max(0, dat[b.MaBienThe] - n.DaNhan - n.DangNhan));
+                Math.Max(0, dat[b.MaBienThe] - n.DaNhan - n.DangNhan), donVi[b.MaBienThe], MaVach(b.MaBienThe));
         }).ToList();
     }
 

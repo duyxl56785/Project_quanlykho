@@ -39,22 +39,27 @@
     {
         <div class="the">
             <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã vạch hàng", "Quét hoặc gõ mã vạch, mã biến thể rồi Enter")' />
-            <form id="formDong" class="row g-3 mt-1" novalidate>
+            <form id="formDong" class="row g-3 mt-1" novalidate data-dong-don-vi>
                 <div class="col-12">
                     <label class="form-label bat-buoc" for="maBienThe">Hàng</label>
-                    <select class="form-select" id="maBienThe" required>
+                    <select class="form-select" id="maBienThe" required data-chon-hang>
                         <option value="">Quét mã hoặc chọn hàng</option>
                         @foreach (var h in Model.Hang)
                         {
-                            <option value="@h.MaBienThe" data-ma-vach="@h.MaVach" data-don-vi="@h.TenDonVi" data-han-dung="@(h.TheoDoiHanDung ? 1 : 0)" data-con="@h.ConNhan">
+                            <option value="@h.MaBienThe" data-ma-vach="@h.MaVach" data-dvt="@h.TenDonVi" data-han-dung="@(h.TheoDoiHanDung ? 1 : 0)" data-con="@h.ConNhan">
                                 @h.MaBienThe – @h.TenHang@(h.ConNhan is null ? "" : $" (còn {So(h.ConNhan.Value)} {h.TenDonVi})")
                             </option>
                         }
                     </select>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <label class="form-label bat-buoc" for="soLuong">Số thực nhận <span class="text-secondary" data-don-vi></span></label>
+                    <label class="form-label bat-buoc" for="soLuong">Số thực nhận</label>
                     <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" required />
+                    <div class="form-text" id="quyDoi"></div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label" for="donVi">Đơn vị</label>
+                    <partial name="_OChonDonVi" model='new OChonDonVi("donVi", null, [], "donVi")' />
                 </div>
                 <div class="col-sm-6 col-lg-3" id="khungHanDung" hidden>
                     <label class="form-label bat-buoc" for="hanDung">Hạn dùng</label>
@@ -114,7 +119,10 @@
                                 <td>@d.STT</td>
                                 <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
                                 <td>@d.MaLo</td>
-                                <td class="so">@So(d.SoLuong) @d.TenDonVi</td>
+                                <td class="so">@So(d.SoLuong) @d.TenDonVi@if (d.HeSo > 1)
+                                    {
+                                        <div class="small text-secondary">= @So(d.SoLuongChinh) @d.DonViChinh</div>
+                                    }</td>
                                 <td>@(d.HanDung?.ToString("dd/MM/yyyy"))</td>
                                 <td><partial name="_HuyHieuTrangThai" model="d.ChatLuong" /></td>
                                 @if (Model.XemGia)
@@ -186,6 +194,7 @@
 
 @if (luuTam)
 {
+    <script type="application/json" data-don-vi-hang>@Json.Serialize(Model.Hang.ToDictionary(h => h.MaBienThe, h => h.DonVi))</script>
     <script>
         (() => {
             const ma = @Json.Serialize(Model.Ma);
@@ -196,22 +205,37 @@
             const hanDung = document.getElementById("hanDung");
             const donGia = document.getElementById("donGia");
             const loi = document.getElementById("loiDong");
+            const donVi = document.getElementById("donVi");
+            const quyDoi = document.getElementById("quyDoi");
+            // Mã vạch của đơn vị quy đổi (thùng...) ra [mã biến thể, tên đơn vị].
+            const maVachDonVi = @Json.Serialize(Model.Hang.SelectMany(h => h.MaVachDonVi.Select(m => new { m.Key, Gia = new[] { h.MaBienThe, m.Value } })).ToDictionary(x => x.Key, x => x.Gia));
+            const tinhQuyDoi = () => {
+                const o = chon.selectedOptions[0];
+                const heSo = +(donVi.selectedOptions[0]?.dataset.heSo ?? 1);
+                quyDoi.textContent = o?.value && heSo > 1 && +soLuong.value > 0
+                    ? `= ${QuanLyKho.dinhDangSo.format(+soLuong.value * heSo)} ${o.dataset.dvt}` : (o?.dataset.con ? `Còn nhận ${QuanLyKho.dinhDangSo.format(+o.dataset.con)} ${o.dataset.dvt}` : "");
+            };
+            soLuong.addEventListener("input", tinhQuyDoi);
+            donVi.addEventListener("change", tinhQuyDoi);
 
             const capNhat = () => {
                 const o = chon.selectedOptions[0];
                 hanDung.required = o?.dataset.hanDung === "1";
                 document.getElementById("khungHanDung").hidden = !hanDung.required;
-                form.querySelector("[data-don-vi]").textContent = o?.dataset.donVi ? `(${o.dataset.donVi})` : "";
+                tinhQuyDoi();
             };
             chon.addEventListener("change", capNhat);
 
             oQuet.addEventListener("quet-ma", (e) => {
-                const o = [...chon.options].find((x) => x.value && (x.dataset.maVach === e.detail || x.value === e.detail));
+                const theoDonVi = maVachDonVi[e.detail];
+                const o = [...chon.options].find((x) => x.value && (x.value === theoDonVi?.[0] || x.dataset.maVach === e.detail || x.value === e.detail));
                 if (!o) return QuanLyKho.baoQuet(oQuet, `Mã ${e.detail} không có trong ${@Json.Serialize(Model.MaDonMua is null ? "danh mục hàng" : "đơn mua")}.`, false);
                 chon.value = o.value;
-                capNhat();
-                soLuong.value = o.dataset.con ?? 1;
-                QuanLyKho.baoQuet(oQuet, `${o.value}: nhập số thực nhận rồi bấm Thêm dòng.`, true);
+                chon.dispatchEvent(new Event("change", { bubbles: true }));
+                donVi.value = theoDonVi?.[1] ?? o.dataset.dvt;
+                soLuong.value = theoDonVi ? 1 : (o.dataset.con ?? 1);
+                tinhQuyDoi();
+                QuanLyKho.baoQuet(oQuet, `${o.value}${theoDonVi ? ` (${theoDonVi[1]})` : ""}: nhập số thực nhận rồi bấm Thêm dòng.`, true);
                 soLuong.focus();
                 soLuong.select();
             });
@@ -223,7 +247,7 @@
                 const kq = await QuanLyKho.goiApi(`/api/phieu-nhap/${encodeURIComponent(ma)}/dong`, {
                     method: "POST",
                     body: {
-                        ma: chon.value, soLuong: +soLuong.value, hanDung: hanDung.value || null,
+                        ma: chon.value, tenDonVi: donVi.value || null, soLuong: +soLuong.value, hanDung: hanDung.value || null,
                         chatLuong: form.querySelector('[name="chatLuong"]:checked').value,
                         donGia: donGia?.value ? +donGia.value : null,
                     },
