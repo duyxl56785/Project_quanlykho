@@ -53,7 +53,7 @@ public class DeXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
     {
         await nguoiDung.DamBaoQuyenKhoAsync(maKho);
         var homNay = tonKhaDung.HomNay;
-        var tu = BatDauNgay(homNay.AddDays(1 - DeXuatNhapBoSung.SoNgayLichSuToiDa));
+        var tu = DinhDang.BatDauNgay(homNay.AddDays(1 - DeXuatNhapBoSung.SoNgayLichSuToiDa));
 
         var xuat = await (from p in db.PhieuXuat
                           where p.MaKho == maKho && p.LoaiPhieu == LoaiPhieuXuat.XuatBan && p.TrangThai == TrangThaiPhieu.HoanTat
@@ -180,10 +180,4 @@ public class DeXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
                               select (decimal?)ct.SoLuongThucNhan).Sum() ?? 0,
                 }).ToListAsync())
         .GroupBy(x => x.MaBienThe).ToDictionary(g => g.Key, g => g.Sum(x => Math.Max(0, x.Dat - x.DaNhan)));
-
-    private static DateTimeOffset BatDauNgay(DateOnly ngay)
-    {
-        var gioDau = ngay.ToDateTime(TimeOnly.MinValue);
-        return new DateTimeOffset(gioDau, DinhDang.GioVietNam.GetUtcOffset(gioDau)).ToUniversalTime();
-    }
 }
