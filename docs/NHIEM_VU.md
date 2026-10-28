@@ -92,7 +92,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: 4 thẻ (dưới tối thiểu, vượt tối đa, sắp hết hạn, quá hạn); số ngày cảnh báo cấu hình được; số liệu khớp báo cáo.
 - [x] Báo cáo tồn tổng hợp và chi tiết, thẻ kho (FR14, S6-04) — 70441c7
   - Xong khi: theo kho, lô, hạn dùng, vị trí; tồn từng kho cạnh tồn tổng hợp; hàng đang vận chuyển tách riêng; báo cáo khớp thẻ kho.
-- [ ] Nhật ký thao tác (FR18, NFR03, S6-05)
+- [x] Nhật ký thao tác (FR18, NFR03, S6-05) — 9ffd736
   - Xong khi: ghi duyệt, hủy, hoàn thành, điều chỉnh tồn, phân quyền, khóa tài khoản; chỉ thêm, không sửa, không xóa; tra theo người, kho, loại, thời gian.
 - [ ] Nhập Excel danh mục (FR17, S6-07)
   - Xong khi: tệp mẫu `.xlsx` 300 dòng có 5 dòng lỗi thì báo đúng số dòng và không ghi gì; sửa xong nhập lại thì ghi đủ; nhập lại cùng tệp bị chặn bằng mã băm.
