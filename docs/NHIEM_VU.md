@@ -90,7 +90,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: chuyển một lô từ ô này sang ô khác, kiểm sức chứa ô đến, không đổi tồn kho, ghi sổ biến động.
 - [x] Cảnh báo và màn hình Tổng quan (FR13, S6-04) — 3473e2c
   - Xong khi: 4 thẻ (dưới tối thiểu, vượt tối đa, sắp hết hạn, quá hạn); số ngày cảnh báo cấu hình được; số liệu khớp báo cáo.
-- [ ] Báo cáo tồn tổng hợp và chi tiết, thẻ kho (FR14, S6-04)
+- [x] Báo cáo tồn tổng hợp và chi tiết, thẻ kho (FR14, S6-04) — 70441c7
   - Xong khi: theo kho, lô, hạn dùng, vị trí; tồn từng kho cạnh tồn tổng hợp; hàng đang vận chuyển tách riêng; báo cáo khớp thẻ kho.
 - [ ] Nhật ký thao tác (FR18, NFR03, S6-05)
   - Xong khi: ghi duyệt, hủy, hoàn thành, điều chỉnh tồn, phân quyền, khóa tài khoản; chỉ thêm, không sửa, không xóa; tra theo người, kho, loại, thời gian.
