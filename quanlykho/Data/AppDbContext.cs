@@ -60,6 +60,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         c.Properties<TrangThaiDieuChuyen>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<TrangThaiKiemKe>().HaveConversion<string>().HaveMaxLength(20);
         c.Properties<PhamViKiemKe>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<LoaiChenhLech>().HaveConversion<string>().HaveMaxLength(20);
+        c.Properties<XuLyChenhLech>().HaveConversion<string>().HaveMaxLength(20);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

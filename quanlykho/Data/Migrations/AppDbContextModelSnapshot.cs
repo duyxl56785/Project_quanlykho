@@ -110,8 +110,16 @@ namespace quanlykho.Data.Migrations
                     b.Property<int>("STT")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CachXuLy")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<int>("HeSo")
                         .HasColumnType("integer");
+
+                    b.Property<string>("LyDoXuLy")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("MaLo")
                         .IsRequired()
@@ -122,6 +130,10 @@ namespace quanlykho.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
+
+                    b.Property<string>("NguoiXuLy")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<decimal>("SoLuong")
                         .HasPrecision(14, 3)
@@ -140,19 +152,28 @@ namespace quanlykho.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<DateTimeOffset?>("ThoiDiemXuLy")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("MaPhieu", "STT");
 
                     b.HasIndex("MaLo");
 
                     b.HasIndex("MaViTriDi");
 
+                    b.HasIndex("NguoiXuLy");
+
                     b.ToTable("ChiTietDieuChuyen", t =>
                         {
+                            t.HasCheckConstraint("CK_ChiTietDieuChuyen_CachXuLy", "\"CachXuLy\" IN ('NhapKhoDen', 'NhapLaiKhoDi', 'GhiGiamHaoHut')");
+
                             t.HasCheckConstraint("CK_ChiTietDieuChuyen_HeSo", "\"HeSo\" >= 1");
 
                             t.HasCheckConstraint("CK_ChiTietDieuChuyen_SoLuong", "\"SoLuong\" > 0 AND \"SoLuong\" = \"SoLuongGoc\" * \"HeSo\"");
 
                             t.HasCheckConstraint("CK_ChiTietDieuChuyen_SoLuongNhan", "\"SoLuongNhan\" IS NULL OR (\"SoLuongNhan\" >= 0 AND \"SoLuongNhan\" <= \"SoLuong\")");
+
+                            t.HasCheckConstraint("CK_ChiTietDieuChuyen_XuLy", "\"CachXuLy\" IS NULL OR (\"LyDoXuLy\" IS NOT NULL AND \"NguoiXuLy\" IS NOT NULL)");
                         });
                 });
 
@@ -245,10 +266,26 @@ namespace quanlykho.Data.Migrations
                     b.Property<int>("STT")
                         .HasColumnType("integer");
 
+                    b.Property<string>("KetLuan")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("LoaiChenhLech")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("MaBienThe")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaBienTheDung")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("MaChungTuXuLy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("MaLo")
                         .HasMaxLength(20)
@@ -259,10 +296,18 @@ namespace quanlykho.Data.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<string>("MaViTriDung")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
                     b.Property<bool>("NgoaiDanhSach")
                         .HasColumnType("boolean");
 
                     b.Property<string>("NguoiDem")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("NguoiDuyet")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
@@ -277,15 +322,24 @@ namespace quanlykho.Data.Migrations
                     b.Property<DateTimeOffset?>("ThoiDiemDem")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("ThoiDiemDuyet")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("MaPhieu", "STT");
 
                     b.HasIndex("MaBienThe");
+
+                    b.HasIndex("MaBienTheDung");
 
                     b.HasIndex("MaLo");
 
                     b.HasIndex("MaViTri");
 
+                    b.HasIndex("MaViTriDung");
+
                     b.HasIndex("NguoiDem");
+
+                    b.HasIndex("NguoiDuyet");
 
                     b.HasIndex("MaPhieu", "MaViTri", "MaLo", "MaBienThe")
                         .IsUnique();
@@ -294,6 +348,10 @@ namespace quanlykho.Data.Migrations
 
                     b.ToTable("ChiTietKiemKe", t =>
                         {
+                            t.HasCheckConstraint("CK_ChiTietKiemKe_DaDuyet", "\"NguoiDuyet\" IS NULL OR (\"LoaiChenhLech\" IS NOT NULL AND \"KetLuan\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_ChiTietKiemKe_LoaiChenhLech", "\"LoaiChenhLech\" IN ('Thieu', 'Thua', 'HuHong', 'HetHan', 'SaiViTri', 'SaiBienThe')");
+
                             t.HasCheckConstraint("CK_ChiTietKiemKe_SoLuong", "\"SoLuongSoSach\" >= 0 AND (\"SoLuongThucTe\" IS NULL OR \"SoLuongThucTe\" >= 0)");
                         });
                 });
@@ -383,8 +441,7 @@ namespace quanlykho.Data.Migrations
 
                     b.HasKey("MaPhieuNhap", "STT");
 
-                    b.HasIndex("MaLo")
-                        .IsUnique();
+                    b.HasIndex("MaLo");
 
                     b.ToTable("ChiTietPhieuNhap", t =>
                         {
@@ -1734,6 +1791,11 @@ namespace quanlykho.Data.Migrations
                         .HasForeignKey("MaViTriDi")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("quanlykho.Domain.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiXuLy")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("quanlykho.Domain.ChiTietDonDat", b =>
@@ -1774,6 +1836,11 @@ namespace quanlykho.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("quanlykho.Domain.BienThe", null)
+                        .WithMany()
+                        .HasForeignKey("MaBienTheDung")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("quanlykho.Domain.Lo", null)
                         .WithMany()
                         .HasForeignKey("MaLo")
@@ -1791,9 +1858,19 @@ namespace quanlykho.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("quanlykho.Domain.ViTri", null)
+                        .WithMany()
+                        .HasForeignKey("MaViTriDung")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("quanlykho.Domain.NguoiDung", null)
                         .WithMany()
                         .HasForeignKey("NguoiDem")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("quanlykho.Domain.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiDuyet")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

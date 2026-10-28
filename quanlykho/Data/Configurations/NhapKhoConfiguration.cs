@@ -87,7 +87,8 @@ public class ChiTietPhieuNhapConfiguration : IEntityTypeConfiguration<ChiTietPhi
         b.HasKey(x => new { x.MaPhieuNhap, x.STT });
         b.Property(x => x.MaPhieuNhap).HasMaxLength(Ma);
         b.Property(x => x.MaLo).HasMaxLength(Ma);
-        b.HasIndex(x => x.MaLo).IsUnique();
+        // Không unique: phiếu nhập khác điều chỉnh kiểm kê (hàng thừa) cộng vào lô đã có.
+        b.HasIndex(x => x.MaLo);
         b.Property(x => x.TenDonVi).HasMaxLength(Ma);
         b.Property(x => x.SoLuongGoc).SoLuong();
         b.Property(x => x.SoLuongThucNhan).SoLuong();

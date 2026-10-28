@@ -42,7 +42,12 @@ public class ChiTietDieuChuyenConfiguration : IEntityTypeConfiguration<ChiTietDi
             t.Check("HeSo", "\"HeSo\" >= 1");
             t.Check("SoLuong", "\"SoLuong\" > 0 AND \"SoLuong\" = \"SoLuongGoc\" * \"HeSo\"");
             t.Check("SoLuongNhan", "\"SoLuongNhan\" IS NULL OR (\"SoLuongNhan\" >= 0 AND \"SoLuongNhan\" <= \"SoLuong\")");
+            t.ChiNhan<XuLyChenhLech>(nameof(ChiTietDieuChuyen.CachXuLy));
+            t.Check("XuLy", "\"CachXuLy\" IS NULL OR (\"LyDoXuLy\" IS NOT NULL AND \"NguoiXuLy\" IS NOT NULL)");
         });
+        b.Property(x => x.LyDoXuLy).HasMaxLength(500);
+        b.Property(x => x.NguoiXuLy).HasMaxLength(Ma);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiXuLy);
         b.HasKey(x => new { x.MaPhieu, x.STT });
         b.Property(x => x.MaPhieu).HasMaxLength(Ma);
         b.Property(x => x.MaLo).HasMaxLength(Ma);

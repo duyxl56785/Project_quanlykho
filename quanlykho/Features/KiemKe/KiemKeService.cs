@@ -16,8 +16,11 @@ namespace quanlykho.Features.KiemKe;
 /// Kiểm kê (mục 2.4, Hình 2.8, quy tắc 10): bắt đầu thì khóa ô trong phạm vi và chốt sổ sách; thành viên đếm, hệ thống tính chênh lệch.
 /// Không sửa thẳng tồn: chênh lệch được phân loại và xử lý bằng chứng từ ở bước duyệt điều chỉnh.
 /// </summary>
-public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungTu maChungTu, TonKhaDung tonKhaDung, GhiNhatKy nhatKy, TimeProvider gio)
+public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungTu maChungTu, TonKhaDung tonKhaDung, CongGhiTon congGhiTon,
+    GhiNhatKy nhatKy, TimeProvider gio)
 {
+    public const string LoaiChuyen = "ChuyenTrongKho";
+
     public async Task<TrangDuLieu<KiemKeDong>> DanhSachAsync(string? maKho, TrangThaiKiemKe? trangThai, int trang)
     {
         var kho = await nguoiDung.KhoDuocGiaoAsync();
@@ -38,16 +41,19 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             .Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.SanPham.DonViTinh }).ToDictionaryAsync(b => b.MaBienThe);
         var maLo = p.ChiTiet.Where(c => c.MaLo != null).Select(c => c.MaLo!).Distinct().ToList();
         var han = await db.Lo.Where(l => maLo.Contains(l.MaLo)).ToDictionaryAsync(l => l.MaLo, l => l.HanDung);
-        var maNguoi = p.ThanhVien.Select(t => t.MaNguoiDung).Append(p.NguoiLap).Concat(p.ChiTiet.Where(c => c.NguoiDem != null).Select(c => c.NguoiDem!)).Distinct().ToList();
+        var maNguoi = p.ThanhVien.Select(t => t.MaNguoiDung).Append(p.NguoiLap)
+            .Concat(p.ChiTiet.SelectMany(c => new[] { c.NguoiDem, c.NguoiDuyet }).OfType<string>()).Distinct().ToList();
         var ten = await db.NguoiDung.Where(n => maNguoi.Contains(n.MaNguoiDung)).ToDictionaryAsync(n => n.MaNguoiDung, n => n.Ten);
         return new KiemKeChiTiet(p.MaPhieu, p.MaKho, await db.ViTri.Where(v => v.MaViTri == p.MaKho).Select(v => v.Ten).SingleAsync(), p.PhamVi, p.DoiTuong,
             p.MucDich, p.NgayKiem, ten[p.NguoiLap], p.NgayLap, p.ThoiDiemBatDau, p.ThoiDiemHoanThanh, p.TrangThai,
             p.ThanhVien.Select(t => new LuaChon(t.MaNguoiDung, ten[t.MaNguoiDung])).OrderBy(t => t.Ma).ToList(),
             p.ChiTiet.OrderBy(c => c.MaViTri, StringComparer.Ordinal).ThenBy(c => c.STT).Select(c => new DongKiemKe(c.STT, c.MaViTri, c.MaLo, c.MaBienThe,
                 DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh), hang[c.MaBienThe].DonViTinh,
-                c.MaLo is null ? null : han[c.MaLo], c.SoLuongSoSach, c.SoLuongThucTe, c.NgoaiDanhSach, c.NguoiDem is null ? null : ten[c.NguoiDem])).ToList(),
+                c.MaLo is null ? null : han[c.MaLo], c.SoLuongSoSach, c.SoLuongThucTe, c.NgoaiDanhSach, c.NguoiDem is null ? null : ten[c.NguoiDem],
+                c.LoaiChenhLech, c.KetLuan, c.NguoiDuyet is null ? null : ten[c.NguoiDuyet], c.MaChungTuXuLy)).ToList(),
             await db.ViTri.Where(v => v.MaPhieuKiemKe == ma).OrderBy(v => v.MaViTri).Select(v => v.MaViTri).ToListAsync(),
-            p.ThanhVien.Any(t => t.MaNguoiDung == nguoiDung.Ma));
+            p.ThanhVien.Any(t => t.MaNguoiDung == nguoiDung.Ma),
+            await db.ViTri.Where(v => v.MaKho == p.MaKho && v.Cap == CapViTri.CapCuoi).OrderBy(v => v.MaViTri).Select(v => v.MaViTri).ToListAsync());
     }
 
     public async Task<KiemKeForm> NapFormAsync(KiemKeForm form)
@@ -163,6 +169,8 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
                 throw new NghiepVuException($"Dòng {d.STT}: số đếm không được âm.");
             if (c.SoLuongThucTe == d.SoLuongThucTe)
                 continue;
+            if (c.NguoiDuyet is not null)
+                throw new NghiepVuException($"Dòng {d.STT} đã duyệt điều chỉnh, không sửa số đếm.");
             (c.SoLuongThucTe, c.NguoiDem, c.ThoiDiemDem) = (d.SoLuongThucTe, nguoiDung.Ma, gio.GetUtcNow());
         }
         await db.SaveChangesAsync();
@@ -207,15 +215,178 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var chuaDem = p.ChiTiet.Count(c => c.SoLuongThucTe is null);
         if (chuaDem > 0)
             throw new NghiepVuException($"Còn {chuaDem} dòng chưa đếm.");
-        var lech = p.ChiTiet.Count(c => c.SoLuongThucTe != c.SoLuongSoSach);
+        var lech = p.ChiTiet.Count(ChoXuLy);
         if (lech > 0)
             throw new NghiepVuException($"Còn {lech} dòng chênh lệch; phân loại và duyệt điều chỉnh trước khi hoàn thành.");
-        await MoKhoaAsync(ma);
-        p.TrangThai = TrangThaiKiemKe.HoanThanh;
-        p.ThoiDiemHoanThanh = gio.GetUtcNow();
-        nhatKy.Ghi("HoanThanhKiemKe", nameof(PhieuKiemKe), ma, maKho: p.MaKho);
+        await KetThucAsync(p);
         await db.SaveChangesAsync();
         await tx.CommitAsync();
+    }
+
+    /// <summary>
+    /// Quản lý kho phân loại, ghi kết luận và duyệt các dòng chênh lệch; một transaction sinh chứng từ qua cổng ghi tồn
+    /// (ô đang khóa chỉ cho chính phiếu này ghi): thiếu thành phiếu xuất khác, thừa thành phiếu nhập khác, sai vị trí chuyển ô,
+    /// hư hỏng và hết hạn chuyển sang ô cách ly, sai biến thể xuất lô sai rồi nhập lô mới cho biến thể đúng (cùng hạn dùng).
+    /// Dòng thừa đối ứng của sai vị trí, sai biến thể không sinh chứng từ riêng nhưng phải khớp số với dòng thiếu tương ứng.
+    /// Xử lý hết thì hoàn thành và mở khóa ô.
+    /// </summary>
+    public async Task<KetQuaGhi> DuyetDieuChinhAsync(string ma, IReadOnlyCollection<DongDuyetForm> duyet, string? khoaChongLap)
+    {
+        if (nguoiDung.VaiTro is not (VaiTro.QuanTriVien or VaiTro.QuanLyKho))
+            throw new KhongCoQuyenException("Chỉ quản lý kho duyệt điều chỉnh tồn.");
+        if (string.IsNullOrWhiteSpace(khoaChongLap) || khoaChongLap.Length > 48)
+            throw new NghiepVuException("Thiếu khóa chống ghi lặp (tối đa 48 ký tự).");
+        await using var tx = await db.Database.BeginTransactionAsync();
+        var p = await KhoaPhieuAsync(ma);
+        if (await db.SoBienDong.AnyAsync(s => s.MaKhoaChongLap.StartsWith(khoaChongLap + "-")))
+            return KetQuaGhi.DaGhiTruocDo;
+        if (p.TrangThai != TrangThaiKiemKe.DangKiemKe)
+            throw new NghiepVuException("Phiếu không ở trạng thái Đang kiểm kê.");
+
+        var dong = p.ChiTiet.ToDictionary(c => c.STT);
+        var chon = new List<(ChiTietKiemKe C, DongDuyetForm D, decimal Lech)>();
+        foreach (var d in duyet.Where(d => d.Loai is not null))
+        {
+            var c = dong.GetValueOrDefault(d.STT) ?? throw new NghiepVuException($"Không có dòng {d.STT}.");
+            if (!ChoXuLy(c))
+                throw new NghiepVuException($"Dòng {d.STT} không có chênh lệch chờ xử lý.");
+            if (string.IsNullOrWhiteSpace(d.KetLuan))
+                throw new NghiepVuException($"Dòng {d.STT}: ghi kết luận (lý do) chênh lệch.");
+            var lech = c.SoLuongThucTe!.Value - c.SoLuongSoSach;
+            var hopLe = d.Loai switch
+            {
+                LoaiChenhLech.Thieu or LoaiChenhLech.HuHong or LoaiChenhLech.HetHan => lech < 0,
+                LoaiChenhLech.Thua => lech > 0,
+                _ => true,
+            };
+            if (!hopLe)
+                throw new NghiepVuException($"Dòng {d.STT}: loại {KiemKeChiTiet.TenLoai(d.Loai!.Value)} không hợp với chênh lệch {So(lech)}.");
+            chon.Add((c, d, lech));
+        }
+        if (chon.Count == 0)
+            throw new NghiepVuException("Chọn loại chênh lệch cho ít nhất một dòng.");
+
+        var oKho = await db.ViTri.Where(v => v.MaKho == p.MaKho && v.Cap == CapViTri.CapCuoi)
+            .Select(v => new { v.MaViTri, v.LoaiKhu, v.LaOMacDinh }).ToDictionaryAsync(v => v.MaViTri);
+        foreach (var (c, d, lech) in chon.Where(x => x.Lech < 0 && x.D.Loai == LoaiChenhLech.SaiViTri))
+        {
+            d.MaViTriDung = d.MaViTriDung?.Trim();
+            if (string.IsNullOrEmpty(d.MaViTriDung) || !oKho.ContainsKey(d.MaViTriDung) || d.MaViTriDung == c.MaViTri)
+                throw new NghiepVuException($"Dòng {c.STT}: chọn ô (cấp 7) của kho {p.MaKho} nơi hàng thực sự nằm.");
+        }
+        foreach (var (c, d, lech) in chon.Where(x => x.Lech < 0 && x.D.Loai == LoaiChenhLech.SaiBienThe))
+        {
+            d.MaBienTheDung = d.MaBienTheDung?.Trim();
+            if (string.IsNullOrEmpty(d.MaBienTheDung) || d.MaBienTheDung == c.MaBienThe || !await db.BienThe.AnyAsync(b => b.MaBienThe == d.MaBienTheDung))
+                throw new NghiepVuException($"Dòng {c.STT}: nhập mã biến thể đúng (khác {c.MaBienThe}).");
+        }
+        // Dòng thừa đối ứng: hàng xuất hiện ở ô khác hoặc là biến thể khác, đã được dòng thiếu tương ứng chuyển, nhập đủ.
+        foreach (var (c, d, lech) in chon.Where(x => x.Lech > 0 && x.D.Loai is LoaiChenhLech.SaiViTri or LoaiChenhLech.SaiBienThe))
+        {
+            var doiUng = d.Loai == LoaiChenhLech.SaiViTri
+                ? chon.Where(x => x.Lech < 0 && x.D.Loai == LoaiChenhLech.SaiViTri && c.MaLo != null && x.C.MaLo == c.MaLo && x.D.MaViTriDung == c.MaViTri)
+                : chon.Where(x => x.Lech < 0 && x.D.Loai == LoaiChenhLech.SaiBienThe && x.D.MaBienTheDung == c.MaBienThe && x.C.MaViTri == c.MaViTri);
+            if (-doiUng.Sum(x => x.Lech) != lech)
+                throw new NghiepVuException($"Dòng {c.STT}: hàng thừa {So(lech)} phải khớp với dòng thiếu {(d.Loai == LoaiChenhLech.SaiViTri ? "chuyển về ô này" : "khai sai biến thể ở ô này")} được duyệt cùng lúc.");
+        }
+
+        var thoiDiem = gio.GetUtcNow();
+        var luuY = $"Điều chỉnh kiểm kê {ma}";
+        var lo = await db.Lo.Where(l => p.ChiTiet.Select(c => c.MaLo).Contains(l.MaLo)).ToDictionaryAsync(l => l.MaLo);
+        var maHang = chon.Select(x => x.C.MaBienThe).Concat(chon.Select(x => x.D.MaBienTheDung).OfType<string>()).Distinct().ToList();
+        var hang = await db.BienThe.Where(b => maHang.Contains(b.MaBienThe))
+            .Select(b => new { b.MaBienThe, b.SanPham.DonViTinh, b.SanPham.TheoDoiHanDung }).ToDictionaryAsync(b => b.MaBienThe);
+        var chungTu = chon.ToDictionary(x => x.C.STT, _ => new List<string>());
+
+        var xuat = chon.Where(x => x.D.Loai is LoaiChenhLech.Thieu || (x.D.Loai == LoaiChenhLech.SaiBienThe && x.Lech < 0)).ToList();
+        if (xuat.Count > 0)
+        {
+            var px = new PhieuXuat
+            {
+                MaPhieuXuat = await maChungTu.TaoAsync("PX"), LoaiPhieu = LoaiPhieuXuat.XuatKhac, MaKho = p.MaKho, NguoiLap = nguoiDung.Ma,
+                NguoiXacNhan = nguoiDung.Ma, NgayXuat = thoiDiem, TrangThai = TrangThaiPhieu.HoanTat, LyDo = luuY,
+                ChiTiet = xuat.Select((x, i) => new ChiTietPhieuXuat
+                {
+                    STT = i + 1, MaLo = x.C.MaLo!, MaViTri = x.C.MaViTri, TenDonVi = hang[x.C.MaBienThe].DonViTinh, HeSo = 1,
+                    SoLuongGoc = -x.Lech, SoLuong = -x.Lech,
+                }).ToList(),
+            };
+            db.PhieuXuat.Add(px);
+            await congGhiTon.GhiAsync(khoaChongLap + "-X", PhieuXuatService.LoaiChungTu, px.MaPhieuXuat,
+                px.ChiTiet.Select(c => new DongGhiTon(c.MaLo, c.MaViTri, -c.SoLuong)).ToList(), maPhieuKiemKe: ma);
+            xuat.ForEach(x => chungTu[x.C.STT].Add(px.MaPhieuXuat));
+        }
+
+        var nhap = chon.Where(x => x.D.Loai is LoaiChenhLech.Thua || (x.D.Loai == LoaiChenhLech.SaiBienThe && x.Lech < 0)).ToList();
+        if (nhap.Count > 0)
+        {
+            var dongNhap = new List<(int Stt, string MaLo, string MaViTri, string BienThe, decimal SoLuong)>();
+            foreach (var (c, d, lech) in nhap)
+            {
+                if (d.Loai == LoaiChenhLech.Thua && c.MaLo is not null)
+                {
+                    dongNhap.Add((c.STT, c.MaLo, c.MaViTri, c.MaBienThe, lech));
+                    continue;
+                }
+                var bienThe = d.Loai == LoaiChenhLech.Thua ? c.MaBienThe : d.MaBienTheDung!;
+                var hanDung = d.Loai == LoaiChenhLech.Thua ? d.HanDung : lo[c.MaLo!].HanDung;
+                if (hang[bienThe].TheoDoiHanDung && hanDung is null)
+                    throw new NghiepVuException($"Dòng {c.STT}: {bienThe} theo dõi hạn dùng, nhập hạn dùng cho lô mới.");
+                var moi = new Lo { MaLo = await maChungTu.TaoAsync("L"), MaBienThe = bienThe, HanDung = hanDung, NgayNhap = thoiDiem };
+                db.Lo.Add(moi);
+                dongNhap.Add((c.STT, moi.MaLo, c.MaViTri, bienThe, Math.Abs(lech)));
+            }
+            var pn = new PhieuNhap
+            {
+                MaPhieuNhap = await maChungTu.TaoAsync("PN"), LoaiPhieu = LoaiPhieuNhap.NhapKhac, MaKho = p.MaKho, NguoiLap = nguoiDung.Ma,
+                NguoiXacNhan = nguoiDung.Ma, NgayNhap = thoiDiem, TrangThai = TrangThaiPhieu.HoanTat, GhiChu = luuY,
+                ChiTiet = dongNhap.Select((x, i) => new ChiTietPhieuNhap
+                {
+                    STT = i + 1, MaLo = x.MaLo, TenDonVi = hang[x.BienThe].DonViTinh, HeSo = 1, SoLuongGoc = x.SoLuong, SoLuongThucNhan = x.SoLuong,
+                    DonGia = 0, ChatLuong = ChatLuong.Dat,
+                }).ToList(),
+            };
+            db.PhieuNhap.Add(pn);
+            // Cổng chèn dòng TonKho bằng SQL nên lô mới phải có trong CSDL trước.
+            await db.SaveChangesAsync();
+            await congGhiTon.GhiAsync(khoaChongLap + "-N", PhieuNhapService.LoaiChungTu, pn.MaPhieuNhap,
+                dongNhap.Select(x => new DongGhiTon(x.MaLo, x.MaViTri, x.SoLuong)).ToList(), maPhieuKiemKe: ma);
+            dongNhap.ForEach(x => chungTu[x.Stt].Add(pn.MaPhieuNhap));
+        }
+
+        var cachLy = oKho.Values.Where(v => v.LaOMacDinh && v.LoaiKhu == LoaiKhu.CachLy).Select(v => v.MaViTri).SingleOrDefault();
+        foreach (var (c, d, lech) in chon.Where(x => x.Lech < 0 && x.D.Loai is LoaiChenhLech.SaiViTri or LoaiChenhLech.HuHong or LoaiChenhLech.HetHan))
+        {
+            var den = d.Loai == LoaiChenhLech.SaiViTri ? d.MaViTriDung!
+                : cachLy ?? throw new NghiepVuException($"Kho {p.MaKho} chưa có ô mặc định khu cách ly.");
+            var cv = new ChuyenViTri
+            {
+                MaChuyen = await maChungTu.TaoAsync("CV"), Loai = LoaiChuyenViTri.ChuyenTrongKho, MaKho = p.MaKho, MaLo = c.MaLo!,
+                MaViTriDi = c.MaViTri, MaViTriDen = den, SoLuong = -lech, ThoiDiem = thoiDiem, NguoiThucHien = nguoiDung.Ma,
+            };
+            db.ChuyenViTri.Add(cv);
+            await congGhiTon.GhiAsync($"{khoaChongLap}-C{c.STT}", LoaiChuyen, cv.MaChuyen,
+                [new DongGhiTon(c.MaLo!, c.MaViTri, lech), new DongGhiTon(c.MaLo!, den, -lech)], maPhieuKiemKe: ma);
+            chungTu[c.STT].Add(cv.MaChuyen);
+        }
+
+        foreach (var (c, d, _) in chon)
+        {
+            c.LoaiChenhLech = d.Loai;
+            c.KetLuan = d.KetLuan!.Trim();
+            c.MaViTriDung = d.Loai == LoaiChenhLech.SaiViTri ? d.MaViTriDung : null;
+            c.MaBienTheDung = d.Loai == LoaiChenhLech.SaiBienThe ? d.MaBienTheDung : null;
+            c.NguoiDuyet = nguoiDung.Ma;
+            c.ThoiDiemDuyet = thoiDiem;
+            c.MaChungTuXuLy = chungTu[c.STT].Count == 0 ? "Đối ứng" : string.Join(", ", chungTu[c.STT].Distinct());
+        }
+        nhatKy.Ghi("DuyetDieuChinhKiemKe", nameof(PhieuKiemKe), ma,
+            chon.Select(x => new { x.C.STT, loai = x.D.Loai.ToString(), chenhLech = x.Lech, ketLuan = x.D.KetLuan, chungTu = x.C.MaChungTuXuLy }), maKho: p.MaKho);
+        if (p.ChiTiet.All(c => c.SoLuongThucTe is not null && !ChoXuLy(c)))
+            await KetThucAsync(p);
+        await db.SaveChangesAsync();
+        await tx.CommitAsync();
+        return KetQuaGhi.DaGhi;
     }
 
     public async Task HuyAsync(string ma)
@@ -224,6 +395,8 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var p = await KhoaPhieuAsync(ma);
         if (p.TrangThai is not (TrangThaiKiemKe.ChuaThucHien or TrangThaiKiemKe.DangKiemKe))
             throw new NghiepVuException("Phiếu đã kết thúc.");
+        if (p.ChiTiet.Any(c => c.NguoiDuyet is not null))
+            throw new NghiepVuException("Phiếu đã có dòng được duyệt điều chỉnh tồn; xử lý nốt các dòng còn lại để hoàn thành, không hủy.");
         await MoKhoaAsync(ma);
         p.TrangThai = TrangThaiKiemKe.DaHuy;
         nhatKy.Ghi("HuyKiemKe", nameof(PhieuKiemKe), ma, maKho: p.MaKho);
@@ -249,6 +422,16 @@ public class KiemKeService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
                 .Select(v => v.MaViTri).ToListAsync(),
             _ => await o.Select(v => v.MaViTri).ToListAsync(),
         };
+    }
+
+    private static bool ChoXuLy(ChiTietKiemKe c) => c.SoLuongThucTe is not null && c.SoLuongThucTe != c.SoLuongSoSach && c.NguoiDuyet is null;
+
+    private async Task KetThucAsync(PhieuKiemKe p)
+    {
+        await MoKhoaAsync(p.MaPhieu);
+        p.TrangThai = TrangThaiKiemKe.HoanThanh;
+        p.ThoiDiemHoanThanh = gio.GetUtcNow();
+        nhatKy.Ghi("HoanThanhKiemKe", nameof(PhieuKiemKe), p.MaPhieu, maKho: p.MaKho);
     }
 
     private Task<int> MoKhoaAsync(string ma) =>

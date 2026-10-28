@@ -72,7 +72,7 @@ public class DieuChuyenTests(CsdlFixture csdl) : IAsyncLifetime
         await using var db = CsdlFixture.TaoDbContext(_chuoi);
         var ton = await db.TonKho.Join(db.ViTri, t => t.MaViTri, v => v.MaViTri, (t, v) => new { v.MaKho, t.SoLuong })
             .GroupBy(x => x.MaKho).ToDictionaryAsync(g => g.Key, g => g.Sum(x => x.SoLuong));
-        var vanChuyen = await db.ChiTietDieuChuyen
+        var vanChuyen = await db.ChiTietDieuChuyen.Where(c => c.CachXuLy == null)
             .Join(db.PhieuDieuChuyen.Where(p => p.TrangThai == TrangThaiDieuChuyen.ChoNhapKho || p.TrangThai == TrangThaiDieuChuyen.NhanMotPhan),
                 c => c.MaPhieu, p => p.MaPhieu, (c, p) => c.SoLuong - (c.SoLuongNhan ?? 0))
             .SumAsync();

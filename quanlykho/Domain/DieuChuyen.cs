@@ -33,4 +33,8 @@ public class ChiTietDieuChuyen
     public decimal SoLuong { get; set; }
     /// <summary>Null khi chưa nhận; nhỏ hơn SoLuong là chênh lệch chờ xử lý.</summary>
     public decimal? SoLuongNhan { get; set; }
+    public XuLyChenhLech? CachXuLy { get; set; }
+    public string? LyDoXuLy { get; set; }
+    public string? NguoiXuLy { get; set; }
+    public DateTimeOffset? ThoiDiemXuLy { get; set; }
 }
