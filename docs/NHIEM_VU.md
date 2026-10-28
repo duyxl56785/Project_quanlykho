@@ -94,7 +94,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: theo kho, lô, hạn dùng, vị trí; tồn từng kho cạnh tồn tổng hợp; hàng đang vận chuyển tách riêng; báo cáo khớp thẻ kho.
 - [x] Nhật ký thao tác (FR18, NFR03, S6-05) — 9ffd736
   - Xong khi: ghi duyệt, hủy, hoàn thành, điều chỉnh tồn, phân quyền, khóa tài khoản; chỉ thêm, không sửa, không xóa; tra theo người, kho, loại, thời gian.
-- [ ] Nhập Excel danh mục (FR17, S6-07)
+- [x] Nhập Excel danh mục (FR17, S6-07) — 4014fd3
   - Xong khi: tệp mẫu `.xlsx` 300 dòng có 5 dòng lỗi thì báo đúng số dòng và không ghi gì; sửa xong nhập lại thì ghi đủ; nhập lại cùng tệp bị chặn bằng mã băm.
 
 ## Giai đoạn 6. Quy đổi đơn vị và tồn đầu kỳ
