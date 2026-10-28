@@ -1,0 +1,50 @@
+@using quanlykho.Features.XuatKho
+@model TrangDuLieu<LenhXuatDong>
+@{
+    ViewData["Title"] = "Lệnh xuất";
+    dynamic loc = ViewData["Loc"]!;
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+}
+
+<div class="tieu-de-trang"><h1>Lệnh xuất</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = kho })
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiLenhXuat>())
+            {
+                <option value="@t" selected="@(t == (TrangThaiLenhXuat?)loc.trangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có lệnh xuất nào. Lệnh được lập từ đơn đặt hàng đã duyệt.">
+    <thead>
+        <tr><th>Mã lệnh</th><th>Đơn đặt</th><th>Kho</th><th>Thủ kho</th><th>Ngày lập</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@l.Ma</td>
+                <td>@l.MaDonDat</td>
+                <td>@l.MaKho</td>
+                <td>@l.NguoiThucHien</td>
+                <td>@NgayGio(l.NgayLap)</td>
+                <td><partial name="_HuyHieuTrangThai" model="l.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@l.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

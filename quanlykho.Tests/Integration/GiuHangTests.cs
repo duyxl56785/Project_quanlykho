@@ -96,7 +96,7 @@ public class GiuHangTests(CsdlFixture csdl) : IAsyncLifetime
         Assert.Equal(6, d.Dong.Single(x => x.MaBienThe == "AOTHUN-01").KhaDung);
 
         await using var db = CsdlFixture.TaoDbContext(_chuoi);
-        Assert.Equal(2, await db.LichSuGoiY.CountAsync(x => x.MaChungTu == ma && x.ChapNhan == true));
+        Assert.Equal(2, await db.LichSuGoiY.CountAsync(x => x.MaChungTu == ma && x.ChapNhan == null));
         Assert.True(await db.NhatKy.AnyAsync(n => n.LoaiThaoTac == "DuyetDonDat" && n.MaDoiTuong == ma));
         await Assert.ThrowsAsync<NghiepVuException>(() => Giu(s => s.DuyetAsync([ma])));
     }

@@ -26,6 +26,10 @@
         </div>
         <div class="col-md-4"><div class="text-secondary small">Người tạo, ngày tạo</div>@Model.NguoiTao · @NgayGio(Model.NgayTao)</div>
         <div class="col-md-4"><div class="text-secondary small">Hạn giao</div>@(Model.HanGiao is null ? "Không đặt" : Ngay(Model.HanGiao))</div>
+        @if (Model.MaLenh is not null)
+        {
+            <div class="col-md-4"><div class="text-secondary small">Lệnh xuất</div><a asp-controller="LenhXuat" asp-action="ChiTiet" asp-route-ma="@Model.MaLenh">@Model.MaLenh</a></div>
+        }
         @if (!string.IsNullOrEmpty(Model.GhiChu))
         {
             <div class="col-md-8"><div class="text-secondary small">Ghi chú</div>@Model.GhiChu</div>
@@ -102,6 +106,21 @@
         <form method="post" asp-action="Duyet" data-xac-nhan="Duyệt đơn @Model.Ma và giữ hàng theo lô, ô do G1 chọn?">
             <input type="hidden" name="ma" value="@Model.Ma" />
             <button type="submit" class="btn btn-primary">Duyệt và giữ hàng</button>
+        </form>
+    }
+    @if (quanLy && Model.TrangThai == TrangThaiDonDat.DaDuyet && ViewData["ThuKho"] is List<LuaChon> thuKho)
+    {
+        <form class="d-flex gap-2" method="post" asp-controller="LenhXuat" asp-action="Them">
+            <input type="hidden" name="maDonDat" value="@Model.Ma" />
+            <label class="visually-hidden" for="nguoiThucHien">Thủ kho thực hiện</label>
+            <select class="form-select" id="nguoiThucHien" name="nguoiThucHien" required>
+                <option value="">Chọn thủ kho</option>
+                @foreach (var t in thuKho)
+                {
+                    <option value="@t.Ma">@t.Ten</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-primary text-nowrap">Lập lệnh xuất</button>
         </form>
     }
     @if (quanLy && Model.TrangThai == TrangThaiDonDat.DaDuyet)

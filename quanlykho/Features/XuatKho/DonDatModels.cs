@@ -12,7 +12,7 @@ public record DongDonDat(string MaBienThe, string TenHang, string TenDonVi, int 
 }
 
 public record DonDatChiTiet(string Ma, string MaKho, string TenKho, string MaNoiNhan, string TenNoiNhan, string? DiaChiNhan, string MaNguoiTao, string NguoiTao,
-    DateTimeOffset NgayTao, DateOnly? HanGiao, TrangThaiDonDat TrangThai, string? GhiChu, List<DongDonDat> Dong, List<HangDaGiu> DaGiu)
+    DateTimeOffset NgayTao, DateOnly? HanGiao, TrangThaiDonDat TrangThai, string? GhiChu, List<DongDonDat> Dong, List<HangDaGiu> DaGiu, string? MaLenh)
 {
     public bool SuaDuoc => TrangThai is TrangThaiDonDat.Nhap or TrangThaiDonDat.ChoDuyet;
 }

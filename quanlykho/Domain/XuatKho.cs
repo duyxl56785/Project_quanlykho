@@ -61,3 +61,74 @@ public class GiuHang
     public DateTimeOffset ThoiDiem { get; set; }
     public string NguoiGiu { get; set; } = "";
 }
+
+/// <summary>Lệnh xuất kho: một đơn đặt một lệnh, giao cho một thủ kho của kho xuất.</summary>
+public class LenhXuat
+{
+    public string MaLenh { get; set; } = "";
+    public string MaDonDat { get; set; } = "";
+    public string MaKho { get; set; } = "";
+    public string NguoiLap { get; set; } = "";
+    public DateTimeOffset NgayLap { get; set; }
+    public string NguoiThucHien { get; set; } = "";
+    public string? NguoiKiemTra { get; set; }
+    public string? GhiChuKiemTra { get; set; }
+    public TrangThaiLenhXuat TrangThai { get; set; }
+    public List<ChiTietLenhXuat> ChiTiet { get; set; } = [];
+}
+
+public class ChiTietLenhXuat
+{
+    public string MaLenh { get; set; } = "";
+    public string MaBienThe { get; set; } = "";
+    public string TenDonVi { get; set; } = "";
+    public int HeSo { get; set; } = 1;
+    /// <summary>Theo đơn vị đã chọn.</summary>
+    public decimal SoLuongGoc { get; set; }
+    /// <summary>Theo đơn vị tính chính = SoLuongGoc × HeSo.</summary>
+    public decimal SoLuongYeuCau { get; set; }
+}
+
+/// <summary>Một lần thủ kho lấy hàng: lô nào, ở ô nào, bao nhiêu (đơn vị tính chính).</summary>
+public class DongLayHang
+{
+    public long MaDong { get; set; }
+    public string MaLenh { get; set; } = "";
+    public string MaBienThe { get; set; } = "";
+    public string MaLo { get; set; } = "";
+    public string MaViTri { get; set; } = "";
+    public decimal SoLuong { get; set; }
+    /// <summary>Phần lấy ngoài số đã giữ, được giữ thêm lúc lấy; xóa dòng thì bỏ giữ phần này.</summary>
+    public decimal SoLuongGiuThem { get; set; }
+    public string NguoiLay { get; set; } = "";
+    public DateTimeOffset ThoiDiem { get; set; }
+}
+
+/// <summary>Phiếu xuất ghi sổ: xuất bán (sinh khi xác nhận lệnh), xuất khác, trả nhà cung cấp; chỉ Hoàn tất mới ghi tồn.</summary>
+public class PhieuXuat
+{
+    public string MaPhieuXuat { get; set; } = "";
+    public LoaiPhieuXuat LoaiPhieu { get; set; }
+    public string? MaLenh { get; set; }
+    public string MaKho { get; set; } = "";
+    public string? MaNhaCungCap { get; set; }
+    public string NguoiLap { get; set; } = "";
+    public string? NguoiXacNhan { get; set; }
+    public DateTimeOffset NgayXuat { get; set; }
+    public TrangThaiPhieu TrangThai { get; set; }
+    public string? LyDo { get; set; }
+    public List<ChiTietPhieuXuat> ChiTiet { get; set; } = [];
+}
+
+public class ChiTietPhieuXuat
+{
+    public string MaPhieuXuat { get; set; } = "";
+    public int STT { get; set; }
+    public string MaLo { get; set; } = "";
+    public string MaViTri { get; set; } = "";
+    public string TenDonVi { get; set; } = "";
+    public int HeSo { get; set; } = 1;
+    public decimal SoLuongGoc { get; set; }
+    /// <summary>Theo đơn vị tính chính.</summary>
+    public decimal SoLuong { get; set; }
+}

@@ -45,7 +45,8 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             d.MaNoiNhan, noiNhan.Ten, noiNhan.DiaChi, d.NguoiTao, await db.NguoiDung.Where(n => n.MaNguoiDung == d.NguoiTao).Select(n => n.Ten).SingleAsync(),
             d.NgayTao, d.HanGiao, d.TrangThai, d.GhiChu,
             d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonDat(c.MaBienThe, DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh),
-                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe))).ToList(), daGiu);
+                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe))).ToList(), daGiu,
+            await db.LenhXuat.Where(l => l.MaDonDat == ma).Select(l => l.MaLenh).FirstOrDefaultAsync());
     }
 
     public async Task<DonDatForm> NapDanhSachAsync(DonDatForm form)
