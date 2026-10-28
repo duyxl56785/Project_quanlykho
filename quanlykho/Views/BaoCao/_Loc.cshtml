@@ -1,0 +1,80 @@
+@using quanlykho.Features.BaoCao
+@using quanlykho.Features.Kho
+@model ThanhLocBaoCao
+@{
+    var l = Model.Loc;
+}
+
+<form class="thanh-loc" method="get">
+    @if (Model.TheKho)
+    {
+        <div>
+            <label class="form-label bat-buoc" for="MaBienThe">Mã biến thể</label>
+            <input class="form-control" id="MaBienThe" name="MaBienThe" value="@l.MaBienThe" placeholder="Ví dụ SUATUOI-01" required />
+        </div>
+        <div>
+            <label class="form-label" for="MaLo">Lô</label>
+            <input class="form-control" id="MaLo" name="MaLo" value="@l.MaLo" />
+        </div>
+    }
+    else
+    {
+        <div>
+            <label class="form-label" for="TuKhoa">Sản phẩm</label>
+            <input class="form-control" id="TuKhoa" name="TuKhoa" value="@l.TuKhoa" placeholder="Mã, tên hoặc mã vạch" />
+        </div>
+        <div>
+            <label class="form-label" for="MaNhom">Nhóm hàng</label>
+            <select class="form-select" id="MaNhom" name="MaNhom">
+                <option value="">Tất cả</option>
+                @foreach (var n in Model.DanhSach.Nhom)
+                {
+                    <option value="@n.Ma" selected="@(n.Ma == l.MaNhom)">@n.Ten</option>
+                }
+            </select>
+        </div>
+    }
+    <div>
+        <label class="form-label" for="MaKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = l.MaKho, coTatCa = true, danhSach = Model.DanhSach.Kho })
+    </div>
+    @if (Model.Khu || Model.TheKho)
+    {
+        <div>
+            <label class="form-label" for="MaViTri">Vị trí (mã hoặc đầu mã)</label>
+            <input class="form-control" id="MaViTri" name="MaViTri" value="@l.MaViTri" placeholder="K01-TA01-TG01-P02" />
+        </div>
+    }
+    @if (Model.Khu)
+    {
+        <div>
+            <label class="form-label" for="LoaiKhu">Khu</label>
+            <select class="form-select" id="LoaiKhu" name="LoaiKhu">
+                <option value="">Tất cả</option>
+                @foreach (var k in Enum.GetValues<LoaiKhu>())
+                {
+                    <option value="@k" selected="@(k == l.LoaiKhu)">@CapViTri.TenKhu(k)</option>
+                }
+            </select>
+        </div>
+    }
+    @if (Model.Ky)
+    {
+        <div>
+            <label class="form-label" for="TuNgay">Từ ngày</label>
+            <input class="form-control" id="TuNgay" name="TuNgay" type="date" value="@l.TuNgay?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div>
+            <label class="form-label" for="DenNgay">Đến ngày</label>
+            <input class="form-control" id="DenNgay" name="DenNgay" type="date" value="@l.DenNgay?.ToString("yyyy-MM-dd")" />
+        </div>
+    }
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Xem</button>
+        <a class="btn btn-outline-secondary" href="?">Bỏ lọc</a>
+    </div>
+</form>
+@if (l.Loi is not null)
+{
+    <div class="alert alert-danger" role="alert">@l.Loi</div>
+}

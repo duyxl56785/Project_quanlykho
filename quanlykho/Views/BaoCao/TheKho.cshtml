@@ -1,0 +1,57 @@
+@using quanlykho.Features.BaoCao
+@model TheKhoTrang
+@{
+    ViewData["Title"] = "Thẻ kho";
+}
+
+<div class="tieu-de-trang"><h1>Thẻ kho</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+<partial name="_Loc" model="new ThanhLocBaoCao(Model.Loc, Model.DanhSach, Ky: true, TheKho: true)" />
+
+@if (Model.TenHang is null)
+{
+    if (Model.Loc.Loi is null)
+    {
+        <partial name="_TrangRong" model='"Nhập mã biến thể để xem thẻ kho."' />
+    }
+}
+else
+{
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-6"><div class="text-secondary small">Hàng</div><span class="fw-semibold">@Model.Loc.MaBienThe</span> · @Model.TenHang (@Model.DonViTinh)</div>
+            <div class="col-6 col-md-3"><div class="text-secondary small">Tồn đầu kỳ</div><span class="fw-semibold">@So(Model.DauKy)</span></div>
+            <div class="col-6 col-md-3"><div class="text-secondary small">Tồn cuối kỳ</div><span class="fw-semibold">@So(Model.CuoiKy)</span></div>
+        </div>
+    </div>
+    <bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có biến động nào trong kỳ.">
+        <thead>
+            <tr><th>Thời điểm</th><th>Chứng từ</th><th>Lô</th><th>Ô</th><th class="so">Nhập</th><th class="so">Xuất</th><th class="so">Tồn</th><th>Người thực hiện</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.Trang.Muc)
+            {
+                <tr>
+                    <td>@NgayGio(d.ThoiDiem)</td>
+                    <td>
+                        @if (TenChungTu.Url(d.MaChungTu) is { } url)
+                        {
+                            <a href="@url">@d.MaChungTu</a>
+                        }
+                        else
+                        {
+                            @d.MaChungTu
+                        }
+                        <div class="small text-secondary">@TenChungTu.Loai(d.LoaiChungTu)</div>
+                    </td>
+                    <td>@d.MaLo</td>
+                    <td class="small">@d.MaViTri</td>
+                    <td class="so">@(d.Nhap > 0 ? So(d.Nhap) : "")</td>
+                    <td class="so">@(d.Xuat > 0 ? So(d.Xuat) : "")</td>
+                    <td class="so tong-cong">@So(d.Ton)</td>
+                    <td>@d.NguoiThucHien</td>
+                </tr>
+            }
+        </tbody>
+    </bang-du-lieu>
+    <p class="text-secondary mt-2">Mỗi dòng là một dòng sổ biến động. Không chọn kho là gộp mọi kho được giao; chuyển vị trí trong kho hiện cặp xuất, nhập cùng chứng từ.</p>
+}

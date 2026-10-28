@@ -48,7 +48,7 @@ Trên máy này PostgreSQL chạy ở cổng 5434 (5432 và 5433 bị dự án k
 - Controller, Service theo mảng; không có tầng Repository riêng, `AppDbContext` đóng vai trò đó. Luật nghiệp vụ chỉ nằm trong Service.
 - Lỗi: Service ném `NghiepVuException` (422), `XungDotException` (409), `KhongCoQuyenException` (403) trong `Common/Loi`. `XuLyLoiFilter` đổi thành JSON `{ loi, chiTiet }` cho controller `[ApiController]`, hoặc hiện lại view của action với lỗi trong ModelState cho trang. Không bắt các lỗi này trong controller.
 - Đăng nhập, phân quyền (`Common/PhanQuyen`): mặc định mọi trang cần đăng nhập, trang công khai đánh `[AllowAnonymous]`. Giới hạn vai bằng `[Authorize(Roles = Vai.QuanTri)]` (hằng trong `Vai`: `QuanTri`, `QuanLyKho`, `ThuKho`, `BanHang`, `QuanLy`, `TrongKho`). Service nhận mã kho phải gọi `NguoiDungHienTai.DamBaoQuyenKhoAsync(maKho)`; danh sách lọc theo `KhoDuocGiaoAsync()`. Đổi vai, kho, mật khẩu hoặc khóa tài khoản phải đổi `SecurityStamp` (phiên cũ hết hiệu lực ở request kế tiếp).
-- Nhật ký: gọi `GhiNhatKy.Ghi(...)` trước `SaveChangesAsync` của thao tác để lưu cùng transaction.
+- Nhật ký: gọi `GhiNhatKy.Ghi(...)` trước `SaveChangesAsync` của thao tác để lưu cùng transaction. Trigger CSDL (migration `NhatKyChiThem`) chặn UPDATE, DELETE, TRUNCATE trên `NhatKy` và `SoBienDong`. Tra cứu ở `/NhatKy` (quản trị viên).
 - Ghi tồn: Service mở `db.Database.BeginTransactionAsync()`, đổi trạng thái chứng từ, gọi `CongGhiTon.GhiAsync(khoaChongLap, loaiChungTu, maChungTu, dong)` (dòng `DongGhiTon(MaLo, MaViTri, SoLuongThayDoi)`, chỉ ô cấp 7), rồi commit. Trả `KetQuaGhi.DaGhiTruocDo` khi khóa đã ghi thì không làm gì thêm. Giữ hàng: `GiuAsync`, `BoGiuAsync`. Không tự sửa `TonKho` ở chỗ khác.
 - Văn hóa request cố định là InvariantCulture (số `1.5`, ngày `yyyy-MM-dd` khi gửi lên); hiển thị kiểu Việt Nam do helper định dạng làm. Giờ hiện tại lấy qua `TimeProvider` (đã đăng ký), không gọi `DateTime.Now`.
 - API REST trả JSON dưới `/api/...`, đường dẫn tiếng Việt không dấu dạng kebab: `/api/don-mua`, `/api/phieu-nhap/{ma}/xac-nhan`, `/api/vi-tri/o-phu-hop`, `/api/xep-hang`.
@@ -110,7 +110,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 ## Gợi ý AI (mục 1.2.3)
 
 - **G1, lấy hàng:** tổng lấy bằng q, không vượt tồn khả dụng từng (lô, vị trí); chỉ lô đạt chất lượng, chưa hết hạn, ở khu lưu trữ, không bị khóa kiểm kê. Ưu tiên FEFO (có hạn dùng) hoặc FIFO, rồi ít kệ phải ghé, sắp thứ tự ghé theo mã vị trí. Trả (lô, vị trí, số lượng, thứ tự) kèm lý do.
-- **G3, nhập bổ sung (theo từng kho):** chỉ đề xuất khi d > 0 và có ít nhất 14 ngày lịch sử xuất. Đề xuất khi `A ≤ d × L + m`, số lượng `ceil(d × (L + 30) − A − số đang chờ nhập)`, số nguyên dương. A: tồn khả dụng, d: nhu cầu trung bình/ngày từ phiếu xuất hoàn tất, L: thời gian chờ hàng, m: tồn tối thiểu. Hằng số 30 cấu hình được.
+- **G3, nhập bổ sung (theo từng kho):** chỉ đề xuất khi d > 0 và có ít nhất 14 ngày lịch sử xuất. Đề xuất khi `A ≤ d × L + m`, số lượng `ceil(d × (L + 30) − A − số đang chờ nhập)`, số nguyên dương. A: tồn khả dụng, d: nhu cầu trung bình/ngày từ phiếu xuất hoàn tất, L: thời gian chờ hàng, m: tồn tối thiểu. Hằng số 30 cấu hình được (`G3:SoNgayDuHang`, mặc định 30). Màn hình `/DeXuatNhap`, API `/api/de-xuat-nhap`.
 
 ## Giao diện
 
@@ -123,6 +123,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
   - View Component `OChonKho`: `@await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = ... })`.
   - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
   - Gọi API từ JS: `QuanLyKho.goiApi(url, { method, body, khoaChongLap })` tự gửi `Idempotency-Key` và token chống CSRF, trả `{ ok, status, duLieu, loi }`.
+  - Nội dung nạp sau: `<div data-tai="/url">` nhận HTML (partial view) kèm trạng thái đang tải và lỗi; nút `data-tai-lai` nạp lại phần trong cùng `.the`, `data-tai-lai-tat-ca` nạp lại hết (mẫu: `Views/TongQuan`).
   - Menu bên trái khai ở `Common/GiaoDien/Menu.cs`; làm xong màn hình nào thì điền `Url` cho mục đó.
 - Form cần dữ liệu phụ (danh sách để chọn) đặt dữ liệu đó trong model (ví dụ `DanhSachNhom`, `DanhSachKho`) và nạp trước khi gọi Service, để `XuLyLoiFilter` hiện lại view khi lỗi nghiệp vụ. View phải trùng tên action (`Them`, `Sua`), phần chung đặt ở partial `_Form`.
 - Mọi POST, PUT, DELETE (cả API) kiểm token chống CSRF (`AutoValidateAntiforgeryToken`); form Razor có sẵn token, fetch dùng `goiApi`.

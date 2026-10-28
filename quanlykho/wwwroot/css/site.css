@@ -101,7 +101,9 @@ main { padding: var(--khoang-4) var(--khoang-3); }
   background: var(--mau-be-mat); border: 1px solid var(--mau-vien); border-radius: var(--bo-goc);
   padding: var(--khoang-3); margin-bottom: var(--khoang-3);
 }
-.the > h2 { font-size: 1.0625rem; font-weight: 600; margin-bottom: var(--khoang-3); }
+.the > h2, .the h2 { font-size: 1.0625rem; font-weight: 600; margin-bottom: var(--khoang-3); }
+/* Danh sách dài trong thẻ (Tổng quan): cuộn bên trong thẻ. */
+.the-cuon { max-height: 22rem; overflow-y: auto; }
 
 /* ---------- Bảng dữ liệu, lọc, phân trang ---------- */
 

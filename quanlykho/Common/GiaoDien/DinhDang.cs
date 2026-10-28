@@ -25,4 +25,11 @@ public static class DinhDang
 
     public static string NgayGio(DateTimeOffset? thoiDiem) =>
         thoiDiem is null ? "" : TimeZoneInfo.ConvertTime(thoiDiem.Value, GioVietNam).ToString("dd/MM/yyyy HH:mm", VanHoa);
+
+    /// <summary>Đầu ngày (00:00 giờ Việt Nam) dưới dạng UTC, để lọc cột timestamptz theo ngày.</summary>
+    public static DateTimeOffset BatDauNgay(DateOnly ngay)
+    {
+        var gioDau = ngay.ToDateTime(TimeOnly.MinValue);
+        return new DateTimeOffset(gioDau, GioVietNam.GetUtcOffset(gioDau)).ToUniversalTime();
+    }
 }

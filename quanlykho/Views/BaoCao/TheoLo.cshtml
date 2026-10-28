@@ -1,0 +1,36 @@
+@using quanlykho.Features.BaoCao
+@model BaoCaoTrang<DongTheoLo>
+@{
+    ViewData["Title"] = "Tồn theo lô và hạn dùng";
+}
+
+<div class="tieu-de-trang"><h1>Tồn theo lô và hạn dùng</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+<partial name="_Loc" model="new ThanhLocBaoCao(Model.Loc, Model.DanhSach)" />
+
+<bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có lô nào còn tồn (chỉ xét hàng có theo dõi hạn dùng).">
+    <thead>
+        <tr>
+            <th>Lô</th><th>Hàng</th><th>Kho</th><th>Hạn dùng</th><th>Ngày nhập</th>
+            <th class="so">Tồn</th><th class="so">Đã giữ</th><th class="so">Khả dụng</th><th class="so">Tiếp nhận</th><th class="so">Cách ly</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Trang.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@d.MaLo</td>
+                <td>@d.MaBienThe<div class="small text-secondary">@d.TenHang (@d.DonViTinh)</div></td>
+                <td>@d.MaKho</td>
+                <td>@Ngay(d.HanDung)</td>
+                <td>@Ngay(d.NgayNhap)</td>
+                <td class="so">@So(d.SoLuong)</td>
+                <td class="so">@So(d.DaGiu)</td>
+                <td class="so">@So(d.KhaDung)</td>
+                <td class="so">@So(d.TiepNhan)</td>
+                <td class="so">@So(d.CachLy)</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="TheKho" asp-route-MaBienThe="@d.MaBienThe" asp-route-MaKho="@d.MaKho" asp-route-MaLo="@d.MaLo">Thẻ kho</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>
+<p class="text-secondary mt-2">Lô đã hết hạn có khả dụng bằng 0. Tồn gồm mọi khu; phần còn lại ngoài khả dụng, tiếp nhận, cách ly là hàng đã giữ, ở khu xuất hoặc ở ô đang kiểm kê.</p>

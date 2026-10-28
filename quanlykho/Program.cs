@@ -13,6 +13,7 @@ using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Data.Seed;
 using quanlykho.Domain;
+using quanlykho.Features.BaoCao;
 using quanlykho.Features.DanhMuc;
 using quanlykho.Features.DieuChuyen;
 using quanlykho.Features.KiemKe;
@@ -20,8 +21,11 @@ using quanlykho.Features.Kho;
 using quanlykho.Features.XepHang;
 using quanlykho.Features.XuatKho;
 using quanlykho.Features.NhapKho;
+using quanlykho.Features.NhatKyThaoTac;
+using quanlykho.Features.NhapExcel;
 using quanlykho.Features.QuanLyNguoiDung;
 using quanlykho.Features.TaiKhoan;
+using quanlykho.Features.TongQuan;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +54,7 @@ builder.Services.AddScoped<DanhMucService>();
 builder.Services.AddScoped<DoiTacService>();
 builder.Services.AddScoped<DonMuaService>();
 builder.Services.AddScoped<PhieuNhapService>();
+builder.Services.AddScoped<DeXuatService>();
 builder.Services.AddScoped<ViTriService>();
 builder.Services.AddScoped<KhoService>();
 builder.Services.AddScoped<OPhuHop>();
@@ -62,6 +67,10 @@ builder.Services.AddScoped<LenhXuatService>();
 builder.Services.AddScoped<PhieuXuatService>();
 builder.Services.AddScoped<DieuChuyenService>();
 builder.Services.AddScoped<KiemKeService>();
+builder.Services.AddScoped<TongQuanService>();
+builder.Services.AddScoped<BaoCaoService>();
+builder.Services.AddScoped<NhatKyService>();
+builder.Services.AddScoped<NhapExcelService>();
 
 var app = builder.Build();
 

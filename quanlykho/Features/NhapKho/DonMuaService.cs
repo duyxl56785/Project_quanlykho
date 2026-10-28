@@ -23,12 +23,12 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         if (!string.IsNullOrWhiteSpace(maKho)) q = q.Where(d => d.MaKho == maKho);
         if (tuNgay is not null)
         {
-            var tu = BatDauNgay(tuNgay.Value);
+            var tu = DinhDang.BatDauNgay(tuNgay.Value);
             q = q.Where(d => d.NgayTao >= tu);
         }
         if (denNgay is not null)
         {
-            var den = BatDauNgay(denNgay.Value.AddDays(1));
+            var den = DinhDang.BatDauNgay(denNgay.Value.AddDays(1));
             q = q.Where(d => d.NgayTao < den);
         }
         if (trangThai is not null) q = q.Where(d => d.TrangThai == trangThai);
@@ -134,8 +134,19 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         if (d.TrangThai != TrangThaiDonMua.Nhap)
             throw new NghiepVuException("Chỉ xác nhận được đơn nháp.");
         d.TrangThai = TrangThaiDonMua.ChuaThucHien;
+        await PhanHoiGoiYAsync(ma, true);
         nhatKy.Ghi("XacNhanDonMua", nameof(DonMua), ma, maKho: d.MaKho);
         await db.SaveChangesAsync();
+    }
+
+    /// <summary>Đơn nháp từ G3: xác nhận là chấp nhận đề xuất, hủy nháp là không chấp nhận.</summary>
+    private async Task PhanHoiGoiYAsync(string ma, bool chapNhan)
+    {
+        foreach (var ls in await db.LichSuGoiY.Where(l => l.Loai == LoaiGoiY.NhapBoSung && l.MaChungTu == ma && l.ChapNhan == null).ToListAsync())
+        {
+            ls.ChapNhan = chapNhan;
+            ls.ThoiDiemPhanHoi = gio.GetUtcNow();
+        }
     }
 
     public async Task HuyAsync(string ma)
@@ -146,6 +157,7 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         if (await db.PhieuNhap.AnyAsync(p => p.MaDonMua == ma && p.TrangThai != TrangThaiPhieu.DaHuy))
             throw new NghiepVuException("Đơn đã có hóa đơn nhập; hủy các hóa đơn nhập liên quan trước.");
         d.TrangThai = TrangThaiDonMua.DaHuy;
+        await PhanHoiGoiYAsync(ma, false);
         nhatKy.Ghi("HuyDonMua", nameof(DonMua), ma, maKho: d.MaKho);
         await db.SaveChangesAsync();
     }
@@ -219,12 +231,6 @@ public class DonMuaService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
 
     private static string? Buoc(TrangThaiDonMua trangThai, List<TienDoDong> dong) =>
         trangThai != TrangThaiDonMua.DangThucHien ? null : dong.Any(d => d.DangNhan > 0) ? ChoKiemDem : ChoNhanHang;
-
-    private static DateTimeOffset BatDauNgay(DateOnly ngay)
-    {
-        var gioDau = ngay.ToDateTime(TimeOnly.MinValue);
-        return new DateTimeOffset(gioDau, DinhDang.GioVietNam.GetUtcOffset(gioDau)).ToUniversalTime();
-    }
 
     public static string MoTaHang(string ten, Dictionary<string, string> thuocTinh) =>
         thuocTinh.Count == 0 ? ten : $"{ten} {string.Join(" ", thuocTinh.Values)}";

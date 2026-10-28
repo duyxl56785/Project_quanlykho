@@ -1587,6 +1587,41 @@ namespace quanlykho.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("quanlykho.Domain.TepDaNhap", b =>
+                {
+                    b.Property<string>("MaBam")
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("Loai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("NguoiNhap")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("SoDong")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TenTep")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTimeOffset>("ThoiDiem")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MaBam");
+
+                    b.HasIndex("NguoiNhap");
+
+                    b.ToTable("TepDaNhap");
+                });
+
             modelBuilder.Entity("quanlykho.Domain.ThanhVienKiemKe", b =>
                 {
                     b.Property<string>("MaPhieu")
@@ -2306,6 +2341,15 @@ namespace quanlykho.Data.Migrations
                     b.HasOne("quanlykho.Domain.NguoiDung", null)
                         .WithMany()
                         .HasForeignKey("NguoiThucHien")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("quanlykho.Domain.TepDaNhap", b =>
+                {
+                    b.HasOne("quanlykho.Domain.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiNhap")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
