@@ -1,0 +1,69 @@
+@using quanlykho.Features.DieuChuyen
+@model DieuChuyenForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+<input type="hidden" asp-for="MaKhoDi" />
+<input type="hidden" asp-for="KhoaChongLap" />
+
+<div class="the">
+    <h2>Thông tin chung</h2>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="text-secondary small">Kho đi</div><span class="fw-semibold">@Model.MaKhoDi</span></div>
+        <div class="col-md-4">
+            <label asp-for="MaKhoDen" class="form-label bat-buoc"></label>
+            <select asp-for="MaKhoDen" class="form-select">
+                <option value="">Chọn kho đến</option>
+                @foreach (var k in Model.DanhSachKhoDen)
+                {
+                    <option value="@k.Ma" selected="@(k.Ma == Model.MaKhoDen)">@k.Ma – @k.Ten</option>
+                }
+            </select>
+            <span asp-validation-for="MaKhoDen"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="NgayChuyen" class="form-label"></label>
+            <input asp-for="NgayChuyen" class="form-control" type="date" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="PhuongTien" class="form-label"></label>
+            <input asp-for="PhuongTien" class="form-control" placeholder="Xe tải 29C-123.45" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="NguoiVanChuyen" class="form-label"></label>
+            <input asp-for="NguoiVanChuyen" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="LyDo" class="form-label"></label>
+            <input asp-for="LyDo" class="form-control" placeholder="Bổ sung hàng cho kho đến" />
+        </div>
+    </div>
+</div>
+
+<div class="the">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 me-auto">Hàng chuyển</h2>
+        <button type="button" class="btn btn-outline-primary" data-them-dong="#dongDieuChuyen">+ Thêm dòng</button>
+    </div>
+    @if (Model.DanhSachTon.Count == 0)
+    {
+        <partial name="_TrangRong" model='"Kho đi không còn hàng khả dụng để chuyển."' />
+    }
+    <div class="table-responsive">
+        <table class="table bang-dong-hang mb-0">
+            <thead><tr><th>#</th><th>Hàng, lô, ô</th><th class="so">Số lượng</th><th></th></tr></thead>
+            <tbody id="dongDieuChuyen" data-dong-hang>
+                @for (var i = 0; i < Model.Dong.Count; i++)
+                {
+                    <partial name="_DongDieuChuyen" model="(Model, i.ToString())" />
+                }
+            </tbody>
+            <template><partial name="_DongDieuChuyen" model='(Model, "__i__")' /></template>
+        </table>
+    </div>
+    <div class="form-text">Chỉ chuyển hàng khả dụng (khu lưu trữ, chưa hết hạn, chưa giữ). Số lượng theo đơn vị tính chính.</div>
+</div>
+
+<div class="thanh-nut">
+    <button type="submit" class="btn btn-primary" name="luu" value="true" data-xac-nhan="Lưu phiếu và trừ hàng ở kho @Model.MaKhoDi? Hàng sẽ ở trạng thái đang vận chuyển cho tới khi kho đến nhận.">Lưu, xuất kho đi</button>
+    <button type="submit" class="btn btn-outline-primary" name="luu" value="false">Lưu tạm</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+</div>

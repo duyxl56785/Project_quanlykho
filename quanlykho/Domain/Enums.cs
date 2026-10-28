@@ -32,3 +32,6 @@ public enum LoaiGoiY { LayHang, NhapBoSung }
 public enum TrangThaiLenhXuat { ChuaThucHien, ChoLayHang, ChoKiemTra, ChoXacNhan, HoanThanh }
 
 public enum LoaiPhieuXuat { XuatBan, XuatKhac, TraNhaCungCap }
+
+/// <summary>Phiếu điều chuyển (Bảng 2.14 dòng 8): hàng đang vận chuyển từ lúc Chờ nhập kho; chỉ hủy khi chưa nhận.</summary>
+public enum TrangThaiDieuChuyen { LuuTam, ChoNhapKho, NhanMotPhan, HoanThanh, DaHuy }

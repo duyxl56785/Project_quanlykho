@@ -1,0 +1,16 @@
+@model quanlykho.Features.DieuChuyen.DieuChuyenForm
+@{ ViewData["Title"] = "Lập phiếu điều chuyển"; }
+
+<div class="tieu-de-trang"><h1>Lập phiếu điều chuyển</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKhoDi">Kho đi</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKhoDi", chon = Model.MaKhoDi, danhSach = Model.DanhSachKhoDi })
+    </div>
+    <div class="thanh-loc-nut thanh-nut"><button class="btn btn-outline-secondary" type="submit">Đổi kho đi</button></div>
+</form>
+
+<form method="post" asp-action="Them">
+    <partial name="_Form" model="Model" />
+</form>

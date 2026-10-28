@@ -96,6 +96,16 @@ const QuanLyKho = (() => {
         }
     }
 
+    // ---------- Số việc chờ trên menu: <span data-dem="/api/..."> ----------
+    document.querySelectorAll("[data-dem]").forEach(async (o) => {
+        const kq = await goiApi(o.dataset.dem);
+        if (kq.ok && kq.duLieu?.so > 0) {
+            o.textContent = kq.duLieu.so;
+            o.setAttribute("aria-label", `${kq.duLieu.so} việc đang chờ`);
+            o.hidden = false;
+        }
+    });
+
     // ---------- Phiếu có dòng hàng ----------
     // <tbody data-dong-hang> + <template> chứa một dòng với tên "Dong[__i__].X"; nút data-them-dong="#idTbody", nút data-xoa-dong trong dòng.
     function danhSoLai(tbody) {

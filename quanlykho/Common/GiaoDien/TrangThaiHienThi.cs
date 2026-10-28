@@ -26,6 +26,8 @@ public static class TrangThaiHienThi
         ["ChoLayHang"] = ("Chờ lấy hàng", "lam"),
         ["ChoKiemTra"] = ("Chờ kiểm tra", "vang"),
         ["ChoXacNhan"] = ("Chờ xác nhận", "vang"),
+        ["ChoNhapKho"] = ("Chờ nhập kho", "vang"),
+        ["NhanMotPhan"] = ("Nhận một phần", "vang"),
         ["Dat"] = ("Đạt", "luc"),
         ["Loi"] = ("Lỗi", "do"),
     };
