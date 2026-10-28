@@ -125,7 +125,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - [x] Nhân viên bán hàng: tồn khả dụng từng kho khớp số xuất được; luôn xem được trạng thái đơn.
   - [x] Quản trị viên: thêm ngành hàng mới không sửa mã rồi nhập, xuất được; phân quyền theo vai và kho đúng; nhật ký đủ; nhập Excel báo lỗi đúng dòng, nhập lại không nhân đôi.
   - [x] Chung: không có tồn âm; thống kê được tỷ lệ gợi ý AI được chấp nhận.
-- [ ] Gộp `develop` vào `main`, gắn tag `v1.0`, ghi hướng dẫn chạy vào `README.md`
+- [x] Gộp `develop` vào `main`, gắn tag `v1.0`, ghi hướng dẫn chạy vào `README.md` — b79bc74
 
 ## Nếu còn thời gian (Could)
 
