@@ -48,6 +48,31 @@ public class BaoCaoService(AppDbContext db, NguoiDungHienTai nguoiDung, TonKhaDu
         return new TongHopTrang(loc, await DanhSachLocAsync(), kho, TrangDuLieu<DongTongHop>.Tao(dong, trang), tong);
     }
 
+    /// <summary>Tỷ lệ chấp nhận gợi ý AI (quy tắc 13) theo loại, trên kho được giao, lọc theo ngày gợi ý.</summary>
+    public async Task<GoiYTrang> GoiYAsync(LocBaoCao loc)
+    {
+        var danhSach = await DanhSachLocAsync();
+        if (loc.TuNgay > loc.DenNgay)
+            return new GoiYTrang(LoiNgay(loc), danhSach, []);
+        var kho = await KhoAsync(loc);
+        var q = db.LichSuGoiY.Where(l => kho.Contains(l.MaKho));
+        if (loc.TuNgay is { } tu)
+        {
+            var tuUtc = DinhDang.BatDauNgay(tu);
+            q = q.Where(l => l.ThoiDiem >= tuUtc);
+        }
+        if (loc.DenNgay is { } den)
+        {
+            var denUtc = DinhDang.BatDauNgay(den.AddDays(1));
+            q = q.Where(l => l.ThoiDiem < denUtc);
+        }
+        var dem = await q.GroupBy(l => l.Loai)
+            .Select(g => new { g.Key, Tong = g.Count(), CoPhanHoi = g.Count(l => l.ChapNhan != null), ChapNhan = g.Count(l => l.ChapNhan == true) })
+            .ToDictionaryAsync(x => x.Key);
+        return new GoiYTrang(loc, danhSach, Enum.GetValues<LoaiGoiY>()
+            .Select(l => dem.TryGetValue(l, out var d) ? new DongGoiY(l, d.Tong, d.CoPhanHoi, d.ChapNhan) : new DongGoiY(l, 0, 0, 0)).ToList());
+    }
+
     /// <summary>Theo lô và hạn dùng: chỉ hàng bật theo dõi hạn dùng (Bảng 2.9 dòng 3).</summary>
     public async Task<BaoCaoTrang<DongTheoLo>> TheoLoAsync(LocBaoCao loc, int trang)
     {
