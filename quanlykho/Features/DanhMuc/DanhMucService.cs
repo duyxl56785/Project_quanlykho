@@ -7,7 +7,7 @@ using quanlykho.Domain;
 
 namespace quanlykho.Features.DanhMuc;
 
-public class DanhMucService(AppDbContext db, GhiNhatKy nhatKy)
+public class DanhMucService(AppDbContext db, GhiNhatKy nhatKy, QuyDoiDonVi quyDoi)
 {
     // ---------- Nhóm hàng, thuộc tính ----------
 
@@ -234,6 +234,8 @@ public class DanhMucService(AppDbContext db, GhiNhatKy nhatKy)
         form.MucTon = (await DanhSachKho()).Select(k => mucTon.TryGetValue(k.Ma, out var m)
             ? new MucTonDong { MaKho = k.Ma, ToiThieu = m.ToiThieu, ToiDa = m.ToiDa, ThoiGianChoHang = m.ThoiGianChoHang }
             : new MucTonDong { MaKho = k.Ma }).ToList();
+        form.DonVi = await db.DonViQuyDoi.AsNoTracking().Where(d => d.MaBienThe == ma).OrderBy(d => d.HeSo)
+            .Select(d => new DonViQuyDoiDong { TenDonVi = d.TenDonVi, HeSo = d.HeSo, MaVach = d.MaVach, TrangThai = d.TrangThai }).ToListAsync();
         return await NapThongTinBienThe(form);
     }
 
@@ -273,6 +275,8 @@ public class DanhMucService(AppDbContext db, GhiNhatKy nhatKy)
         b.MaVach = maVach;
         GhiDoiTrangThai(nameof(BienThe), ma, b.TrangThai, form.TrangThai);
         b.TrangThai = form.TrangThai;
+
+        await quyDoi.LuuAsync(b, await db.SanPham.Where(s => s.MaSanPham == b.MaSanPham).Select(s => s.DonViTinh).SingleAsync(), form.DonVi);
 
         var cu = await db.MucTon.Where(m => m.MaBienThe == ma).ToListAsync();
         db.MucTon.RemoveRange(cu);

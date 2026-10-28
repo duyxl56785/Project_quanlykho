@@ -58,6 +58,61 @@
             </div>
         </div>
 
+        <div class="the bieu-mau">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <h2 class="mb-0">Đơn vị quy đổi</h2>
+                @if (laQuanTri)
+                {
+                    <button type="button" class="btn btn-outline-primary" data-them-dong="#donVi">+ Thêm đơn vị</button>
+                }
+            </div>
+            <p class="form-text">Một tầng so với đơn vị tính chính (@Model.DonViTinh), hệ số nguyên lớn hơn 1, ví dụ 1 thùng = 24 @Model.DonViTinh. Tồn và sổ sách luôn tính theo @Model.DonViTinh. Đơn vị đã có trên chứng từ chỉ được ngừng sử dụng.</p>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Tên đơn vị</th><th>1 đơn vị = ? @Model.DonViTinh</th><th>Mã vạch</th><th>Trạng thái</th><th></th></tr></thead>
+                    <tbody id="donVi" data-dong-hang>
+                        @for (var i = 0; i < Model.DonVi.Count; i++)
+                        {
+                            <tr>
+                                <td><input class="form-control" name="DonVi[@i].TenDonVi" value="@Model.DonVi[i].TenDonVi" maxlength="20" required aria-label="Tên đơn vị" /></td>
+                                <td><input class="form-control text-end" name="DonVi[@i].HeSo" value="@Model.DonVi[i].HeSo.ToString("G29")" type="number" min="2" step="1" required aria-label="Hệ số" /></td>
+                                <td><input class="form-control" name="DonVi[@i].MaVach" value="@Model.DonVi[i].MaVach" maxlength="64" aria-label="Mã vạch đơn vị" /></td>
+                                <td>
+                                    <select class="form-select" name="DonVi[@i].TrangThai" aria-label="Trạng thái đơn vị">
+                                        @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+                                        {
+                                            <option value="@t" selected="@(t == Model.DonVi[i].TrangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong aria-label="Xóa đơn vị">✕</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                    <template>
+                        <tr>
+                            <td><input class="form-control" name="DonVi[__i__].TenDonVi" maxlength="20" required placeholder="thùng" aria-label="Tên đơn vị" /></td>
+                            <td><input class="form-control text-end" name="DonVi[__i__].HeSo" type="number" min="2" step="1" required placeholder="24" aria-label="Hệ số" /></td>
+                            <td><input class="form-control" name="DonVi[__i__].MaVach" maxlength="64" aria-label="Mã vạch đơn vị" /></td>
+                            <td>
+                                <select class="form-select" name="DonVi[__i__].TrangThai" aria-label="Trạng thái đơn vị">
+                                    @foreach (var t in Enum.GetValues<TrangThaiSuDung>())
+                                    {
+                                        <option value="@t">@TrangThaiHienThi.Lay(t).Ten</option>
+                                    }
+                                </select>
+                            </td>
+                            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong aria-label="Xóa đơn vị">✕</button></td>
+                        </tr>
+                    </template>
+                </table>
+            </div>
+            @if (Model.DonVi.Count == 0)
+            {
+                <p class="text-secondary mt-2 mb-0">Chưa có đơn vị quy đổi.</p>
+            }
+        </div>
+
         @if (laQuanTri)
         {
             <div class="thanh-nut"><button type="submit" class="btn btn-primary">Lưu</button></div>

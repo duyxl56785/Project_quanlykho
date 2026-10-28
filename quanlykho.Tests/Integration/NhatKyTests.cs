@@ -74,7 +74,7 @@ public class NhatKyTests(CsdlFixture csdl) : IAsyncLifetime
             await s.SuaAsync("NCC01", f);
             f.TrangThai = TrangThaiSuDung.DangSuDung;
             await s.SuaAsync("NCC01", f);
-            var dm = new DanhMucService(db, nk);
+            var dm = new DanhMucService(db, nk, new QuyDoiDonVi(db));
             var b = await dm.LayBienTheAsync("AOTHUN-02");
             b.TrangThai = TrangThaiSuDung.NgungSuDung;
             await dm.SuaBienTheAsync("AOTHUN-02", b);
