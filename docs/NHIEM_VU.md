@@ -103,7 +103,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: bảng `DonViQuyDoi`, cột `TenDonVi`, `HeSo`, `SoLuongGoc` trên dòng chứng từ; dịch vụ quy đổi; 10 thùng (1 thùng = 24 chai) ra 240 chai; hệ số không nguyên hoặc nhỏ hơn 2 bị từ chối; ô chọn đơn vị có trên `/Styleguide`.
 - [x] Quy đổi ở danh mục, đơn mua, đơn đặt hàng (S7-04) — 438fd79
   - Xong khi: đặt 3 thùng giữ đúng 72 chai; tồn 235 chai hiện "9 thùng 19 chai".
-- [ ] Quy đổi ở hóa đơn nhập (S7-01)
+- [x] Quy đổi ở hóa đơn nhập (S7-01) — 531999c
   - Xong khi: nhập 10 thùng ghi tồn 240 chai; quét mã thùng nhận ra đơn vị thùng.
 - [ ] Quy đổi ở xuất kho, chuyển kho, báo cáo (S7-05)
   - Xong khi: xuất 5 chai từ lô 10 thùng còn 235 chai; chuyển 2 thùng trừ đúng 48 chai; tổng biến động bằng tồn.
