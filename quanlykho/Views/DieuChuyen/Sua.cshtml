@@ -1,0 +1,8 @@
+@model quanlykho.Features.DieuChuyen.DieuChuyenForm
+@{ ViewData["Title"] = $"Sửa phiếu {Model.Ma}"; }
+
+<div class="tieu-de-trang"><h1>Sửa phiếu điều chuyển @Model.Ma</h1></div>
+
+<form method="post" asp-action="Sua" asp-route-ma="@Model.Ma">
+    <partial name="_Form" model="Model" />
+</form>

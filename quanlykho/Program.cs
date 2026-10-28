@@ -14,6 +14,7 @@ using quanlykho.Data;
 using quanlykho.Data.Seed;
 using quanlykho.Domain;
 using quanlykho.Features.DanhMuc;
+using quanlykho.Features.DieuChuyen;
 using quanlykho.Features.Kho;
 using quanlykho.Features.XepHang;
 using quanlykho.Features.XuatKho;
@@ -58,6 +59,7 @@ builder.Services.AddScoped<GoiYService>();
 builder.Services.AddScoped<GiuHangService>();
 builder.Services.AddScoped<LenhXuatService>();
 builder.Services.AddScoped<PhieuXuatService>();
+builder.Services.AddScoped<DieuChuyenService>();
 
 var app = builder.Build();
 
