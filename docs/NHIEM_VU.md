@@ -88,7 +88,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: công thức ở mục 1.2.3 theo từng kho; không đề xuất khi d = 0 hoặc dưới 14 ngày lịch sử; tạo đơn mua nháp; khớp với tính tay trên dữ liệu mẫu (Hình 2.9).
 - [x] Chuyển vị trí trong cùng kho (FR16, S6-02) — b4ef867
   - Xong khi: chuyển một lô từ ô này sang ô khác, kiểm sức chứa ô đến, không đổi tồn kho, ghi sổ biến động.
-- [ ] Cảnh báo và màn hình Tổng quan (FR13, S6-04)
+- [x] Cảnh báo và màn hình Tổng quan (FR13, S6-04) — 3473e2c
   - Xong khi: 4 thẻ (dưới tối thiểu, vượt tối đa, sắp hết hạn, quá hạn); số ngày cảnh báo cấu hình được; số liệu khớp báo cáo.
 - [ ] Báo cáo tồn tổng hợp và chi tiết, thẻ kho (FR14, S6-04)
   - Xong khi: theo kho, lô, hạn dùng, vị trí; tồn từng kho cạnh tồn tổng hợp; hàng đang vận chuyển tách riêng; báo cáo khớp thẻ kho.
