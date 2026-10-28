@@ -58,10 +58,13 @@
                     <tr>
                         <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
                         <td>@d.TenDonVi</td>
-                        <td class="so">@So(d.SoLuongDat)</td>
-                        <td class="so">@So(d.DaNhan)</td>
-                        <td class="so">@So(d.DangNhan)</td>
-                        <td class="so fw-semibold">@So(d.ChuaNhan)</td>
+                        <td class="so">@So(d.SoLuongDat)@if (d.HeSo > 1)
+                            {
+                                <div class="small text-secondary">= @So(d.SoDatChinh) @d.DonViChinh</div>
+                            }</td>
+                        <td class="so">@So(d.DaNhan) @d.DonViChinh</td>
+                        <td class="so">@So(d.DangNhan) @d.DonViChinh</td>
+                        <td class="so fw-semibold">@So(d.ChuaNhan) @d.DonViChinh</td>
                         @if (quanLy)
                         {
                             <td class="so">@Tien(d.DonGia)</td>

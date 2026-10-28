@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.NhapKho;
 
 namespace quanlykho.Features.XuatKho;
@@ -38,6 +39,7 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         var khaDung = await tonKhaDung.TruyVan().Where(k => k.MaKho == d.MaKho && maHang.Contains(k.MaBienThe))
             .GroupBy(k => k.MaBienThe).Select(g => new { g.Key, Tong = g.Sum(k => k.KhaDung) }).ToDictionaryAsync(x => x.Key, x => x.Tong);
         var noiNhan = await db.NoiNhan.Where(n => n.MaNoiNhan == d.MaNoiNhan).Select(n => new { n.Ten, n.DiaChi }).SingleAsync();
+        var donVi = await new QuyDoiDonVi(db).BangAsync(maHang);
         var daGiu = await db.GiuHang.Where(g => g.MaDonDat == ma).OrderBy(g => g.ThuTu)
             .Join(db.Lo, g => g.MaLo, l => l.MaLo, (g, l) => new HangDaGiu(g.ThuTu, l.MaBienThe, g.MaLo, g.MaViTri, l.HanDung, g.SoLuong))
             .ToListAsync();
@@ -45,7 +47,8 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             d.MaNoiNhan, noiNhan.Ten, noiNhan.DiaChi, d.NguoiTao, await db.NguoiDung.Where(n => n.MaNguoiDung == d.NguoiTao).Select(n => n.Ten).SingleAsync(),
             d.NgayTao, d.HanGiao, d.TrangThai, d.GhiChu,
             d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonDat(c.MaBienThe, DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh),
-                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe))).ToList(), daGiu,
+                c.TenDonVi, c.HeSo, c.SoLuongDat, c.SoLuongDaXuat, khaDung.GetValueOrDefault(c.MaBienThe),
+                donVi[c.MaBienThe][0].Ten, QuyDoiDonVi.HienThi(donVi[c.MaBienThe], khaDung.GetValueOrDefault(c.MaBienThe)))).ToList(), daGiu,
             await db.LenhXuat.Where(l => l.MaDonDat == ma).Select(l => l.MaLenh).FirstOrDefaultAsync());
     }
 
@@ -60,6 +63,7 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
                 .Where(b => b.TrangThai == TrangThaiSuDung.DangSuDung && b.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
                 .OrderBy(b => b.MaBienThe).Select(b => new { b.MaBienThe, b.SanPham.Ten, b.SanPham.DonViTinh, b.ThuocTinh }).ToListAsync())
             .Select(b => new LuaChon(b.MaBienThe, $"{DonMuaService.MoTaHang(b.Ten, b.ThuocTinh)} ({b.DonViTinh})")).ToList();
+        form.DonViHang = await new QuyDoiDonVi(db).BangAsync(form.DanhSachBienThe.Select(b => b.Ma));
         return form;
     }
 
@@ -69,7 +73,7 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
         return await NapDanhSachAsync(new DonDatForm
         {
             Ma = d.MaDonDat, MaKho = d.MaKho, MaNoiNhan = d.MaNoiNhan, HanGiao = d.HanGiao, GhiChu = d.GhiChu,
-            Dong = d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonDatForm { MaBienThe = c.MaBienThe, SoLuong = c.SoLuongDat }).ToList(),
+            Dong = d.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongDonDatForm { MaBienThe = c.MaBienThe, TenDonVi = c.TenDonVi, SoLuong = c.SoLuongDat }).ToList(),
         });
     }
 
@@ -173,14 +177,19 @@ public class DonDatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChungT
             throw new NghiepVuException("Số lượng đặt phải lớn hơn 0.");
 
         var ma = dong.Select(d => d.MaBienThe).ToList();
-        var bienThe = await db.BienThe.Where(b => ma.Contains(b.MaBienThe)
+        var dangDung = await db.BienThe.Where(b => ma.Contains(b.MaBienThe)
                 && b.TrangThai == TrangThaiSuDung.DangSuDung && b.SanPham.TrangThai == TrangThaiSuDung.DangSuDung)
-            .Select(b => new { b.MaBienThe, b.SanPham.DonViTinh })
-            .ToDictionaryAsync(b => b.MaBienThe, b => b.DonViTinh);
-        var thieu = ma.FirstOrDefault(m => !bienThe.ContainsKey(m));
+            .Select(b => b.MaBienThe).ToListAsync();
+        var thieu = ma.FirstOrDefault(m => !dangDung.Contains(m));
         if (thieu is not null)
             throw new NghiepVuException($"Biến thể {thieu} không có hoặc đã ngừng sử dụng.");
 
-        return dong.Select(d => new ChiTietDonDat { MaBienThe = d.MaBienThe, TenDonVi = bienThe[d.MaBienThe], HeSo = 1, SoLuongDat = d.SoLuong }).ToList();
+        // Giữ hàng, lệnh xuất tính theo SoLuongDat × HeSo (đơn vị chính).
+        var donVi = await new QuyDoiDonVi(db).BangAsync(ma);
+        return dong.Select(d =>
+        {
+            var q = QuyDoiDonVi.QuyVeChinh(donVi[d.MaBienThe], d.TenDonVi, d.SoLuong, d.MaBienThe);
+            return new ChiTietDonDat { MaBienThe = d.MaBienThe, TenDonVi = q.TenDonVi, HeSo = q.HeSo, SoLuongDat = d.SoLuong };
+        }).ToList();
     }
 }

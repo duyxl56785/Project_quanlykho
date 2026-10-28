@@ -3,6 +3,7 @@ using quanlykho.Common.GiaoDien;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.NhapKho;
 
 namespace quanlykho.Features.XuatKho;
@@ -19,7 +20,8 @@ public class DongKhaDung
     public decimal KhaDung { get; init; }
 }
 
-public record TonKhaDungDong(string MaBienThe, string TenHang, string? MaVach, string DonViTinh, Dictionary<string, decimal> TheoKho)
+/// <param name="DonVi">Đơn vị chính và đơn vị quy đổi, để hiện kèm "9 thùng 19 chai".</param>
+public record TonKhaDungDong(string MaBienThe, string TenHang, string? MaVach, string DonViTinh, Dictionary<string, decimal> TheoKho, List<DonViChon> DonVi)
 {
     public decimal Tong => TheoKho.Values.Sum();
 }
@@ -70,7 +72,9 @@ public class TonKhaDung(AppDbContext db, NguoiDungHienTai nguoiDung, TimeProvide
         if (!string.IsNullOrWhiteSpace(tuKhoa))
         {
             var tk = $"%{tuKhoa.Trim()}%";
-            bienThe = bienThe.Where(b => EF.Functions.ILike(b.MaBienThe, tk) || EF.Functions.ILike(b.SanPham.Ten, tk) || b.MaVach == tuKhoa.Trim());
+            var maVach = tuKhoa.Trim();
+            bienThe = bienThe.Where(b => EF.Functions.ILike(b.MaBienThe, tk) || EF.Functions.ILike(b.SanPham.Ten, tk) || b.MaVach == maVach
+                || db.DonViQuyDoi.Any(d => d.MaBienThe == b.MaBienThe && d.MaVach == maVach));
         }
         var hang = await bienThe.OrderBy(b => b.MaBienThe)
             .Select(b => new { b.MaBienThe, b.SanPham.Ten, b.ThuocTinh, b.MaVach, b.SanPham.DonViTinh }).ToListAsync();
@@ -79,8 +83,9 @@ public class TonKhaDung(AppDbContext db, NguoiDungHienTai nguoiDung, TimeProvide
                 .GroupBy(d => new { d.MaBienThe, d.MaKho }).Select(g => new { g.Key.MaBienThe, g.Key.MaKho, Tong = g.Sum(d => d.KhaDung) })
                 .ToListAsync())
             .ToLookup(x => x.MaBienThe);
+        var donVi = await new QuyDoiDonVi(db).BangAsync(ma);
         var dong = hang.Select(h => new TonKhaDungDong(h.MaBienThe, DonMuaService.MoTaHang(h.Ten, h.ThuocTinh), h.MaVach, h.DonViTinh,
-            kho.ToDictionary(k => k, k => so[h.MaBienThe].Where(x => x.MaKho == k).Sum(x => x.Tong))));
+            kho.ToDictionary(k => k, k => so[h.MaBienThe].Where(x => x.MaKho == k).Sum(x => x.Tong)), donVi[h.MaBienThe]));
         return TrangDuLieu<TonKhaDungDong>.Tao(chiConHang ? dong.Where(d => d.Tong > 0) : dong, trang);
     }
 }

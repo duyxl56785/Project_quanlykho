@@ -74,13 +74,16 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
         if ((await ThuKhoAsync(don.MaKho)).All(t => t.Ma != yc.NguoiThucHien))
             throw new NghiepVuException("Người thực hiện phải là thủ kho đang hoạt động được giao kho này.");
 
+        // Lệnh xuất làm việc theo đơn vị tính chính (số còn phải xuất có thể lẻ so với thùng).
+        var maHang = don.ChiTiet.Select(c => c.MaBienThe).ToList();
+        var donViChinh = await db.BienThe.Where(b => maHang.Contains(b.MaBienThe)).Select(b => new { b.MaBienThe, b.SanPham.DonViTinh }).ToDictionaryAsync(b => b.MaBienThe, b => b.DonViTinh);
         var l = new LenhXuat
         {
             MaLenh = await maChungTu.TaoAsync("LX"), MaDonDat = don.MaDonDat, MaKho = don.MaKho, NguoiLap = nguoiDung.Ma, NgayLap = gio.GetUtcNow(),
             NguoiThucHien = yc.NguoiThucHien, TrangThai = TrangThaiLenhXuat.ChuaThucHien,
             ChiTiet = don.ChiTiet.Where(c => c.SoLuongDat * c.HeSo > c.SoLuongDaXuat).Select(c => new ChiTietLenhXuat
             {
-                MaBienThe = c.MaBienThe, TenDonVi = c.TenDonVi, HeSo = 1,
+                MaBienThe = c.MaBienThe, TenDonVi = donViChinh[c.MaBienThe], HeSo = 1,
                 SoLuongGoc = c.SoLuongDat * c.HeSo - c.SoLuongDaXuat, SoLuongYeuCau = c.SoLuongDat * c.HeSo - c.SoLuongDaXuat,
             }).ToList(),
         };

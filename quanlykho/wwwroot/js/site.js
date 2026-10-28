@@ -128,6 +128,25 @@ const QuanLyKho = (() => {
         if (nut) nut.closest(".the").querySelectorAll("[data-tai]").forEach(taiNoiDung);
     });
 
+    // ---------- Ô chọn đơn vị theo hàng: <script type="application/json" data-don-vi-hang> { maBienThe: [{ ten, heSo }] };
+    // trong mỗi dòng select[data-chon-hang] và select[data-don-vi] (partial _OChonDonVi); đổi hàng thì nạp lại đơn vị ----------
+    const donViHang = JSON.parse(document.querySelector("[data-don-vi-hang]")?.textContent || "{}");
+    function napDonVi(dong) {
+        const chon = dong.querySelector("[data-don-vi]");
+        if (!chon) return;
+        const ds = donViHang[dong.querySelector("[data-chon-hang]")?.value] ?? [];
+        const cu = chon.value;
+        chon.replaceChildren(...ds.map((d) => {
+            const o = new Option(d.heSo === 1 ? d.ten : `${d.ten} (${d.heSo} ${ds[0].ten})`, d.ten, false, d.ten === cu);
+            o.dataset.heSo = d.heSo;
+            return o;
+        }));
+    }
+    document.addEventListener("change", (e) => {
+        const hang = e.target.closest("[data-chon-hang]");
+        if (hang) napDonVi(hang.closest("tr"));
+    });
+
     // ---------- Phiếu có dòng hàng ----------
     // <tbody data-dong-hang> + <template> chứa một dòng với tên "Dong[__i__].X"; nút data-them-dong="#idTbody", nút data-xoa-dong trong dòng.
     function danhSoLai(tbody) {
