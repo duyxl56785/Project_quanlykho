@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using quanlykho.Common;
 using quanlykho.Common.GiaoDien;
 using quanlykho.Common.Loi;
 using quanlykho.Data;
@@ -6,7 +7,7 @@ using quanlykho.Domain;
 
 namespace quanlykho.Features.DanhMuc;
 
-public class DoiTacService(AppDbContext db)
+public class DoiTacService(AppDbContext db, GhiNhatKy nhatKy)
 {
     public Task<TrangDuLieu<DoiTacDong>> DanhSachAsync(LoaiDoiTac loai, string? tuKhoa, TrangThaiSuDung? trangThai, int trang)
     {
@@ -54,10 +55,21 @@ public class DoiTacService(AppDbContext db)
 
     public async Task SuaAsync(string ma, DoiTacForm form)
     {
+        TrangThaiSuDung cu;
         if (form.Loai == LoaiDoiTac.NhaCungCap)
-            Gan(await db.NhaCungCap.SingleOrDefaultAsync(x => x.MaNhaCungCap == ma) ?? throw new NghiepVuException($"Không có mã {ma}."), form);
+        {
+            var x = await db.NhaCungCap.SingleOrDefaultAsync(x => x.MaNhaCungCap == ma) ?? throw new NghiepVuException($"Không có mã {ma}.");
+            cu = x.TrangThai;
+            Gan(x, form);
+        }
         else
-            Gan(await db.NoiNhan.SingleOrDefaultAsync(x => x.MaNoiNhan == ma) ?? throw new NghiepVuException($"Không có mã {ma}."), form);
+        {
+            var x = await db.NoiNhan.SingleOrDefaultAsync(x => x.MaNoiNhan == ma) ?? throw new NghiepVuException($"Không có mã {ma}.");
+            cu = x.TrangThai;
+            Gan(x, form);
+        }
+        if (cu != form.TrangThai)
+            nhatKy.Ghi(form.TrangThai == TrangThaiSuDung.NgungSuDung ? "NgungSuDung" : "DungLai", form.Loai == LoaiDoiTac.NhaCungCap ? nameof(NhaCungCap) : nameof(NoiNhan), ma);
         await db.SaveChangesAsync();
     }
 

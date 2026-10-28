@@ -1,0 +1,75 @@
+@using quanlykho.Features.NhatKyThaoTac
+@model NhatKyTrang
+@{
+    ViewData["Title"] = "Nhật ký thao tác";
+    var l = Model.Loc;
+}
+
+<div class="tieu-de-trang"><h1>Nhật ký thao tác</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="MaNguoiDung">Người thực hiện</label>
+        <select class="form-select" id="MaNguoiDung" name="MaNguoiDung">
+            <option value="">Tất cả</option>
+            @foreach (var n in Model.NguoiDung)
+            {
+                <option value="@n.Ma" selected="@(n.Ma == l.MaNguoiDung)">@n.Ten</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="MaKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = l.MaKho, coTatCa = true, danhSach = Model.Kho })
+    </div>
+    <div>
+        <label class="form-label" for="LoaiThaoTac">Loại thao tác</label>
+        <select class="form-select" id="LoaiThaoTac" name="LoaiThaoTac">
+            <option value="">Tất cả</option>
+            @foreach (var t in Model.LoaiThaoTac)
+            {
+                <option value="@t.Ma" selected="@(t.Ma == l.LoaiThaoTac)">@t.Ten</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="MaDoiTuong">Mã đối tượng</label>
+        <input class="form-control" id="MaDoiTuong" name="MaDoiTuong" value="@l.MaDoiTuong" placeholder="PN000001, ND004, K01-…" />
+    </div>
+    <div>
+        <label class="form-label" for="TuNgay">Từ ngày</label>
+        <input class="form-control" id="TuNgay" name="TuNgay" type="date" value="@l.TuNgay?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div>
+        <label class="form-label" for="DenNgay">Đến ngày</label>
+        <input class="form-control" id="DenNgay" name="DenNgay" type="date" value="@l.DenNgay?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+@if (l.Loi is not null)
+{
+    <div class="alert alert-danger" role="alert">@l.Loi</div>
+}
+
+<bang-du-lieu trang="Model.Trang" thong-bao-rong="Không có dòng nhật ký nào khớp bộ lọc.">
+    <thead>
+        <tr><th>Thời điểm</th><th>Người thực hiện</th><th>Kho</th><th>Thao tác</th><th>Đối tượng</th><th>Chi tiết</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Trang.Muc)
+        {
+            <tr>
+                <td>@NgayGio(d.ThoiDiem)</td>
+                <td>@(d.TenNguoiDung ?? "Hệ thống")<div class="small text-secondary">@d.MaNguoiDung</div></td>
+                <td>@d.MaKho</td>
+                <td>@NhatKyService.TenThaoTac(d.LoaiThaoTac)</td>
+                <td>@d.MaDoiTuong<div class="small text-secondary">@d.DoiTuong</div></td>
+                <td class="small text-break"><code>@d.ChiTiet</code></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>
+<p class="text-secondary mt-2">Nhật ký chỉ thêm: không sửa, không xóa được (CSDL chặn cả lệnh chạy tay).</p>
