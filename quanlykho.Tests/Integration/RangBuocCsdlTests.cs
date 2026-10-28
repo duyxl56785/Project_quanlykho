@@ -52,7 +52,7 @@ public class RangBuocCsdlTests(CsdlFixture csdl) : IAsyncLifetime
         await using var db = Db();
 
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
-        Assert.Equal(20, db.Model.GetEntityTypes().Count());
+        Assert.Equal(29, db.Model.GetEntityTypes().Count());
     }
 
     [Fact]

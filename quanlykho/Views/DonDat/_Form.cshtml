@@ -1,0 +1,53 @@
+@using quanlykho.Features.XuatKho
+@model DonDatForm
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="the">
+    <h2>Thông tin chung</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="MaKho" class="form-label bat-buoc"></label>
+            @await Component.InvokeAsync("OChonKho", new { ten = nameof(Model.MaKho), chon = Model.MaKho, danhSach = Model.DanhSachKho })
+            <div class="form-text">Mỗi đơn xuất từ một kho; xem số khả dụng ở màn hình Tồn khả dụng.</div>
+        </div>
+        <div class="col-md-5">
+            <label asp-for="MaNoiNhan" class="form-label bat-buoc"></label>
+            <select asp-for="MaNoiNhan" class="form-select">
+                <option value="">Chọn nơi nhận</option>
+                @foreach (var n in Model.DanhSachNoiNhan)
+                {
+                    <option value="@n.Ma" selected="@(n.Ma == Model.MaNoiNhan)">@n.Ma – @n.Ten</option>
+                }
+            </select>
+            <span asp-validation-for="MaNoiNhan"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="HanGiao" class="form-label"></label>
+            <input asp-for="HanGiao" class="form-control" type="date" />
+        </div>
+        <div class="col-md-12">
+            <label asp-for="GhiChu" class="form-label"></label>
+            <input asp-for="GhiChu" class="form-control" />
+        </div>
+    </div>
+</div>
+
+<div class="the">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 me-auto">Dòng hàng</h2>
+        <button type="button" class="btn btn-outline-primary" data-them-dong="#dongDonDat">+ Thêm dòng</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table bang-dong-hang mb-0">
+            <thead><tr><th>#</th><th>Biến thể</th><th class="so">Số lượng</th><th></th></tr></thead>
+            <tbody id="dongDonDat" data-dong-hang>
+                @for (var i = 0; i < Model.Dong.Count; i++)
+                {
+                    <partial name="_DongDonDat" model="(Model, i.ToString())" />
+                }
+            </tbody>
+            <template><partial name="_DongDonDat" model='(Model, "__i__")' /></template>
+        </table>
+    </div>
+    <div class="form-text">Số lượng theo đơn vị tính chính của hàng.</div>
+</div>

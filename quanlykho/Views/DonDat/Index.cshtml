@@ -1,0 +1,75 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.XuatKho
+@model TrangDuLieu<DonDatDong>
+@{
+    ViewData["Title"] = "Đơn đặt hàng";
+    dynamic loc = ViewData["Loc"]!;
+    var ds = (DonDatForm)ViewData["DanhSach"]!;
+    var datHang = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.BanHang);
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Đơn đặt hàng</h1>
+    @if (datHang)
+    {
+        <a class="btn btn-primary" asp-action="Them">Tạo đơn</a>
+    }
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="tuKhoa">Mã đơn</label>
+        <input class="form-control" id="tuKhoa" name="tuKhoa" value="@loc.tuKhoa" />
+    </div>
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = ds.DanhSachKho })
+    </div>
+    <div>
+        <label class="form-label" for="trangThai">Trạng thái</label>
+        <select class="form-select" id="trangThai" name="trangThai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<TrangThaiDonDat>())
+            {
+                <option value="@t" selected="@(t == (TrangThaiDonDat?)loc.trangThai)">@TrangThaiHienThi.Lay(t).Ten</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+        @if (quanLy)
+        {
+            <button class="btn btn-outline-primary" type="submit" form="formDuyet" data-xac-nhan="Duyệt các đơn đã chọn và giữ hàng? Thiếu hàng ở bất kỳ dòng nào thì không đơn nào được duyệt.">Duyệt đơn đã chọn</button>
+        }
+    </div>
+</form>
+<form id="formDuyet" method="post" asp-action="Duyet"></form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Không có đơn đặt hàng nào khớp bộ lọc.">
+    <thead>
+        <tr><th><span class="visually-hidden">Chọn duyệt</span></th><th>Mã đơn</th><th>Kho</th><th>Nơi nhận</th><th>Người tạo, ngày tạo</th><th>Hạn giao</th><th class="so">Số dòng</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.Muc)
+        {
+            <tr>
+                <td>
+                    @if (quanLy && d.TrangThai == TrangThaiDonDat.ChoDuyet)
+                    {
+                        <input class="form-check-input" type="checkbox" name="ma" value="@d.Ma" form="formDuyet" aria-label="Chọn duyệt @d.Ma" />
+                    }
+                </td>
+                <td class="fw-semibold">@d.Ma</td>
+                <td>@d.MaKho</td>
+                <td>@d.NoiNhan</td>
+                <td>@d.NguoiTao<div class="small text-secondary">@NgayGio(d.NgayTao)</div></td>
+                <td>@Ngay(d.HanGiao)</td>
+                <td class="so">@d.SoDong</td>
+                <td><partial name="_HuyHieuTrangThai" model="d.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@d.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>

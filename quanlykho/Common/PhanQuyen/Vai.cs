@@ -14,6 +14,10 @@ public static class Vai
     public const string QuanLy = QuanTri + "," + QuanLyKho;
     /// <summary>Người làm việc trong kho: thủ kho, quản lý kho, quản trị viên.</summary>
     public const string TrongKho = QuanLy + "," + ThuKho;
+    /// <summary>Tạo, sửa, gửi duyệt đơn đặt hàng.</summary>
+    public const string DatHang = QuanTri + "," + BanHang;
+    /// <summary>Xem đơn đặt hàng: người đặt và người duyệt.</summary>
+    public const string XemDonDat = QuanLy + "," + BanHang;
 
     public static string TenHienThi(VaiTro vai) => vai switch
     {
