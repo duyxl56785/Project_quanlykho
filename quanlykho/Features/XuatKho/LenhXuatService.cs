@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.Kho;
 using quanlykho.Features.NhapKho;
 using static quanlykho.Common.GiaoDien.DinhDang;
@@ -50,7 +51,9 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
             await db.PhieuXuat.Where(p => p.MaLenh == ma).Select(p => p.MaPhieuXuat).FirstOrDefaultAsync(),
             l.ChiTiet.OrderBy(c => c.MaBienThe).Select(c => new DongYeuCauXuat(c.MaBienThe, DonMuaService.MoTaHang(hang[c.MaBienThe].Ten, hang[c.MaBienThe].ThuocTinh),
                 hang[c.MaBienThe].DonViTinh, c.SoLuongYeuCau, daLay.Where(d => d.MaBienThe == c.MaBienThe).Sum(d => d.SoLuong))).ToList(),
-            goiYLay, daLay);
+            goiYLay, daLay,
+            (await db.DonViQuyDoi.Where(d => maHang.Contains(d.MaBienThe) && d.MaVach != null && d.TrangThai == TrangThaiSuDung.DangSuDung).ToListAsync())
+                .ToDictionary(d => d.MaVach!, d => new DonViChon(d.TenDonVi, d.HeSo)));
     }
 
     /// <summary>Thủ kho đang hoạt động được giao kho này, để phân công lệnh.</summary>
@@ -101,6 +104,16 @@ public class LenhXuatService(AppDbContext db, NguoiDungHienTai nguoiDung, MaChun
     /// </summary>
     public async Task<long> LayHangAsync(string ma, LayHangYeuCau yc)
     {
+        // Thủ kho có thể đếm theo thùng; mọi so sánh, giữ hàng, ghi tồn theo đơn vị chính.
+        var quyDoi = new QuyDoiDonVi(db);
+        var theoMaVach = await quyDoi.TraMaVachAsync(yc.Ma);
+        if (theoMaVach is not null)
+            yc = yc with { Ma = theoMaVach.MaBienThe, TenDonVi = string.IsNullOrWhiteSpace(yc.TenDonVi) ? theoMaVach.TenDonVi : yc.TenDonVi };
+        if (!string.IsNullOrWhiteSpace(yc.TenDonVi))
+        {
+            var maBienThe = await db.Lo.Where(l => l.MaLo == yc.Ma).Select(l => l.MaBienThe).FirstOrDefaultAsync() ?? yc.Ma;
+            yc = yc with { SoLuong = (await quyDoi.QuyVeChinhAsync(maBienThe, yc.TenDonVi, yc.SoLuong)).SoLuong };
+        }
         if (yc.SoLuong <= 0)
             throw new NghiepVuException("Số lượng lấy phải lớn hơn 0.");
         await using var tx = await db.Database.BeginTransactionAsync();
