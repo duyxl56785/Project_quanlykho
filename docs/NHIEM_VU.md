@@ -115,7 +115,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 ## Giai đoạn 7. Kiểm thử tổng và nghiệm thu
 
 - [x] Dữ liệu thử đầy đủ: 3 tháng lịch sử xuất, tệp Excel mẫu khoảng 300 dòng có dòng lỗi (S7-03) — 7f81f38
-- [ ] Sao lưu và khôi phục bằng `pg_dump` (NFR09)
+- [x] Sao lưu và khôi phục bằng `pg_dump` (NFR09) — 78ba367
   - Xong khi: script sao lưu tạo tệp có ngày giờ và giữ 14 bản mới nhất; script khôi phục đưa DB về đúng bản sao lưu; có hướng dẫn đặt lịch chạy hằng ngày.
 - [ ] Đo thời gian tải các trang dưới 3 giây (NFR04)
 - [ ] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07)
