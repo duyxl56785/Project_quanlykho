@@ -1,0 +1,61 @@
+@using quanlykho.Features.TongQuan
+@model TheCanhBao
+@{
+    var mucTon = Model.Loai is LoaiThe.DuoiToiThieu or LoaiThe.VuotToiDa;
+    var rong = Model.Loai switch
+    {
+        LoaiThe.DuoiToiThieu => "Không có hàng nào dưới mức tối thiểu.",
+        LoaiThe.VuotToiDa => "Không có hàng nào vượt mức tối đa.",
+        LoaiThe.SapHetHan => $"Không có lô nào hết hạn trong {Model.SoNgay} ngày tới.",
+        _ => "Không có lô quá hạn nào còn tồn.",
+    };
+}
+
+<p class="small text-secondary mb-2">
+    @Model.Dong.Count dòng · Số liệu tính đến @NgayGio(Model.TinhDen)
+</p>
+@if (Model.Dong.Count == 0)
+{
+    <p class="mb-0">@rong</p>
+}
+else
+{
+    <div class="table-responsive the-cuon">
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Hàng</th><th>Kho</th>
+                    @if (mucTon)
+                    {
+                        <th class="so">Tồn khả dụng</th><th class="so">@(Model.Loai == LoaiThe.DuoiToiThieu ? "Tối thiểu" : "Tối đa")</th>
+                    }
+                    else
+                    {
+                        <th>Lô</th><th>Hạn dùng</th><th class="so">Số lượng</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.Dong)
+                {
+                    <tr>
+                        <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                        <td>@d.MaKho</td>
+                        @if (mucTon)
+                        {
+                            <td class="so">@So(d.SoLuong) @d.DonViTinh</td>
+                            <td class="so">@So(d.Muc)</td>
+                        }
+                        else
+                        {
+                            var ngay = d.HanDung!.Value.DayNumber - Model.HomNay.DayNumber;
+                            <td>@d.MaLo</td>
+                            <td>@Ngay(d.HanDung)<div class="small @(ngay < 0 ? "text-danger" : "text-secondary")">@(ngay < 0 ? $"quá {-ngay} ngày" : ngay == 0 ? "dùng được hết hôm nay" : $"còn {ngay} ngày")</div></td>
+                            <td class="so">@So(d.SoLuong) @d.DonViTinh</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

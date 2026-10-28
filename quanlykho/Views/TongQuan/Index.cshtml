@@ -1,0 +1,52 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.TongQuan
+@model int
+@{
+    ViewData["Title"] = "Tổng quan";
+    var xemCanhBao = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+    (LoaiThe Loai, string Ten)[] the =
+    [
+        (LoaiThe.DuoiToiThieu, "Tồn kho dưới mức tối thiểu"),
+        (LoaiThe.VuotToiDa, "Tồn kho vượt mức tối đa"),
+        (LoaiThe.SapHetHan, $"Hàng hóa sắp hết hạn (trong {Model} ngày)"),
+        (LoaiThe.QuaHan, "Hàng hóa quá hạn sử dụng"),
+    ];
+}
+
+<div class="tieu-de-trang">
+    <h1>Tổng quan</h1>
+    @if (xemCanhBao)
+    {
+        <button type="button" class="btn btn-outline-primary" data-tai-lai-tat-ca>Tải lại</button>
+    }
+</div>
+
+@if (!xemCanhBao)
+{
+    <partial name="_TrangRong" model='"Chọn chức năng ở menu bên trái."' />
+}
+else
+{
+    <form class="thanh-loc" method="get">
+        <div>
+            <label class="form-label" for="soNgay">Chọn tham số: số ngày cảnh báo trước hạn dùng</label>
+            <input class="form-control" id="soNgay" name="soNgay" type="number" min="1" max="365" step="1" required value="@Model" />
+        </div>
+        <div class="thanh-loc-nut thanh-nut"><button class="btn btn-primary" type="submit">Áp dụng</button></div>
+    </form>
+
+    <div class="row g-3">
+        @foreach (var (loai, ten) in the)
+        {
+            <div class="col-lg-6">
+                <section class="the h-100 mb-0">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <h2 class="mb-0">@ten</h2>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-tai-lai>Làm mới</button>
+                    </div>
+                    <div data-tai="@Url.Action("The", "TongQuan", new { loai, soNgay = Model })"></div>
+                </section>
+            </div>
+        }
+    </div>
+}

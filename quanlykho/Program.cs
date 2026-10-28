@@ -22,6 +22,7 @@ using quanlykho.Features.XuatKho;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.QuanLyNguoiDung;
 using quanlykho.Features.TaiKhoan;
+using quanlykho.Features.TongQuan;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,7 @@ builder.Services.AddScoped<LenhXuatService>();
 builder.Services.AddScoped<PhieuXuatService>();
 builder.Services.AddScoped<DieuChuyenService>();
 builder.Services.AddScoped<KiemKeService>();
+builder.Services.AddScoped<TongQuanService>();
 
 var app = builder.Build();
 
