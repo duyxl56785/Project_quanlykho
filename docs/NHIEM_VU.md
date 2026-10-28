@@ -119,12 +119,12 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: script sao lưu tạo tệp có ngày giờ và giữ 14 bản mới nhất; script khôi phục đưa DB về đúng bản sao lưu; có hướng dẫn đặt lịch chạy hằng ngày.
 - [x] Đo thời gian tải các trang dưới 3 giây (NFR04) — 19969f3, kết quả ở [DO_TAI_TRANG.md](DO_TAI_TRANG.md)
 - [x] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07) — 6338ba6
-- [ ] Đạt tiêu chí nghiệm thu Bảng 1.6:
-  - [ ] Thủ kho: chạy trọn nhập hàng, lấy hàng, nhận hàng chuyển đến bằng ô quét mã trên máy tính bảng; G1 không vi phạm ràng buộc; quét sai bị chặn.
-  - [ ] Quản lý kho: tổng biến động bằng tồn từng kho; chuyển kho không mất hay nhân đôi hàng; hai phiếu không giữ trùng; mọi chênh lệch có người duyệt; ca 10 thùng xuất 5 chai còn 235 chai; G3 không bỏ sót mặt hàng dưới điểm đặt hàng.
-  - [ ] Nhân viên bán hàng: tồn khả dụng từng kho khớp số xuất được; luôn xem được trạng thái đơn.
-  - [ ] Quản trị viên: thêm ngành hàng mới không sửa mã rồi nhập, xuất được; phân quyền theo vai và kho đúng; nhật ký đủ; nhập Excel báo lỗi đúng dòng, nhập lại không nhân đôi.
-  - [ ] Chung: không có tồn âm; thống kê được tỷ lệ gợi ý AI được chấp nhận.
+- [x] Đạt tiêu chí nghiệm thu Bảng 1.6 — 4474292, bằng chứng ở [NGHIEM_THU.md](NGHIEM_THU.md):
+  - [x] Thủ kho: chạy trọn nhập hàng, lấy hàng, nhận hàng chuyển đến bằng ô quét mã trên máy tính bảng; G1 không vi phạm ràng buộc; quét sai bị chặn.
+  - [x] Quản lý kho: tổng biến động bằng tồn từng kho; chuyển kho không mất hay nhân đôi hàng; hai phiếu không giữ trùng; mọi chênh lệch có người duyệt; ca 10 thùng xuất 5 chai còn 235 chai; G3 không bỏ sót mặt hàng dưới điểm đặt hàng.
+  - [x] Nhân viên bán hàng: tồn khả dụng từng kho khớp số xuất được; luôn xem được trạng thái đơn.
+  - [x] Quản trị viên: thêm ngành hàng mới không sửa mã rồi nhập, xuất được; phân quyền theo vai và kho đúng; nhật ký đủ; nhập Excel báo lỗi đúng dòng, nhập lại không nhân đôi.
+  - [x] Chung: không có tồn âm; thống kê được tỷ lệ gợi ý AI được chấp nhận.
 - [ ] Gộp `develop` vào `main`, gắn tag `v1.0`, ghi hướng dẫn chạy vào `README.md`
 
 ## Nếu còn thời gian (Could)
