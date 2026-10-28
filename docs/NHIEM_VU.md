@@ -117,7 +117,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 - [x] Dữ liệu thử đầy đủ: 3 tháng lịch sử xuất, tệp Excel mẫu khoảng 300 dòng có dòng lỗi (S7-03) — 7f81f38
 - [x] Sao lưu và khôi phục bằng `pg_dump` (NFR09) — 78ba367
   - Xong khi: script sao lưu tạo tệp có ngày giờ và giữ 14 bản mới nhất; script khôi phục đưa DB về đúng bản sao lưu; có hướng dẫn đặt lịch chạy hằng ngày.
-- [ ] Đo thời gian tải các trang dưới 3 giây (NFR04)
+- [x] Đo thời gian tải các trang dưới 3 giây (NFR04) — 19969f3, kết quả ở [DO_TAI_TRANG.md](DO_TAI_TRANG.md)
 - [ ] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07)
 - [ ] Đạt tiêu chí nghiệm thu Bảng 1.6:
   - [ ] Thủ kho: chạy trọn nhập hàng, lấy hàng, nhận hàng chuyển đến bằng ô quét mã trên máy tính bảng; G1 không vi phạm ràng buộc; quét sai bị chặn.
