@@ -68,7 +68,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: nhân viên bán hàng xem tồn khả dụng từng kho (trừ hàng chờ kiểm, cách ly, hết hạn, đang vận chuyển, đã giữ), tạo đơn, xem trạng thái.
 - [x] Gợi ý lấy hàng G1 (FR20, S4-02) — 3747758
   - Xong khi: không bao giờ gợi ý lô hết hạn; ưu tiên FEFO, rồi FIFO, rồi ít kệ; trả lý do; ghi lịch sử gợi ý và việc người dùng chấp nhận hay không; unit test cho các ca ràng buộc.
-- [ ] Duyệt đơn và giữ hàng (FR02, S4-01)
+- [x] Duyệt đơn và giữ hàng (FR02, S4-01) — a4addd1
   - Xong khi: hai đơn không giữ trùng một số hàng; thiếu thì báo "Cần X, còn Y" (422); chỉ giữ lô đạt chất lượng, chưa hết hạn.
 - [ ] Lệnh xuất, lấy hàng, kiểm tra, xác nhận xuất (FR03, FR04, S4-03)
   - Xong khi: quét sai hàng, lấy vượt số, lấy lô hết hạn đều bị chặn; người kiểm khác người lấy; phiếu xuất ghi qua cổng; test hai người lấy cùng lúc không làm tồn âm; đi trọn luồng Hình 2.6 trên máy tính bảng.
