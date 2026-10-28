@@ -35,18 +35,19 @@
     </div>
     <div class="table-responsive">
         <table class="table bang-dong-hang mb-0">
-            <thead><tr><th>#</th><th>Biến thể</th><th class="so">Số lượng</th><th class="so">Đơn giá</th><th class="so">Thành tiền</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Biến thể</th><th>Đơn vị</th><th class="so">Số lượng</th><th class="so">Đơn giá</th><th class="so">Thành tiền</th><th></th></tr></thead>
             <tbody id="dongDonMua" data-dong-hang>
                 @for (var i = 0; i < Model.Dong.Count; i++)
                 {
                     <partial name="_DongDonMua" model="(Model, i.ToString())" />
                 }
             </tbody>
-            <tfoot><tr><td colspan="4" class="text-end">Tổng tiền</td><td class="so tong-cong" data-tong-tien></td><td></td></tr></tfoot>
+            <tfoot><tr><td colspan="5" class="text-end">Tổng tiền</td><td class="so tong-cong" data-tong-tien></td><td></td></tr></tfoot>
             <template><partial name="_DongDonMua" model='(Model, "__i__")' /></template>
         </table>
     </div>
-    <div class="form-text">Số lượng và đơn giá theo đơn vị tính chính của hàng.</div>
+    <div class="form-text">Số lượng và đơn giá theo đơn vị chọn trên dòng; hệ thống quy về đơn vị tính chính khi nhận hàng.</div>
+    <script type="application/json" data-don-vi-hang>@Json.Serialize(Model.DonViHang)</script>
 </div>
 
 <script>

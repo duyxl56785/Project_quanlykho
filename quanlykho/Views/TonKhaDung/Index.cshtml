@@ -1,3 +1,4 @@
+@using quanlykho.Features.DanhMuc
 @using quanlykho.Features.XuatKho
 @model TrangDuLieu<TonKhaDungDong>
 @{
@@ -54,11 +55,17 @@
                 <td>@d.DonViTinh</td>
                 @foreach (var k in cot)
                 {
-                    <td class="so">@So(d.TheoKho.GetValueOrDefault(k.Ma))</td>
+                    <td class="so">@So(d.TheoKho.GetValueOrDefault(k.Ma))@if (d.DonVi.Count > 1 && d.TheoKho.GetValueOrDefault(k.Ma) >= d.DonVi[^1].HeSo)
+                        {
+                            <div class="small text-secondary">@QuyDoiDonVi.HienThi(d.DonVi, d.TheoKho.GetValueOrDefault(k.Ma))</div>
+                        }</td>
                 }
                 @if (cot.Count > 1)
                 {
-                    <td class="so tong-cong">@So(d.Tong)</td>
+                    <td class="so tong-cong">@So(d.Tong)@if (d.DonVi.Count > 1 && d.Tong >= d.DonVi[^1].HeSo)
+                        {
+                            <div class="small text-secondary fw-normal">@QuyDoiDonVi.HienThi(d.DonVi, d.Tong)</div>
+                        }</td>
                 }
             </tr>
         }

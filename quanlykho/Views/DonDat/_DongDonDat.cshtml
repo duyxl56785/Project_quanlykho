@@ -6,7 +6,7 @@
 <tr>
     <td data-stt>@(i + 1)</td>
     <td>
-        <select class="form-select" name="Dong[@Model.I].MaBienThe" aria-label="Biến thể">
+        <select class="form-select" name="Dong[@Model.I].MaBienThe" aria-label="Biến thể" data-chon-hang>
             <option value="">Chọn hàng</option>
             @foreach (var b in Model.Form.DanhSachBienThe)
             {
@@ -14,6 +14,7 @@
             }
         </select>
     </td>
+    <td><partial name="_OChonDonVi" model='new OChonDonVi($"Dong[{Model.I}].TenDonVi", dong.TenDonVi, Model.Form.DonViHang.GetValueOrDefault(dong.MaBienThe) ?? [])' /></td>
     <td><input class="form-control text-end" name="Dong[@Model.I].SoLuong" type="number" min="0.001" step="any" value="@dong.SoLuong" aria-label="Số lượng" /></td>
     <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong aria-label="Xóa dòng">✕</button></td>
 </tr>
