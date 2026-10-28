@@ -84,5 +84,15 @@ public static class TenChungTu
     };
 }
 
+/// <summary>Một loại gợi ý AI: CoPhanHoi là số lần đã biết người dùng làm theo hay không (đã lập chứng từ, bỏ qua hoặc hủy).</summary>
+public record DongGoiY(LoaiGoiY Loai, int Tong, int CoPhanHoi, int ChapNhan)
+{
+    public decimal? TyLe => CoPhanHoi == 0 ? null : Math.Round(ChapNhan * 100m / CoPhanHoi, 1);
+
+    public string Ten => Loai == LoaiGoiY.LayHang ? "G1 – Gợi ý lấy hàng" : "G3 – Đề xuất nhập bổ sung";
+}
+
+public record GoiYTrang(LocBaoCao Loc, DanhSachLoc DanhSach, List<DongGoiY> Dong);
+
 /// <summary>Model của partial _Loc: các ô lọc dùng chung, bật thêm ô theo từng báo cáo.</summary>
 public record ThanhLocBaoCao(LocBaoCao Loc, DanhSachLoc DanhSach, bool Ky = false, bool Khu = false, bool TheKho = false);

@@ -88,10 +88,22 @@ html { font-size: 15px; }
   background: var(--mau-be-mat); border-bottom: 1px solid var(--mau-vien);
   position: sticky; top: 0; z-index: 1020;
 }
-.thanh-tren .tieu-de { margin: 0; font-size: 1.0625rem; font-weight: 600; }
+.thanh-tren .tieu-de { margin: 0; min-width: 0; font-size: 1.0625rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .thanh-tren .nguoi-dung { margin-left: auto; color: var(--mau-chu-phu); font-size: var(--co-chu-nho); }
 
 main { padding: var(--khoang-4) var(--khoang-3); }
+
+/* Bảng xếp dòng (điện thoại): mỗi dòng một thẻ, ô có data-nhan hiện nhãn bên trái, ô .cot-chinh làm tiêu đề thẻ. */
+@media (max-width: 575.98px) {
+  .bang-xep-dong thead { display: none; }
+  .bang-xep-dong table, .bang-xep-dong tbody, .bang-xep-dong tr { display: block; }
+  .bang-xep-dong tr { padding: var(--khoang-2) 0; border-bottom: 1px solid var(--mau-vien); }
+  .bang-xep-dong td { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; column-gap: var(--khoang-3); padding: .15rem var(--khoang-3); border: 0; text-align: right; }
+  .bang-xep-dong td > div { flex-basis: 100%; }
+  .bang-xep-dong td[data-nhan]::before { content: attr(data-nhan); flex-shrink: 0; color: var(--mau-chu-phu); font-size: var(--co-chu-nho); text-align: left; }
+  .bang-xep-dong td.cot-chinh { display: block; text-align: left; }
+  .bang-xep-dong td:empty { display: none; }
+}
 @media (min-width: 992px) { main { padding: var(--khoang-4); } }
 
 .tieu-de-trang { display: flex; flex-wrap: wrap; align-items: center; gap: var(--khoang-2); margin-bottom: var(--khoang-3); }

@@ -26,7 +26,7 @@ dotnet tool restore           # lần đầu: cài dotnet-ef
 dotnet run --project quanlykho -- --seed   # migrate rồi nạp dữ liệu thử (chạy lại không nhân đôi), xong thì thoát
 ```
 
-Dữ liệu thử ở `Data/Seed/DuLieuThu.cs`: kho `K01`, `K02` (19 ô mỗi kho, có ô mặc định khu tiếp nhận và cách ly), 4 nhóm hàng, 50 biến thể, 3 nhà cung cấp, 2 nơi nhận, 7 tài khoản `ND001`–`ND007` email `@kho.test` (mật khẩu ở `DuLieuThu:MatKhau` trong `appsettings.Development.json`). `--seed` còn thêm mỗi kho một hóa đơn nhập mẫu đã xác nhận và đã xếp vào ô lưu trữ (`Data/Seed/PhieuNhapMau.cs`, đi qua service, không có trong DB test). Muốn DB sạch: `docker compose down -v`, `docker compose up -d`, rồi seed lại.
+Dữ liệu thử ở `Data/Seed/DuLieuThu.cs`: kho `K01`, `K02` (19 ô mỗi kho, có ô mặc định khu tiếp nhận và cách ly), 4 nhóm hàng, 50 biến thể, 3 nhà cung cấp, 2 nơi nhận, 7 tài khoản `ND001`–`ND007` email `@kho.test` (mật khẩu ở `DuLieuThu:MatKhau` trong `appsettings.Development.json`). `--seed` còn thêm mỗi kho một hóa đơn nhập mẫu đã xác nhận và đã xếp vào ô lưu trữ (`Data/Seed/PhieuNhapMau.cs`, đi qua service, không có trong DB test), và 3 tháng lịch sử xuất bán cho G3 (`Data/Seed/LichSuXuat.cs`: mỗi kho một phiếu tồn đầu kỳ 95 ngày trước rồi phiếu xuất bán hằng ngày, ghi qua cổng; cuối kỳ sữa, giấy K01 và mì K02 dưới điểm đặt hàng). Tệp Excel thử ở `quanlykho.Tests/TepMau/`. Muốn DB sạch: `docker compose down -v`, `docker compose up -d`, rồi seed lại.
 
 ```bash
 dotnet test                   # chạy toàn bộ test (quanlykho.Tests); test tích hợp cần Docker đang chạy
@@ -118,7 +118,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 - Dựa trên Bootstrap có sẵn. Một file CSS dùng chung (biến màu, cỡ chữ, khoảng cách), một `_Layout`; không CSS riêng từng trang, không style inline.
 - Thành phần dùng lại bằng partial view hoặc View Component: bảng dữ liệu có lọc và phân trang, ô quét mã (tự nhận con trỏ), huy hiệu trạng thái (mỗi trạng thái một màu cố định), hộp xác nhận, thông báo, ô chọn kho, ô chọn đơn vị. Có trang `/Styleguide` hiện mọi thành phần.
 - Thành phần đã có (xem `/Styleguide`, chỉ mở ở Development):
-  - Bảng: `<bang-du-lieu trang="Model" thong-bao-rong="...">` với model `TrangDuLieu<T>` (`TrangDuLieu<T>.TaoAsync(query, trang)`); thanh lọc là `<form class="thanh-loc" method="get">`.
+  - Bảng: `<bang-du-lieu trang="Model" thong-bao-rong="...">` với model `TrangDuLieu<T>` (`TrangDuLieu<T>.TaoAsync(query, trang)`); thanh lọc là `<form class="thanh-loc" method="get">`. Màn hình người dùng xem trên điện thoại thêm `xep-dong="true"` (bảng thường: lớp `bang-xep-dong` trên khung `table-responsive`): dưới 576 px mỗi dòng thành thẻ, ô cần nhãn gắn `data-nhan`, ô tiêu đề thẻ gắn `cot-chinh`.
   - Partial: `_HuyHieuTrangThai` (model enum; tên, màu khai ở `Common/GiaoDien/TrangThaiHienThi`, enum trạng thái mới phải thêm vào đó), `_OQuetMa` (model `OQuetMa`; JS nghe sự kiện `quet-ma`, báo bằng `QuanLyKho.baoQuet`), `_TrangRong`, `_DangTai`, `_ThongBao` (TempData `ThongBao`, `Loi`), `_HopXacNhan` (thuộc tính `data-xac-nhan` trên form, nút, liên kết).
   - View Component `OChonKho`: `@await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = ... })`.
   - Ô chọn đơn vị: `<partial name="_OChonDonVi" model="new OChonDonVi(ten, chon, donVi)" />` với `donVi` từ `QuyDoiDonVi.DonViAsync/BangAsync` (phần tử 0 là đơn vị chính, mỗi option có `data-he-so`). Quy đổi ở Service bằng `QuyDoiDonVi.QuyVeChinhAsync`, hiển thị bằng `QuyDoiDonVi.HienThi` ("9 thùng 19 chai"), quét mã vạch đơn vị bằng `TraMaVachAsync`.

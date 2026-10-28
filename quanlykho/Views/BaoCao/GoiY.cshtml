@@ -1,0 +1,54 @@
+@using quanlykho.Features.BaoCao
+@model GoiYTrang
+@{
+    ViewData["Title"] = "Tỷ lệ chấp nhận gợi ý AI";
+}
+
+<div class="tieu-de-trang"><h1>Tỷ lệ chấp nhận gợi ý AI</h1><a class="btn btn-outline-secondary" asp-action="Index">Báo cáo</a></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="MaKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = Model.Loc.MaKho, coTatCa = true, danhSach = Model.DanhSach.Kho })
+    </div>
+    <div>
+        <label class="form-label" for="TuNgay">Từ ngày</label>
+        <input class="form-control" id="TuNgay" name="TuNgay" type="date" value="@Model.Loc.TuNgay?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div>
+        <label class="form-label" for="DenNgay">Đến ngày</label>
+        <input class="form-control" id="DenNgay" name="DenNgay" type="date" value="@Model.Loc.DenNgay?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Xem</button>
+        <a class="btn btn-outline-secondary" href="?">Bỏ lọc</a>
+    </div>
+</form>
+@if (Model.Loc.Loi is not null)
+{
+    <div class="alert alert-danger" role="alert">@Model.Loc.Loi</div>
+}
+
+<div class="the">
+    <div class="table-responsive bang-xep-dong">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Loại gợi ý</th><th class="so">Số lần gợi ý</th><th class="so">Đã biết kết quả</th><th class="so">Làm theo</th><th class="so">Tỷ lệ chấp nhận</th></tr></thead>
+            <tbody>
+                @foreach (var d in Model.Dong)
+                {
+                    <tr>
+                        <td class="cot-chinh fw-semibold">@d.Ten</td>
+                        <td class="so" data-nhan="Số lần gợi ý">@So(d.Tong)</td>
+                        <td class="so" data-nhan="Đã biết kết quả">@So(d.CoPhanHoi)</td>
+                        <td class="so" data-nhan="Làm theo">@So(d.ChapNhan)</td>
+                        <td class="so tong-cong" data-nhan="Tỷ lệ chấp nhận">@(d.TyLe is { } t ? $"{So(t)} %" : "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="text-secondary">
+    Tỷ lệ = số lần làm theo / số lần đã biết kết quả. G1 tính là làm theo khi phiếu xuất lấy đúng lô, ô được gợi ý; G3 khi đơn mua nháp từ đề xuất được xác nhận
+    (hủy đơn nháp hoặc bấm Bỏ qua là không làm theo). Gợi ý chưa dùng cho chứng từ nào chưa tính vào tỷ lệ.
+</p>
