@@ -125,6 +125,9 @@ public class BienTheForm
     public TrangThaiSuDung TrangThai { get; set; }
 
     public List<MucTonDong> MucTon { get; set; } = [];
+
+    /// <summary>Đơn vị quy đổi một tầng: 1 TenDonVi = HeSo DonViTinh.</summary>
+    public List<DonViQuyDoiDong> DonVi { get; set; } = [];
 }
 
 public enum LoaiDoiTac { NhaCungCap, NoiNhan }

@@ -1,0 +1,8 @@
+@model OChonDonVi
+@* Ô chọn đơn vị: mỗi option mang data-he-so để JS quy ra đơn vị chính; máy chủ vẫn quy đổi lại bằng QuyDoiDonVi. *@
+<select class="form-select" name="@Model.Ten" id="@(Model.Id ?? Model.Ten)" aria-label="Đơn vị">
+    @foreach (var d in Model.DonVi)
+    {
+        <option value="@d.Ten" data-he-so="@d.HeSo" selected="@(string.Equals(d.Ten, Model.Chon, StringComparison.CurrentCultureIgnoreCase))">@(d.HeSo == 1 ? d.Ten : $"{d.Ten} ({d.HeSo} {Model.DonVi[0].Ten})")</option>
+    }
+</select>

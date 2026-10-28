@@ -26,7 +26,7 @@ public class DanhMucTests(CsdlFixture csdl) : IAsyncLifetime
     private DanhMucService Service(out Data.AppDbContext db)
     {
         db = CsdlFixture.TaoDbContext(_chuoi);
-        return new DanhMucService(db, NguoiThu.NhatKy(db, NguoiThu.HienTai(db, "ND001", Vai.QuanTri)));
+        return new DanhMucService(db, NguoiThu.NhatKy(db, NguoiThu.HienTai(db, "ND001", Vai.QuanTri)), new QuyDoiDonVi(db));
     }
 
     private static async Task<HttpResponseMessage> Post(HttpClient client, string url, string trangLayToken, Dictionary<string, string> duLieu)

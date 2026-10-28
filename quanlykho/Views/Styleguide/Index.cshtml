@@ -1,3 +1,4 @@
+@using quanlykho.Features.DanhMuc
 @{
     ViewData["Title"] = "Styleguide";
     var khoMau = new List<LuaChon> { new("K01", "Kho Hà Nội"), new("K02", "Kho Bắc Ninh") };
@@ -95,6 +96,11 @@
         <div class="col-md-4">
             <label class="form-label" for="maKho">Kho <small class="text-secondary">(OChonKho)</small></label>
             @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = "K01", danhSach = khoMau })
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="vdDonVi">Đơn vị <small class="text-secondary">(_OChonDonVi)</small></label>
+            <partial name="_OChonDonVi" model='new OChonDonVi("vdDonVi", "thùng", [new("chai", 1), new("lốc", 6), new("thùng", 24)])' />
+            <div class="form-text">Tồn 235 chai hiện là @QuyDoiDonVi.HienThi([new("chai", 1), new("lốc", 6), new("thùng", 24)], 235).</div>
         </div>
     </div>
 </div>
