@@ -1,0 +1,86 @@
+@using quanlykho.Features.XuatKho
+@model PhieuXuatForm
+@{ ViewData["Title"] = "Xuất khác, trả nhà cung cấp"; }
+
+<div class="tieu-de-trang"><h1>Xuất khác, trả nhà cung cấp</h1></div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho xuất</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = Model.MaKho, danhSach = Model.DanhSachKho })
+    </div>
+    <div class="thanh-loc-nut thanh-nut"><button class="btn btn-outline-secondary" type="submit">Đổi kho</button></div>
+</form>
+
+<form method="post" asp-action="Them">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <input type="hidden" asp-for="MaKho" />
+    <input type="hidden" asp-for="KhoaChongLap" />
+
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <span class="form-label d-block bat-buoc">Loại phiếu</span>
+                <div class="btn-group w-100" role="group" aria-label="Loại phiếu">
+                    <input type="radio" class="btn-check" name="LoaiPhieu" id="loaiKhac" value="XuatKhac" checked="@(Model.LoaiPhieu != LoaiPhieuXuat.TraNhaCungCap)" />
+                    <label class="btn btn-outline-primary" for="loaiKhac">Xuất khác</label>
+                    <input type="radio" class="btn-check" name="LoaiPhieu" id="loaiTra" value="TraNhaCungCap" checked="@(Model.LoaiPhieu == LoaiPhieuXuat.TraNhaCungCap)" />
+                    <label class="btn btn-outline-primary" for="loaiTra">Trả nhà cung cấp</label>
+                </div>
+            </div>
+            <div class="col-md-4" data-tra-ncc>
+                <label asp-for="MaNhaCungCap" class="form-label bat-buoc"></label>
+                <select asp-for="MaNhaCungCap" class="form-select">
+                    <option value="">Chọn nhà cung cấp</option>
+                    @foreach (var n in Model.DanhSachNhaCungCap)
+                    {
+                        <option value="@n.Ma" selected="@(n.Ma == Model.MaNhaCungCap)">@n.Ma – @n.Ten</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-12">
+                <label asp-for="LyDo" class="form-label bat-buoc"></label>
+                <input asp-for="LyDo" class="form-control" placeholder="Ví dụ: hủy hàng hết hạn, trưng bày, hàng lỗi trả lại" />
+                <span asp-validation-for="LyDo"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="the">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="mb-0 me-auto">Hàng xuất (kho @Model.MaKho)</h2>
+            <button type="button" class="btn btn-outline-primary" data-them-dong="#dongPhieuXuat">+ Thêm dòng</button>
+        </div>
+        @if (Model.DanhSachTon.Count == 0)
+        {
+            <partial name="_TrangRong" model='"Kho này không còn hàng chưa giữ để xuất."' />
+        }
+        <div class="table-responsive">
+            <table class="table bang-dong-hang mb-0">
+                <thead><tr><th>#</th><th>Ô, lô, hàng</th><th class="so">Số lượng</th><th></th></tr></thead>
+                <tbody id="dongPhieuXuat" data-dong-hang>
+                    @for (var i = 0; i < Model.Dong.Count; i++)
+                    {
+                        <partial name="_DongPhieuXuat" model="(Model, i.ToString())" />
+                    }
+                </tbody>
+                <template><partial name="_DongPhieuXuat" model='(Model, "__i__")' /></template>
+            </table>
+        </div>
+        <div class="form-text">Chỉ hiện phần chưa giữ cho đơn khác; lấy được ở mọi khu, kể cả khu cách ly. Số lượng theo đơn vị tính chính.</div>
+    </div>
+
+    <div class="thanh-nut">
+        <button type="submit" class="btn btn-primary" data-xac-nhan="Xuất kho ngay? Tồn bị trừ và phiếu Hoàn tất, không sửa được.">Xuất kho</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy bỏ</a>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const ncc = document.querySelector("[data-tra-ncc]");
+        const capNhat = () => ncc.hidden = !document.getElementById("loaiTra").checked;
+        document.querySelectorAll('[name="LoaiPhieu"]').forEach((r) => r.addEventListener("change", capNhat));
+        capNhat();
+    })();
+</script>

@@ -1,0 +1,19 @@
+@using quanlykho.Features.XuatKho
+@model (PhieuXuatForm Form, string I)
+@{
+    var dong = int.TryParse(Model.I, out var i) ? Model.Form.Dong[i] : new DongPhieuXuatForm();
+}
+<tr>
+    <td data-stt>@(i + 1)</td>
+    <td>
+        <select class="form-select" name="Dong[@Model.I].LoO" aria-label="Ô, lô, hàng">
+            <option value="">Chọn ô, lô</option>
+            @foreach (var t in Model.Form.DanhSachTon)
+            {
+                <option value="@t.Ma" selected="@(t.Ma == dong.LoO)">@t.Ten</option>
+            }
+        </select>
+    </td>
+    <td><input class="form-control text-end" name="Dong[@Model.I].SoLuong" type="number" min="0.001" step="any" value="@(dong.SoLuong > 0 ? dong.SoLuong : null)" aria-label="Số lượng" /></td>
+    <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong aria-label="Xóa dòng">✕</button></td>
+</tr>

@@ -1,0 +1,68 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.XuatKho
+@model TrangDuLieu<PhieuXuatDong>
+@{
+    ViewData["Title"] = "Phiếu xuất";
+    dynamic loc = ViewData["Loc"]!;
+    var kho = (List<LuaChon>)ViewData["Kho"]!;
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+}
+
+<div class="tieu-de-trang">
+    <h1>Phiếu xuất</h1>
+    @if (quanLy)
+    {
+        <a class="btn btn-primary" asp-action="Them">Xuất khác, trả nhà cung cấp</a>
+    }
+</div>
+
+<form class="thanh-loc" method="get">
+    <div>
+        <label class="form-label" for="maKho">Kho</label>
+        @await Component.InvokeAsync("OChonKho", new { ten = "maKho", chon = (string?)loc.maKho, coTatCa = true, danhSach = kho })
+    </div>
+    <div>
+        <label class="form-label" for="loai">Loại phiếu</label>
+        <select class="form-select" id="loai" name="loai">
+            <option value="">Tất cả</option>
+            @foreach (var t in Enum.GetValues<LoaiPhieuXuat>())
+            {
+                <option value="@t" selected="@(t == (LoaiPhieuXuat?)loc.loai)">@TenLoai(t)</option>
+            }
+        </select>
+    </div>
+    <div class="thanh-loc-nut thanh-nut">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+    </div>
+</form>
+
+<bang-du-lieu trang="Model" thong-bao-rong="Chưa có phiếu xuất nào.">
+    <thead>
+        <tr><th>Mã phiếu</th><th>Loại</th><th>Kho</th><th>Lệnh xuất</th><th>Ngày xuất</th><th class="so">Số dòng</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Muc)
+        {
+            <tr>
+                <td class="fw-semibold">@p.Ma</td>
+                <td>@TenLoai(p.LoaiPhieu)</td>
+                <td>@p.MaKho</td>
+                <td>@p.MaLenh</td>
+                <td>@NgayGio(p.NgayXuat)</td>
+                <td class="so">@p.SoDong</td>
+                <td><partial name="_HuyHieuTrangThai" model="p.TrangThai" /></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-ma="@p.Ma">Xem</a></td>
+            </tr>
+        }
+    </tbody>
+</bang-du-lieu>
+
+@functions {
+    private static string TenLoai(LoaiPhieuXuat l) => l switch
+    {
+        LoaiPhieuXuat.XuatBan => "Xuất bán",
+        LoaiPhieuXuat.TraNhaCungCap => "Trả nhà cung cấp",
+        _ => "Xuất khác",
+    };
+}

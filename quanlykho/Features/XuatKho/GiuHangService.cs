@@ -51,7 +51,6 @@ public class GiuHangService(AppDbContext db, NguoiDungHienTai nguoiDung, CongGhi
         foreach (var d in don)
         {
             var giu = new List<GiuHang>();
-            var goiYDaDung = new List<long>();
             foreach (var c in d.ChiTiet.OrderBy(c => c.MaBienThe, StringComparer.Ordinal))
             {
                 var can = c.SoLuongDat * c.HeSo - c.SoLuongDaXuat;
@@ -63,7 +62,6 @@ public class GiuHangService(AppDbContext db, NguoiDungHienTai nguoiDung, CongGhi
                     thieu.Add((d.MaDonDat, c.MaBienThe, can, can - kq.ConThieu));
                     continue;
                 }
-                goiYDaDung.Add(kq.MaGoiY);
                 giu.AddRange(kq.Dong.Select(x => new GiuHang
                 {
                     MaDonDat = d.MaDonDat, MaLo = x.MaLo, MaViTri = x.MaViTri, SoLuong = x.SoLuong, ThuTu = x.ThuTu,
@@ -79,8 +77,6 @@ public class GiuHangService(AppDbContext db, NguoiDungHienTai nguoiDung, CongGhi
             d.TrangThai = TrangThaiDonDat.DaDuyet;
             nhatKy.Ghi("DuyetDonDat", nameof(DonDatHang), d.MaDonDat, maKho: d.MaKho);
             await db.SaveChangesAsync();
-            foreach (var maGoiY in goiYDaDung)
-                await goiY.PhanHoiAsync(maGoiY, true);
         }
 
         if (thieu.Count > 0)

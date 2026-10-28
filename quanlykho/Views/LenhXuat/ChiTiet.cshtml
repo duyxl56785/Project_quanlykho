@@ -1,0 +1,226 @@
+@using quanlykho.Common.PhanQuyen
+@using quanlykho.Features.XuatKho
+@model LenhXuatChiTiet
+@{
+    ViewData["Title"] = $"Lệnh xuất {Model.Ma}";
+    var toi = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var laNguoiLay = toi == Model.MaNguoiThucHien;
+    var quanLy = User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho);
+    var dangLay = laNguoiLay && Model.DangLay;
+}
+
+<div class="@(dangLay ? "man-hinh-quet" : null)">
+    <div class="tieu-de-trang">
+        <h1>Lệnh xuất @Model.Ma</h1>
+        <partial name="_HuyHieuTrangThai" model="Model.TrangThai" />
+        <a class="btn btn-outline-secondary" asp-action="Index">Danh sách</a>
+    </div>
+
+    <div class="the">
+        <div class="row g-3">
+            <div class="col-md-4"><div class="text-secondary small">Đơn đặt, nơi nhận</div><a asp-controller="DonDat" asp-action="ChiTiet" asp-route-ma="@Model.MaDonDat">@Model.MaDonDat</a> – @Model.NoiNhan</div>
+            <div class="col-md-4"><div class="text-secondary small">Kho xuất</div>@Model.MaKho – @Model.TenKho</div>
+            <div class="col-md-4"><div class="text-secondary small">Thủ kho, ngày lập</div>@Model.NguoiThucHien · @NgayGio(Model.NgayLap)</div>
+            @if (Model.NguoiKiemTra is not null)
+            {
+                <div class="col-md-4"><div class="text-secondary small">Người kiểm tra</div>@Model.NguoiKiemTra</div>
+            }
+            @if (Model.MaPhieuXuat is not null)
+            {
+                <div class="col-md-4"><div class="text-secondary small">Phiếu xuất</div><a asp-controller="PhieuXuat" asp-action="ChiTiet" asp-route-ma="@Model.MaPhieuXuat">@Model.MaPhieuXuat</a></div>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Model.GhiChuKiemTra) && Model.DangLay)
+        {
+            <div class="alert alert-warning mt-3 mb-0" role="alert">Kiểm tra trả lại: @Model.GhiChuKiemTra</div>
+        }
+    </div>
+
+    @if (dangLay)
+    {
+        <div class="the">
+            <partial name="_OQuetMa" model='new OQuetMa("oQuet", "Quét mã ô, rồi quét mã lô (hoặc mã vạch hàng)", "Quét ô K01-… rồi quét lô L…")' />
+            <div class="row g-3 mt-1">
+                <div class="col-sm-6 col-lg-4"><div class="text-secondary small">Ô</div><span class="fw-semibold" data-chon-o>Chưa quét</span></div>
+                <div class="col-sm-6 col-lg-4"><div class="text-secondary small">Hàng</div><span class="fw-semibold" data-chon-hang>Chưa quét</span></div>
+                <div class="col-sm-6 col-lg-4">
+                    <label class="form-label" for="soLuong">Số lượng lấy</label>
+                    <input class="form-control text-end" id="soLuong" type="number" inputmode="decimal" min="0.001" step="any" />
+                </div>
+                <div class="col-12">
+                    <div class="alert alert-danger mb-2" role="alert" id="loiLay" hidden></div>
+                    <button type="button" class="btn btn-primary w-100" id="nutLay" disabled>Lấy</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="the">
+        <h2>Hàng cần xuất</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Hàng</th><th>Đơn vị</th><th class="so">Yêu cầu</th><th class="so">Đã lấy</th><th class="so">Còn lại</th></tr></thead>
+                <tbody>
+                    @foreach (var d in Model.Dong)
+                    {
+                        <tr>
+                            <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                            <td>@d.DonViTinh</td>
+                            <td class="so">@So(d.YeuCau)</td>
+                            <td class="so">@So(d.DaLay)</td>
+                            <td class="so @(d.ConLai > 0 ? "fw-semibold" : null)">@So(d.ConLai)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.GoiY.Count > 0 && Model.TrangThai != TrangThaiLenhXuat.HoanThanh)
+    {
+        <div class="the">
+            <h2>Gợi ý lấy (đã giữ), theo thứ tự ghé</h2>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th>Hạn dùng</th><th class="so">Lấy</th></tr></thead>
+                    <tbody>
+                        @foreach (var g in Model.GoiY)
+                        {
+                            <tr>
+                                <td class="small fw-semibold">@g.MaViTri</td>
+                                <td>@g.MaLo</td>
+                                <td>@g.MaBienThe</td>
+                                <td>@Ngay(g.HanDung)</td>
+                                <td class="so">@So(g.SoLuong)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="the">
+        <h2>Đã lấy</h2>
+        @if (Model.DaLay.Count == 0)
+        {
+            <partial name="_TrangRong" model='"Chưa lấy dòng nào."' />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Ô</th><th>Lô</th><th>Hàng</th><th class="so">Số lượng</th><th>Người lấy</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var d in Model.DaLay)
+                        {
+                            <tr>
+                                <td class="small">@d.MaViTri</td>
+                                <td>@d.MaLo</td>
+                                <td>@d.MaBienThe</td>
+                                <td class="so">@So(d.SoLuong)</td>
+                                <td>@d.NguoiLay<div class="small text-secondary">@NgayGio(d.ThoiDiem)</div></td>
+                                <td class="text-end">
+                                    @if (dangLay && Model.TrangThai == TrangThaiLenhXuat.ChoLayHang)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-xoa-dong="@d.MaDong" data-xac-nhan="Xóa dòng lấy @d.MaLo tại @d.MaViTri?" aria-label="Xóa dòng lấy">✕</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="thanh-nut">
+        @if (dangLay && Model.TrangThai == TrangThaiLenhXuat.ChoLayHang)
+        {
+            <form method="post" asp-action="XongLay" asp-route-ma="@Model.Ma" data-xac-nhan="Báo đã lấy xong lệnh @Model.Ma để quản lý kho kiểm tra?">
+                <button type="submit" class="btn btn-primary" disabled="@Model.Dong.Any(d => d.ConLai > 0)">Lấy xong, chờ kiểm tra</button>
+            </form>
+        }
+        @if (quanLy && Model.TrangThai == TrangThaiLenhXuat.ChoKiemTra)
+        {
+            <form method="post" asp-action="KiemTra" asp-route-ma="@Model.Ma" class="d-flex flex-wrap gap-2 flex-grow-1">
+                <input class="form-control flex-grow-1 w-auto" name="ghiChu" placeholder="Ghi chú (bắt buộc khi trả lại)" aria-label="Ghi chú kiểm tra" />
+                <button type="submit" class="btn btn-primary" name="dung" value="true">Đúng, chờ xác nhận</button>
+                <button type="submit" class="btn btn-outline-danger" name="dung" value="false">Sai, trả lại lấy hàng</button>
+            </form>
+        }
+        @if (quanLy && Model.TrangThai == TrangThaiLenhXuat.ChoXacNhan)
+        {
+            <form method="post" asp-action="XacNhan" asp-route-ma="@Model.Ma" data-xac-nhan="Xác nhận xuất kho lệnh @Model.Ma? Hệ thống sinh phiếu xuất, trừ tồn theo hàng đã lấy; sau đó không sửa được.">
+                <input type="hidden" name="khoaChongLap" value="@Guid.NewGuid().ToString("N")" />
+                <button type="submit" class="btn btn-primary">Xác nhận xuất kho</button>
+            </form>
+        }
+        @if (Model.TrangThai == TrangThaiLenhXuat.ChuaThucHien && !laNguoiLay)
+        {
+            <span class="text-secondary align-self-center">Chờ @Model.NguoiThucHien bắt đầu lấy hàng.</span>
+        }
+    </div>
+</div>
+
+@if (dangLay)
+{
+    <script>
+        (() => {
+            const ma = @Json.Serialize(Model.Ma);
+            const tienToO = @Json.Serialize(Model.MaKho + "-");
+            const goiY = @Json.Serialize(Model.GoiY.Select(g => new { g.MaLo, g.MaViTri, g.SoLuong }));
+            const daLay = @Json.Serialize(Model.DaLay.Select(d => new { d.MaLo, d.MaViTri, d.SoLuong }));
+            const oQuet = document.getElementById("oQuet");
+            const soLuong = document.getElementById("soLuong");
+            const nutLay = document.getElementById("nutLay");
+            const loi = document.getElementById("loiLay");
+            let o = null, hang = null;
+
+            const hien = (sel, text) => document.querySelector(sel).textContent = text;
+            const capNhat = () => nutLay.disabled = !(o && hang);
+
+            oQuet.addEventListener("quet-ma", (e) => {
+                loi.hidden = true;
+                if (e.detail.startsWith(tienToO)) {
+                    o = e.detail;
+                    hang = null;
+                    hien("[data-chon-o]", o);
+                    hien("[data-chon-hang]", "Chưa quét");
+                    capNhat();
+                    return QuanLyKho.baoQuet(oQuet, `Ô ${o}: quét mã lô hoặc mã vạch hàng.`, true);
+                }
+                if (!o) return QuanLyKho.baoQuet(oQuet, "Quét mã ô trước, rồi mới quét hàng.", false);
+                hang = e.detail;
+                hien("[data-chon-hang]", hang);
+                const giu = goiY.filter((g) => g.maLo === hang && g.maViTri === o).reduce((s, g) => s + g.soLuong, 0);
+                const lay = daLay.filter((d) => d.maLo === hang && d.maViTri === o).reduce((s, d) => s + d.soLuong, 0);
+                soLuong.value = giu - lay > 0 ? giu - lay : "";
+                capNhat();
+                QuanLyKho.baoQuet(oQuet, giu ? `Theo gợi ý lấy ${QuanLyKho.dinhDangSo.format(giu - lay)}; kiểm số rồi bấm Lấy.` : "Nhập số lượng rồi bấm Lấy.", true);
+                soLuong.focus();
+                soLuong.select();
+            });
+
+            nutLay.addEventListener("click", async () => {
+                loi.hidden = true;
+                nutLay.disabled = true;
+                const kq = await QuanLyKho.goiApi(`/api/lenh-xuat/${encodeURIComponent(ma)}/lay`, {
+                    method: "POST", body: { maViTri: o, ma: hang, soLuong: +soLuong.value },
+                });
+                if (kq.ok) return location.reload();
+                loi.textContent = kq.loi;
+                loi.hidden = false;
+                capNhat();
+            });
+
+            document.addEventListener("da-xac-nhan", async (e) => {
+                const maDong = e.target.dataset.xoaDong;
+                if (!maDong) return;
+                const kq = await QuanLyKho.goiApi(`/api/lenh-xuat/${encodeURIComponent(ma)}/lay/${maDong}`, { method: "DELETE" });
+                if (!kq.ok) return QuanLyKho.baoQuet(oQuet, kq.loi, false);
+                location.reload();
+            });
+        })();
+    </script>
+}

@@ -7,7 +7,7 @@ using quanlykho.Features.Kho;
 namespace quanlykho.Features.XuatKho;
 
 [Authorize(Roles = Vai.XemDonDat), Route("DonDat")]
-public class DonDatController(DonDatService service, GiuHangService giuHang) : Controller
+public class DonDatController(DonDatService service, GiuHangService giuHang, LenhXuatService lenhXuat) : Controller
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(string? tuKhoa, string? maKho, TrangThaiDonDat? trangThai, int trang = 1)
@@ -18,7 +18,13 @@ public class DonDatController(DonDatService service, GiuHangService giuHang) : C
     }
 
     [HttpGet("{ma}")]
-    public async Task<IActionResult> ChiTiet(string ma) => View(await service.LayAsync(ma));
+    public async Task<IActionResult> ChiTiet(string ma)
+    {
+        var d = await service.LayAsync(ma);
+        if (d.TrangThai == TrangThaiDonDat.DaDuyet && (User.IsInRole(Vai.QuanTri) || User.IsInRole(Vai.QuanLyKho)))
+            ViewData["ThuKho"] = await lenhXuat.ThuKhoAsync(d.MaKho);
+        return View(d);
+    }
 
     [HttpGet("Them"), Authorize(Roles = Vai.DatHang)]
     public async Task<IActionResult> Them() => View(await service.NapDanhSachAsync(new DonDatForm { Dong = [new() { SoLuong = 1 }] }));
