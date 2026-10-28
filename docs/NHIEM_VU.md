@@ -86,7 +86,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 
 - [x] Đề xuất nhập bổ sung G3 (FR21, S6-01) — 656d7e6
   - Xong khi: công thức ở mục 1.2.3 theo từng kho; không đề xuất khi d = 0 hoặc dưới 14 ngày lịch sử; tạo đơn mua nháp; khớp với tính tay trên dữ liệu mẫu (Hình 2.9).
-- [ ] Chuyển vị trí trong cùng kho (FR16, S6-02)
+- [x] Chuyển vị trí trong cùng kho (FR16, S6-02) — b4ef867
   - Xong khi: chuyển một lô từ ô này sang ô khác, kiểm sức chứa ô đến, không đổi tồn kho, ghi sổ biến động.
 - [ ] Cảnh báo và màn hình Tổng quan (FR13, S6-04)
   - Xong khi: 4 thẻ (dưới tối thiểu, vượt tối đa, sắp hết hạn, quá hạn); số ngày cảnh báo cấu hình được; số liệu khớp báo cáo.
