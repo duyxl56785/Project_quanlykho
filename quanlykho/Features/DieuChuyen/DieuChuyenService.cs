@@ -5,6 +5,7 @@ using quanlykho.Common.Loi;
 using quanlykho.Common.PhanQuyen;
 using quanlykho.Data;
 using quanlykho.Domain;
+using quanlykho.Features.DanhMuc;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.XuatKho;
 using static quanlykho.Common.GiaoDien.DinhDang;
@@ -46,14 +47,14 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
             ?? throw new NghiepVuException($"Không có phiếu điều chuyển {ma} hoặc bạn không được xem phiếu này.");
         var maLo = p.ChiTiet.Select(c => c.MaLo).ToList();
         var lo = await db.Lo.Where(l => maLo.Contains(l.MaLo))
-            .Select(l => new { l.MaLo, l.MaBienThe, l.HanDung, l.BienThe.SanPham.Ten, l.BienThe.ThuocTinh }).ToDictionaryAsync(l => l.MaLo);
+            .Select(l => new { l.MaLo, l.MaBienThe, l.HanDung, l.BienThe.SanPham.Ten, l.BienThe.ThuocTinh, l.BienThe.SanPham.DonViTinh }).ToDictionaryAsync(l => l.MaLo);
         var tenKho = await db.ViTri.Where(v => v.MaViTri == p.MaKhoDi || v.MaViTri == p.MaKhoDen).ToDictionaryAsync(v => v.MaViTri, v => v.Ten);
         var tenNguoi = await db.NguoiDung.Where(n => n.MaNguoiDung == p.NguoiLap || n.MaNguoiDung == p.NguoiNhan).ToDictionaryAsync(n => n.MaNguoiDung, n => n.Ten);
         var kho = await nguoiDung.KhoDuocGiaoAsync();
         return new DieuChuyenChiTiet(p.MaPhieu, p.MaKhoDi, tenKho[p.MaKhoDi], p.MaKhoDen, tenKho[p.MaKhoDen], p.NgayChuyen, p.PhuongTien, p.NguoiVanChuyen,
             p.LyDo, tenNguoi[p.NguoiLap], p.NgayLap, p.ThoiDiemXuat, p.NguoiNhan is null ? null : tenNguoi[p.NguoiNhan], p.ThoiDiemNhan, p.TrangThai,
             p.ChiTiet.OrderBy(c => c.STT).Select(c => new DongDieuChuyen(c.STT, c.MaLo, lo[c.MaLo].MaBienThe, DonMuaService.MoTaHang(lo[c.MaLo].Ten, lo[c.MaLo].ThuocTinh),
-                c.MaViTriDi, lo[c.MaLo].HanDung, c.TenDonVi, c.SoLuong, c.SoLuongNhan, c.CachXuLy, c.LyDoXuLy)).ToList(),
+                c.MaViTriDi, lo[c.MaLo].HanDung, c.TenDonVi, c.SoLuong, c.SoLuongNhan, c.CachXuLy, c.LyDoXuLy, c.SoLuongGoc, c.HeSo, lo[c.MaLo].DonViTinh)).ToList(),
             kho.Contains(p.MaKhoDi), kho.Contains(p.MaKhoDen));
     }
 
@@ -74,6 +75,7 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
             .Select(x => new LuaChon($"{x.MaLo}|{x.MaViTri}",
                 $"{x.MaBienThe} · {x.MaLo}{(x.HanDung is null ? "" : $" · HSD {Ngay(x.HanDung)}")} · {x.MaViTri} · khả dụng {So(x.KhaDung)} {x.DonViTinh}"))
             .ToList();
+        form.DonViHang = await new QuyDoiDonVi(db).TheoLuaChonLoOAsync(form.DanhSachTon);
         return form;
     }
 
@@ -88,7 +90,7 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
         {
             Ma = p.MaPhieu, MaKhoDi = p.MaKhoDi, MaKhoDen = p.MaKhoDen, NgayChuyen = p.NgayChuyen, PhuongTien = p.PhuongTien,
             NguoiVanChuyen = p.NguoiVanChuyen, LyDo = p.LyDo,
-            Dong = p.ChiTiet.OrderBy(c => c.STT).Select(c => new DongDieuChuyenForm { LoO = $"{c.MaLo}|{c.MaViTriDi}", SoLuong = c.SoLuong }).ToList(),
+            Dong = p.ChiTiet.OrderBy(c => c.STT).Select(c => new DongDieuChuyenForm { LoO = $"{c.MaLo}|{c.MaViTriDi}", TenDonVi = c.TenDonVi, SoLuong = c.SoLuongGoc }).ToList(),
         });
     }
 
@@ -272,15 +274,17 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
         if (!await db.ViTri.AnyAsync(v => v.MaKho == form.MaKhoDen && v.LaOMacDinh && v.LoaiKhu == LoaiKhu.TiepNhan))
             throw new NghiepVuException($"Kho {form.MaKhoDen} chưa có ô mặc định khu tiếp nhận để nhận hàng.");
 
-        var dong = new List<(string MaLo, string MaViTri, decimal SoLuong)>();
-        foreach (var d in form.Dong.Where(d => !string.IsNullOrWhiteSpace(d.LoO)))
+        var chon = form.Dong.Where(d => !string.IsNullOrWhiteSpace(d.LoO)).ToList();
+        var theoLo = await new QuyDoiDonVi(db).TheoLoAsync(chon.Select(d => d.LoO.Split('|')[0]));
+        var dong = new List<(string MaLo, string MaViTri, KetQuaQuyDoi Q, decimal SoLuongGoc)>();
+        foreach (var d in chon)
         {
             var tach = d.LoO.Split('|');
             if (tach.Length != 2)
                 throw new NghiepVuException("Dòng hàng không hợp lệ, chọn lại lô.");
             if (d.SoLuong <= 0)
                 throw new NghiepVuException("Số lượng chuyển phải lớn hơn 0.");
-            dong.Add((tach[0], tach[1], d.SoLuong));
+            dong.Add((tach[0], tach[1], QuyDoiDonVi.QuyVeChinhTheoLo(theoLo, tach[0], d.TenDonVi, d.SoLuong), d.SoLuong));
         }
         if (dong.Count == 0)
             throw new NghiepVuException("Phiếu điều chuyển phải có ít nhất một dòng hàng.");
@@ -289,12 +293,9 @@ public class DieuChuyenService(AppDbContext db, NguoiDungHienTai nguoiDung, MaCh
         var maO = dong.Select(d => d.MaViTri).Distinct().ToList();
         if (await db.ViTri.CountAsync(v => maO.Contains(v.MaViTri) && v.MaKho == form.MaKhoDi) != maO.Count)
             throw new NghiepVuException($"Có ô không thuộc kho {form.MaKhoDi}.");
-        var maLo = dong.Select(d => d.MaLo).Distinct().ToList();
-        var donVi = await db.Lo.Where(l => maLo.Contains(l.MaLo)).Select(l => new { l.MaLo, l.BienThe.SanPham.DonViTinh }).ToDictionaryAsync(l => l.MaLo, l => l.DonViTinh);
         return dong.Select((d, i) => new ChiTietDieuChuyen
         {
-            STT = i + 1, MaLo = d.MaLo, MaViTriDi = d.MaViTri, TenDonVi = donVi.GetValueOrDefault(d.MaLo) ?? throw new NghiepVuException($"Không có lô {d.MaLo}."),
-            HeSo = 1, SoLuongGoc = d.SoLuong, SoLuong = d.SoLuong,
+            STT = i + 1, MaLo = d.MaLo, MaViTriDi = d.MaViTri, TenDonVi = d.Q.TenDonVi, HeSo = d.Q.HeSo, SoLuongGoc = d.SoLuongGoc, SoLuong = d.Q.SoLuong,
         }).ToList();
     }
 

@@ -49,7 +49,7 @@
     }
     <div class="table-responsive">
         <table class="table bang-dong-hang mb-0">
-            <thead><tr><th>#</th><th>Hàng, lô, ô</th><th class="so">Số lượng</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Hàng, lô, ô</th><th>Đơn vị</th><th class="so">Số lượng</th><th></th></tr></thead>
             <tbody id="dongDieuChuyen" data-dong-hang>
                 @for (var i = 0; i < Model.Dong.Count; i++)
                 {
@@ -59,7 +59,8 @@
             <template><partial name="_DongDieuChuyen" model='(Model, "__i__")' /></template>
         </table>
     </div>
-    <div class="form-text">Chỉ chuyển hàng khả dụng (khu lưu trữ, chưa hết hạn, chưa giữ). Số lượng theo đơn vị tính chính.</div>
+    <div class="form-text">Chỉ chuyển hàng khả dụng (khu lưu trữ, chưa hết hạn, chưa giữ). Số lượng theo đơn vị chọn trên dòng; kho đến nhận theo đơn vị tính chính.</div>
+    <script type="application/json" data-don-vi-hang>@Json.Serialize(Model.DonViHang)</script>
 </div>
 
 <div class="thanh-nut">

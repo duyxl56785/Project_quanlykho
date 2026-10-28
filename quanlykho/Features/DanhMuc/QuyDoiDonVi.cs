@@ -40,6 +40,27 @@ public class QuyDoiDonVi(AppDbContext db)
             b => quyDoi[b.MaBienThe].OrderBy(d => d.HeSo).Select(d => new DonViChon(d.TenDonVi, d.HeSo)).Prepend(new DonViChon(b.DonViTinh, 1)).ToList());
     }
 
+    /// <summary>Đơn vị theo lô (đơn vị của biến thể của lô), cho dòng chứng từ chọn theo (lô, ô).</summary>
+    public async Task<Dictionary<string, List<DonViChon>>> TheoLoAsync(IEnumerable<string> maLo)
+    {
+        var ma = maLo.Distinct().ToList();
+        var lo = await db.Lo.Where(l => ma.Contains(l.MaLo)).ToDictionaryAsync(l => l.MaLo, l => l.MaBienThe);
+        var bang = await BangAsync(lo.Values);
+        return lo.ToDictionary(x => x.Key, x => bang[x.Value]);
+    }
+
+    /// <summary>Đơn vị cho ô chọn đơn vị trên dòng chọn theo "MaLo|MaViTri" (khóa là giá trị lựa chọn).</summary>
+    public async Task<Dictionary<string, List<DonViChon>>> TheoLuaChonLoOAsync(IEnumerable<LuaChon> loO)
+    {
+        var ds = loO.ToList();
+        var theoLo = await TheoLoAsync(ds.Select(x => x.Ma.Split('|')[0]));
+        return ds.Where(x => theoLo.ContainsKey(x.Ma.Split('|')[0])).ToDictionary(x => x.Ma, x => theoLo[x.Ma.Split('|')[0]]);
+    }
+
+    /// <summary>Quy một dòng chọn theo lô; lô không có thì báo lỗi.</summary>
+    public static KetQuaQuyDoi QuyVeChinhTheoLo(Dictionary<string, List<DonViChon>> theoLo, string maLo, string? tenDonVi, decimal soLuong) =>
+        QuyVeChinh(theoLo.GetValueOrDefault(maLo) ?? throw new NghiepVuException($"Không có lô {maLo}."), tenDonVi, soLuong, maLo);
+
     /// <summary>Số theo đơn vị đã chọn ra số theo đơn vị tính chính; tên trống là đơn vị chính.</summary>
     public async Task<KetQuaQuyDoi> QuyVeChinhAsync(string maBienThe, string? tenDonVi, decimal soLuongGoc) =>
         QuyVeChinh(await DonViAsync(maBienThe), tenDonVi, soLuongGoc, maBienThe);
@@ -67,6 +88,10 @@ public class QuyDoiDonVi(AppDbContext db)
         var le = so - phanLon * lon.HeSo;
         return le == 0 ? $"{am}{DinhDang.So(phanLon)} {lon.Ten}" : $"{am}{DinhDang.So(phanLon)} {lon.Ten} {DinhDang.So(le)} {chinh.Ten}";
     }
+
+    /// <summary>"9 thùng 19 chai" khi hàng có đơn vị quy đổi và số đủ một đơn vị lớn; null thì không cần hiện thêm.</summary>
+    public static string? HienThiNeuCo(IReadOnlyList<DonViChon>? donVi, decimal soLuong) =>
+        donVi is { Count: > 1 } && Math.Abs(soLuong) >= donVi.Max(d => d.HeSo) ? HienThi(donVi, soLuong) : null;
 
     /// <summary>Mã vạch của biến thể (đơn vị chính) hoặc của một đơn vị quy đổi đang dùng.</summary>
     public async Task<MaVachHang?> TraMaVachAsync(string maVach)

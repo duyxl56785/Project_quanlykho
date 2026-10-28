@@ -44,7 +44,7 @@
                     <thead>
                         <tr>
                             <th>#</th><th>Hàng</th><th>Lô</th><th>Hạn dùng</th><th>Ô ở kho đi</th><th class="so">Chuyển</th>
-                            <th class="so">Thực nhận</th>
+                            <th class="so">Thực nhận (đơn vị chính)</th>
                             @if (Model.Dong.Any(d => d.ChenhLech > 0))
                             {
                                 <th class="so">Chênh lệch</th>
@@ -61,7 +61,10 @@
                                 <td>@d.MaLo</td>
                                 <td>@Ngay(d.HanDung)</td>
                                 <td class="small">@d.MaViTriDi</td>
-                                <td class="so">@So(d.SoLuong) @d.TenDonVi</td>
+                                <td class="so">@So(d.SoLuongGoc) @d.TenDonVi@if (d.HeSo > 1)
+                                    {
+                                        <div class="small text-secondary">= @So(d.SoLuong) @d.DonViChinh</div>
+                                    }</td>
                                 <td class="so">
                                     @if (nhanDuoc)
                                     {
@@ -112,10 +115,10 @@
             @foreach (var d in Model.Dong.Where(x => x.ChoXuLy))
             {
                 <form method="post" asp-action="XuLy" asp-route-ma="@Model.Ma" class="row g-2 align-items-end mb-2"
-                      data-xac-nhan="Xử lý phần thiếu @So(d.ChenhLech) @d.TenDonVi của lô @d.MaLo? Không hoàn tác được.">
+                      data-xac-nhan="Xử lý phần thiếu @So(d.ChenhLech) @d.DonViChinh của lô @d.MaLo? Không hoàn tác được.">
                     <input type="hidden" name="stt" value="@d.STT" />
                     <input type="hidden" name="khoaChongLap" value="@Guid.NewGuid().ToString("N")" />
-                    <div class="col-md-3"><div class="small text-secondary">Dòng @d.STT · @d.MaLo</div><span class="fw-semibold text-danger">Thiếu @So(d.ChenhLech) @d.TenDonVi</span></div>
+                    <div class="col-md-3"><div class="small text-secondary">Dòng @d.STT · @d.MaLo</div><span class="fw-semibold text-danger">Thiếu @So(d.ChenhLech) @d.DonViChinh</span></div>
                     <div class="col-md-3">
                         <label class="form-label" for="cach-@d.STT">Cách xử lý</label>
                         <select class="form-select" id="cach-@d.STT" name="cachXuLy">
