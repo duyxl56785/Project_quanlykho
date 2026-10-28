@@ -39,7 +39,7 @@
 
 <div class="the">
     <h2>Dòng hàng</h2>
-    <div class="table-responsive">
+    <div class="table-responsive bang-xep-dong">
         <table class="table align-middle mb-0">
             <thead>
                 <tr><th>Hàng</th><th>Đơn vị</th><th class="so">Đặt</th><th class="so">Đã xuất (đơn vị chính)</th><th class="so">Khả dụng ở @Model.MaKho</th></tr>
@@ -48,14 +48,14 @@
                 @foreach (var d in Model.Dong)
                 {
                     <tr>
-                        <td><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
-                        <td>@d.TenDonVi</td>
-                        <td class="so">@So(d.SoLuongDat)@if (d.HeSo > 1)
+                        <td class="cot-chinh"><span class="fw-semibold">@d.MaBienThe</span><div class="small text-secondary">@d.TenHang</div></td>
+                        <td data-nhan="Đơn vị">@d.TenDonVi</td>
+                        <td class="so" data-nhan="Đặt">@So(d.SoLuongDat)@if (d.HeSo > 1)
                             {
                                 <div class="small text-secondary">= @So(d.SoDatChinh) @d.DonViChinh</div>
                             }</td>
-                        <td class="so">@So(d.SoLuongDaXuat) @d.DonViChinh</td>
-                        <td class="so @(Model.SuaDuoc && d.KhaDung < d.SoDatChinh - d.SoLuongDaXuat ? "text-danger fw-semibold" : null)">@So(d.KhaDung) @d.DonViChinh@if (d.KhaDungQuyDoi != $"{So(d.KhaDung)} {d.DonViChinh}")
+                        <td class="so" data-nhan="Đã xuất">@So(d.SoLuongDaXuat) @d.DonViChinh</td>
+                        <td class="so @(Model.SuaDuoc && d.KhaDung < d.SoDatChinh - d.SoLuongDaXuat ? "text-danger fw-semibold" : null)" data-nhan="Khả dụng ở @Model.MaKho">@So(d.KhaDung) @d.DonViChinh@if (d.KhaDungQuyDoi != $"{So(d.KhaDung)} {d.DonViChinh}")
                             {
                                 <div class="small text-secondary">@d.KhaDungQuyDoi</div>
                             }</td>
