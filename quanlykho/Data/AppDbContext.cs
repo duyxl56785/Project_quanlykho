@@ -40,6 +40,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<PhieuNhap> PhieuNhap => Set<PhieuNhap>();
     public DbSet<ChiTietPhieuNhap> ChiTietPhieuNhap => Set<ChiTietPhieuNhap>();
     public DbSet<NhatKy> NhatKy => Set<NhatKy>();
+    public DbSet<TepDaNhap> TepDaNhap => Set<TepDaNhap>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder c)
     {

@@ -1,0 +1,88 @@
+@using quanlykho.Features.NhapExcel
+@model KetQuaKiemTra?
+@{
+    ViewData["Title"] = "Nhập Excel danh mục";
+    const int HienToiDa = 200;
+}
+
+<div class="tieu-de-trang">
+    <h1>Nhập Excel danh mục</h1>
+    <a class="btn btn-outline-primary" asp-action="Mau">Tải tệp mẫu</a>
+</div>
+
+<form class="the" method="post" asp-action="KiemTra" enctype="multipart/form-data">
+    <h2>1. Tải tệp lên để kiểm tra</h2>
+    <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+            <label class="form-label bat-buoc" for="tep">Tệp .xlsx theo mẫu (sản phẩm, biến thể, nhà cung cấp; tối đa 5 MB)</label>
+            <input class="form-control" id="tep" name="tep" type="file" accept=".xlsx" required />
+        </div>
+        <div class="col-md-4"><button type="submit" class="btn btn-primary w-100">Kiểm tra</button></div>
+    </div>
+    <p class="form-text mb-0">Hệ thống kiểm lỗi toàn bộ tệp và chưa ghi gì; chỉ ghi khi tệp không còn lỗi. Một tệp chỉ nhập được một lần.</p>
+</form>
+
+@if (Model is not null)
+{
+    <div class="the">
+        <h2>2. Kết quả kiểm tra: @Model.TenTep</h2>
+        <p>
+            @Model.SoSanPham sản phẩm, @Model.SoBienThe biến thể, @Model.SoNhaCungCap nhà cung cấp hợp lệ.
+            @if (Model.Loi.Count > 0)
+            {
+                <span class="text-danger fw-semibold">@Model.Loi.Count lỗi.</span>
+            }
+        </p>
+
+        @if (Model.DaNhapLuc is { } luc)
+        {
+            <div class="alert alert-warning" role="alert">Tệp này đã được nhập lúc @NgayGio(luc); không nhập lại được.</div>
+        }
+
+        @if (Model.Loi.Count > 0)
+        {
+            <div class="alert alert-danger" role="alert">Tệp còn lỗi nên chưa ghi gì. Sửa các dòng dưới đây trong Excel rồi tải lên lại.</div>
+            <div class="table-responsive the-cuon">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Sheet</th><th class="so">Dòng</th><th>Lỗi</th></tr></thead>
+                    <tbody>
+                        @foreach (var l in Model.Loi.Take(HienToiDa))
+                        {
+                            <tr><td>@l.Sheet</td><td class="so">@(l.Dong == 0 ? "" : l.Dong)</td><td>@l.NoiDung</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.Loi.Count > HienToiDa)
+            {
+                <p class="text-secondary mt-2 mb-0">Còn @(Model.Loi.Count - HienToiDa) lỗi nữa chưa hiện.</p>
+            }
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var (sheet, dong) in Model.XemTruoc.Where(x => x.Value.Count > 0))
+                {
+                    <div class="col-lg-4">
+                        <div class="text-secondary small">Xem trước @sheet (tối đa 10 dòng đầu)</div>
+                        <ul class="small mb-0">
+                            @foreach (var d in dong)
+                            {
+                                <li>@d</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Model.GhiDuoc)
+        {
+            <form method="post" asp-action="Ghi" class="mt-3" data-xac-nhan="Ghi @Model.SoDong dòng vào danh mục? Không hoàn tác được (chỉ ngừng sử dụng).">
+                <input type="hidden" name="maBam" value="@Model.MaBam" />
+                <input type="hidden" name="tenTep" value="@Model.TenTep" />
+                <button type="submit" class="btn btn-primary">Ghi vào hệ thống</button>
+            </form>
+        }
+    </div>
+}

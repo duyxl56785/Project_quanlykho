@@ -22,6 +22,7 @@ using quanlykho.Features.XepHang;
 using quanlykho.Features.XuatKho;
 using quanlykho.Features.NhapKho;
 using quanlykho.Features.NhatKyThaoTac;
+using quanlykho.Features.NhapExcel;
 using quanlykho.Features.QuanLyNguoiDung;
 using quanlykho.Features.TaiKhoan;
 using quanlykho.Features.TongQuan;
@@ -69,6 +70,7 @@ builder.Services.AddScoped<KiemKeService>();
 builder.Services.AddScoped<TongQuanService>();
 builder.Services.AddScoped<BaoCaoService>();
 builder.Services.AddScoped<NhatKyService>();
+builder.Services.AddScoped<NhapExcelService>();
 
 var app = builder.Build();
 
