@@ -110,7 +110,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 ## Gợi ý AI (mục 1.2.3)
 
 - **G1, lấy hàng:** tổng lấy bằng q, không vượt tồn khả dụng từng (lô, vị trí); chỉ lô đạt chất lượng, chưa hết hạn, ở khu lưu trữ, không bị khóa kiểm kê. Ưu tiên FEFO (có hạn dùng) hoặc FIFO, rồi ít kệ phải ghé, sắp thứ tự ghé theo mã vị trí. Trả (lô, vị trí, số lượng, thứ tự) kèm lý do.
-- **G3, nhập bổ sung (theo từng kho):** chỉ đề xuất khi d > 0 và có ít nhất 14 ngày lịch sử xuất. Đề xuất khi `A ≤ d × L + m`, số lượng `ceil(d × (L + 30) − A − số đang chờ nhập)`, số nguyên dương. A: tồn khả dụng, d: nhu cầu trung bình/ngày từ phiếu xuất hoàn tất, L: thời gian chờ hàng, m: tồn tối thiểu. Hằng số 30 cấu hình được.
+- **G3, nhập bổ sung (theo từng kho):** chỉ đề xuất khi d > 0 và có ít nhất 14 ngày lịch sử xuất. Đề xuất khi `A ≤ d × L + m`, số lượng `ceil(d × (L + 30) − A − số đang chờ nhập)`, số nguyên dương. A: tồn khả dụng, d: nhu cầu trung bình/ngày từ phiếu xuất hoàn tất, L: thời gian chờ hàng, m: tồn tối thiểu. Hằng số 30 cấu hình được (`G3:SoNgayDuHang`, mặc định 30). Màn hình `/DeXuatNhap`, API `/api/de-xuat-nhap`.
 
 ## Giao diện
 

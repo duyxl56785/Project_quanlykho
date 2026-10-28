@@ -17,7 +17,7 @@ public static class Menu
     public static readonly NhomMenu[] TatCa =
     [
         new("Chung", [new("Tổng quan", "/")]),
-        new("Nhập kho", [new("Đơn mua", "/DonMua", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Hóa đơn nhập", "/PhieuNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Xếp hàng", "/XepHang", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho])]),
+        new("Nhập kho", [new("Đơn mua", "/DonMua", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Hóa đơn nhập", "/PhieuNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Xếp hàng", "/XepHang", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Đề xuất nhập bổ sung", "/DeXuatNhap", [VaiTro.QuanTriVien, VaiTro.QuanLyKho])]),
         new("Xuất kho", [new("Tồn khả dụng", "/TonKhaDung"), new("Đơn đặt hàng", "/DonDat", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.NhanVienBanHang]), new("Lệnh xuất", "/LenhXuat", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Phiếu xuất", "/PhieuXuat", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho])]),
         new("Kho", [new("Chuyển kho", "/DieuChuyen", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho], "/api/dieu-chuyen/dem-cho-nhan"), new("Kiểm kê", "/KiemKe", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Báo cáo tồn", null)]),
         new("Danh mục", [new("Hàng hóa", "/DanhMuc/SanPham"), new("Nhóm hàng", "/DanhMuc/NhomHang"), new("Danh mục kho", "/Kho", QuanTri), new("Kho và vị trí", "/ViTri", [VaiTro.QuanTriVien, VaiTro.QuanLyKho, VaiTro.ThuKho]), new("Nhà cung cấp, nơi nhận", "/DanhMuc/NhaCungCap")]),

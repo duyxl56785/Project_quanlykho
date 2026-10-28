@@ -50,6 +50,7 @@ builder.Services.AddScoped<DanhMucService>();
 builder.Services.AddScoped<DoiTacService>();
 builder.Services.AddScoped<DonMuaService>();
 builder.Services.AddScoped<PhieuNhapService>();
+builder.Services.AddScoped<DeXuatService>();
 builder.Services.AddScoped<ViTriService>();
 builder.Services.AddScoped<KhoService>();
 builder.Services.AddScoped<OPhuHop>();
