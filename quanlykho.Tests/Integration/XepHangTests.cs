@@ -81,7 +81,7 @@ public class XepHangTests(CsdlFixture csdl) : IAsyncLifetime
         Assert.Contains("tối đa 528", loi.Message);
         Assert.Contains("bảo quản", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep("K01-TA01-TG01-P03-H01-KE01-O01", 1, "b"))).Message);
         Assert.Contains("khu lưu trữ", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep("K01-TA01-TG01-P04-H01-KE01-O01", 1, "c"))).Message);
-        Assert.Contains("khu tiếp nhận", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep(Ke + "-O03", 1, "d", di: Ke + "-O02"))).Message);
+        Assert.Contains("khu tiếp nhận", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep(Ke + "-O03", 1, "d", di: "K01-TA01-TG01-P04-H01-KE01-O01"))).Message);
         await Assert.ThrowsAsync<NghiepVuException>(() => Xep(Ke + "-O02", 1, ""));
         await Assert.ThrowsAsync<KhongCoQuyenException>(() => Xep(Ke + "-O02", 1, "e", ma: "ND006"));
 
@@ -144,6 +144,38 @@ public class XepHangTests(CsdlFixture csdl) : IAsyncLifetime
 
         var khac = _app.TaoClient(Vai.ThuKho, "ND006");
         Assert.Equal(HttpStatusCode.Forbidden, (await khac.GetAsync("/api/xep-hang/cho-xep?maKho=K01")).StatusCode);
+    }
+
+    [Fact]
+    public async Task ChuyenTrongKho_TonKhongDoi_CapTruCong_KhongChuyenPhanDangGiu()
+    {
+        await Xep(Ke + "-O01", 100, "k1");
+        await using (var db = CsdlFixture.TaoDbContext(_chuoi))
+        {
+            await using var tx = await db.Database.BeginTransactionAsync();
+            await new CongGhiTon(db, NguoiThu.HienTai(db, "ND002", Vai.QuanLyKho), TimeProvider.System).GiuAsync([new DongGiu("LT1", Ke + "-O01", 30)]);
+            await tx.CommitAsync();
+        }
+        await using (var db = CsdlFixture.TaoDbContext(_chuoi))
+            Assert.Equal(("LT1", 70m), (await Service(db).HangTaiOAsync("K01", Ke + "-O01")).Select(h => (h.MaLo, h.SoLuong)).Single());
+
+        Assert.Contains("cần 80, còn 70", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep(Ke + "-O02", 80, "m1", di: Ke + "-O01"))).Message);
+        Assert.Contains("bảo quản", (await Assert.ThrowsAsync<NghiepVuException>(() => Xep("K01-TA01-TG01-P03-H01-KE01-O01", 1, "m2", di: Ke + "-O01"))).Message);
+        var kq = await Xep(Ke + "-O02", 50, "m3", di: Ke + "-O01");
+        Assert.Equal(new KetQuaXep(kq.MaChuyen, true), await Xep(Ke + "-O02", 50, "m3", di: Ke + "-O01"));
+
+        var ton = await Ton();
+        Assert.Equal((500m, 50m, 50m, 600m), (ton[TiepNhan], ton[Ke + "-O01"], ton[Ke + "-O02"], ton.Values.Sum()));
+        await using var kt = CsdlFixture.TaoDbContext(_chuoi);
+        Assert.Equal(30, await kt.TonKho.Where(t => t.MaLo == "LT1" && t.MaViTri == Ke + "-O01").Select(t => t.SoLuongDaGiu).SingleAsync());
+        var cv = await kt.ChuyenViTri.SingleAsync(c => c.MaChuyen == kq.MaChuyen);
+        Assert.Equal((LoaiChuyenViTri.ChuyenTrongKho, Ke + "-O01", Ke + "-O02"), (cv.Loai, cv.MaViTriDi, cv.MaViTriDen));
+        var so = await kt.SoBienDong.Where(s => s.MaChungTu == kq.MaChuyen).OrderBy(s => s.SoLuongThayDoi).Select(s => new { s.LoaiChungTu, s.MaViTri, s.SoLuongThayDoi }).ToListAsync();
+        Assert.Equal([(XepHangService.LoaiChuyen, Ke + "-O01", -50m), (XepHangService.LoaiChuyen, Ke + "-O02", 50m)], so.Select(s => (s.LoaiChungTu, s.MaViTri, s.SoLuongThayDoi)));
+
+        var thuKho = _app.TaoClient(Vai.ThuKho, "ND004");
+        Assert.Contains("data-lo=\"LT1\"", await thuKho.GetStringAsync($"/XepHang/ChuyenViTri?maKho=K01&maViTri={Ke}-O02"));
+        Assert.Contains("không có hàng chuyển được", await thuKho.GetStringAsync($"/XepHang/ChuyenViTri?maKho=K01&maViTri={TiepNhan}"));
     }
 
     [Fact]
