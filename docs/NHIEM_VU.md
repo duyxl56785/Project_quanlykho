@@ -107,7 +107,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: nhập 10 thùng ghi tồn 240 chai; quét mã thùng nhận ra đơn vị thùng.
 - [x] Quy đổi ở xuất kho, chuyển kho, báo cáo (S7-05) — 43da386
   - Xong khi: xuất 5 chai từ lô 10 thùng còn 235 chai; chuyển 2 thùng trừ đúng 48 chai; tổng biến động bằng tồn.
-- [ ] Quy đổi ở kiểm kê (S7-02)
+- [x] Quy đổi ở kiểm kê (S7-02) — f636cdc
   - Xong khi: đếm 9 thùng 19 chai so đúng với sổ sách 235 chai.
 - [ ] Nhập tồn đầu kỳ từ Excel (FR17, S7-06)
   - Xong khi: tệp 300 dòng sinh phiếu nhập khác loại Tồn đầu kỳ ở trạng thái Lưu tạm; quản lý kho xác nhận thì ghi đúng tồn; dòng vượt sức chứa bị báo lỗi; nhập lại cùng tệp bị chặn.
