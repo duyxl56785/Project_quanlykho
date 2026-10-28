@@ -46,7 +46,8 @@ const QuanLyKho = (() => {
         const ma = o.value.trim();
         o.value = "";
         if (ma) o.dispatchEvent(new CustomEvent("quet-ma", { detail: ma, bubbles: true }));
-        o.focus();
+        // Màn hình đã chuyển con trỏ sang ô số lượng thì giữ nguyên.
+        if (document.activeElement === o || document.activeElement === document.body) o.focus();
     });
 
     let amThanh = null;
@@ -68,7 +69,7 @@ const QuanLyKho = (() => {
         khung.classList.toggle("dang-loi", !thanhCong);
         khung.querySelector(".thong-bao-quet").textContent = thongDiep;
         bip(thanhCong ? 880 : 220);
-        o.focus();
+        if (document.activeElement === document.body) o.focus();
     }
 
     // ---------- Gọi API ----------
