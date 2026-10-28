@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using quanlykho.Common;
 using quanlykho.Common.GiaoDien;
 using quanlykho.Common.Loi;
 using quanlykho.Data;
@@ -6,7 +7,7 @@ using quanlykho.Domain;
 
 namespace quanlykho.Features.DanhMuc;
 
-public class DanhMucService(AppDbContext db)
+public class DanhMucService(AppDbContext db, GhiNhatKy nhatKy)
 {
     // ---------- Nhóm hàng, thuộc tính ----------
 
@@ -194,6 +195,7 @@ public class DanhMucService(AppDbContext db)
         s.DieuKienBaoQuan = form.DieuKienBaoQuan;
         s.TheoDoiHanDung = form.TheoDoiHanDung;
         s.MoTa = form.MoTa?.Trim();
+        GhiDoiTrangThai(nameof(SanPham), ma, s.TrangThai, form.TrangThai);
         s.TrangThai = form.TrangThai;
         await db.SaveChangesAsync();
     }
@@ -269,6 +271,7 @@ public class DanhMucService(AppDbContext db)
         b.CaoDongGoi = form.CaoDongGoi;
         b.KhoiLuong = form.KhoiLuong;
         b.MaVach = maVach;
+        GhiDoiTrangThai(nameof(BienThe), ma, b.TrangThai, form.TrangThai);
         b.TrangThai = form.TrangThai;
 
         var cu = await db.MucTon.Where(m => m.MaBienThe == ma).ToListAsync();
@@ -293,4 +296,11 @@ public class DanhMucService(AppDbContext db)
         (chuoi ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct();
 
     private static string? NullNeuRong(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+    /// <summary>Quy tắc 5: hàng đã dùng chỉ ngừng sử dụng chứ không xóa; ghi nhật ký mỗi lần ngừng hoặc dùng lại.</summary>
+    private void GhiDoiTrangThai(string doiTuong, string ma, TrangThaiSuDung cu, TrangThaiSuDung moi)
+    {
+        if (cu != moi)
+            nhatKy.Ghi(moi == TrangThaiSuDung.NgungSuDung ? "NgungSuDung" : "DungLai", doiTuong, ma);
+    }
 }

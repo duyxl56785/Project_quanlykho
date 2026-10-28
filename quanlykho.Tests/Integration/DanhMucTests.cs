@@ -26,7 +26,7 @@ public class DanhMucTests(CsdlFixture csdl) : IAsyncLifetime
     private DanhMucService Service(out Data.AppDbContext db)
     {
         db = CsdlFixture.TaoDbContext(_chuoi);
-        return new DanhMucService(db);
+        return new DanhMucService(db, NguoiThu.NhatKy(db, NguoiThu.HienTai(db, "ND001", Vai.QuanTri)));
     }
 
     private static async Task<HttpResponseMessage> Post(HttpClient client, string url, string trangLayToken, Dictionary<string, string> duLieu)
@@ -41,7 +41,7 @@ public class DanhMucTests(CsdlFixture csdl) : IAsyncLifetime
     [Fact]
     public async Task ThemNganhHangMoi_TrenGiaoDien_KhongSuaMa()
     {
-        var admin = _app.TaoClient(Vai.QuanTri);
+        var admin = _app.TaoClient(Vai.QuanTri, "ND001");
 
         Assert.Equal(HttpStatusCode.Redirect, (await Post(admin, "/DanhMuc/NhomHang/Them", "/DanhMuc/NhomHang/Them",
             new() { ["Ma"] = "gd", ["Ten"] = "Đồ gia dụng" })).StatusCode);
@@ -182,7 +182,7 @@ public class DanhMucTests(CsdlFixture csdl) : IAsyncLifetime
     [Fact]
     public async Task NhaCungCap_ThemSuaNgungDung()
     {
-        var admin = _app.TaoClient(Vai.QuanTri);
+        var admin = _app.TaoClient(Vai.QuanTri, "ND001");
 
         var trung = await Post(admin, "/DanhMuc/NhaCungCap/Them", "/DanhMuc/NhaCungCap/Them", new() { ["Ma"] = "NCC01", ["Ten"] = "Trùng" });
         Assert.Contains("Mã NCC01 đã có.", await trung.Content.ReadAsStringAsync());
