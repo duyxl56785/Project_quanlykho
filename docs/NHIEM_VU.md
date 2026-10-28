@@ -118,7 +118,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
 - [x] Sao lưu và khôi phục bằng `pg_dump` (NFR09) — 78ba367
   - Xong khi: script sao lưu tạo tệp có ngày giờ và giữ 14 bản mới nhất; script khôi phục đưa DB về đúng bản sao lưu; có hướng dẫn đặt lịch chạy hằng ngày.
 - [x] Đo thời gian tải các trang dưới 3 giây (NFR04) — 19969f3, kết quả ở [DO_TAI_TRANG.md](DO_TAI_TRANG.md)
-- [ ] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07)
+- [x] Màn hình tra tồn và trạng thái đơn hiển thị tốt trên điện thoại (NFR07) — 6338ba6
 - [ ] Đạt tiêu chí nghiệm thu Bảng 1.6:
   - [ ] Thủ kho: chạy trọn nhập hàng, lấy hàng, nhận hàng chuyển đến bằng ô quét mã trên máy tính bảng; G1 không vi phạm ràng buộc; quét sai bị chặn.
   - [ ] Quản lý kho: tổng biến động bằng tồn từng kho; chuyển kho không mất hay nhân đôi hàng; hai phiếu không giữ trùng; mọi chênh lệch có người duyệt; ca 10 thùng xuất 5 chai còn 235 chai; G3 không bỏ sót mặt hàng dưới điểm đặt hàng.
