@@ -51,9 +51,9 @@ public class KiemKeController(KiemKeService service, ViTriService viTri) : Contr
     }
 
     [HttpPost("{ma}/ThemDong")]
-    public async Task<IActionResult> ThemDong(string ma, string maViTri, string maHang, decimal soLuongThucTe)
+    public async Task<IActionResult> ThemDong(string ma, string maViTri, string maHang, decimal soLuongThucTe, decimal soLon = 0)
     {
-        await service.ThemDongAsync(ma, new ThemDongKiemKe(maViTri, maHang, soLuongThucTe));
+        await service.ThemDongAsync(ma, new ThemDongKiemKe(maViTri, maHang, soLuongThucTe, soLon));
         TempData["ThongBao"] = "Đã thêm hàng ngoài danh sách.";
         return RedirectToAction(nameof(ChiTiet), new { ma });
     }

@@ -40,6 +40,19 @@ public class QuyDoiDonVi(AppDbContext db)
             b => quyDoi[b.MaBienThe].OrderBy(d => d.HeSo).Select(d => new DonViChon(d.TenDonVi, d.HeSo)).Prepend(new DonViChon(b.DonViTinh, 1)).ToList());
     }
 
+    /// <summary>Đếm theo đơn vị lớn nhất và số lẻ (9 thùng 19 chai) ra số theo đơn vị chính.</summary>
+    public static decimal CongDonViLon(IReadOnlyList<DonViChon> donVi, decimal soLon, decimal soLe, string maBienThe)
+    {
+        if (soLon == 0)
+            return soLe;
+        var lon = donVi.MaxBy(d => d.HeSo)!;
+        if (lon.HeSo == 1)
+            throw new NghiepVuException($"Hàng {maBienThe} không có đơn vị quy đổi; chỉ nhập số {lon.Ten}.");
+        if (soLon < 0)
+            throw new NghiepVuException($"Số {lon.Ten} không được âm.");
+        return soLon * lon.HeSo + soLe;
+    }
+
     /// <summary>Đơn vị theo lô (đơn vị của biến thể của lô), cho dòng chứng từ chọn theo (lô, ô).</summary>
     public async Task<Dictionary<string, List<DonViChon>>> TheoLoAsync(IEnumerable<string> maLo)
     {
