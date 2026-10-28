@@ -93,3 +93,16 @@ public class NhatKyConfiguration : IEntityTypeConfiguration<NhatKy>
         b.HasIndex(x => x.ThoiDiem);
     }
 }
+
+public class TepDaNhapConfiguration : IEntityTypeConfiguration<TepDaNhap>
+{
+    public void Configure(EntityTypeBuilder<TepDaNhap> b)
+    {
+        b.HasKey(x => x.MaBam);
+        b.Property(x => x.MaBam).HasMaxLength(64).IsFixedLength();
+        b.Property(x => x.TenTep).HasMaxLength(255);
+        b.Property(x => x.Loai).HasMaxLength(Ma);
+        b.Property(x => x.NguoiNhap).HasMaxLength(Ma);
+        b.HasOne<NguoiDung>().WithMany().HasForeignKey(x => x.NguoiNhap);
+    }
+}

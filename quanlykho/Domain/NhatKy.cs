@@ -13,3 +13,15 @@ public class NhatKy
     /// <summary>JSON tùy thao tác (giá trị trước, sau, lý do...).</summary>
     public string? ChiTiet { get; set; }
 }
+
+/// <summary>Tệp Excel đã nhập thành công; mã băm SHA-256 của nội dung chặn nhập lặp cùng một tệp.</summary>
+public class TepDaNhap
+{
+    public string MaBam { get; set; } = "";
+    public string TenTep { get; set; } = "";
+    /// <summary>"DanhMuc" hoặc "TonDauKy".</summary>
+    public string Loai { get; set; } = "";
+    public int SoDong { get; set; }
+    public DateTimeOffset ThoiDiem { get; set; }
+    public string NguoiNhap { get; set; } = "";
+}
