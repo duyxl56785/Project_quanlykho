@@ -105,7 +105,7 @@ Cuối mỗi giai đoạn: chạy lại toàn bộ test, gộp `develop` vào `m
   - Xong khi: đặt 3 thùng giữ đúng 72 chai; tồn 235 chai hiện "9 thùng 19 chai".
 - [x] Quy đổi ở hóa đơn nhập (S7-01) — 531999c
   - Xong khi: nhập 10 thùng ghi tồn 240 chai; quét mã thùng nhận ra đơn vị thùng.
-- [ ] Quy đổi ở xuất kho, chuyển kho, báo cáo (S7-05)
+- [x] Quy đổi ở xuất kho, chuyển kho, báo cáo (S7-05) — 43da386
   - Xong khi: xuất 5 chai từ lô 10 thùng còn 235 chai; chuyển 2 thùng trừ đúng 48 chai; tổng biến động bằng tồn.
 - [ ] Quy đổi ở kiểm kê (S7-02)
   - Xong khi: đếm 9 thùng 19 chai so đúng với sổ sách 235 chai.
