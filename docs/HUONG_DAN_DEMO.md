@@ -98,13 +98,13 @@ Chuyển vị trí trong kho: Kho → Chuyển vị trí, quét ô đang chứa 
 2. Mở lại Tồn khả dụng: số khả dụng của sữa giảm 48.
 3. Chọn thủ kho `Thủ kho Hà Nội 1` → Lập lệnh xuất.
 
-## 6. Lấy hàng bằng quét mã, kiểm tra chéo (hai thủ kho)
+## 6. Lấy hàng bằng quét mã, kiểm tra chéo (thủ kho lấy, quản lý kho kiểm)
 
 1. `tk1.k01` (máy tính bảng): Xuất kho → Lệnh xuất → mở lệnh vừa lập. Danh sách lấy hàng sắp theo thứ tự ghé ô.
 2. Quét mã ô rồi mã lô theo từng dòng (gõ mã như trên danh sách rồi Enter). Demo lỗi: quét lô L000011 (hết hạn) → bị chặn; quét sai hàng → bị chặn; nhập số vượt yêu cầu → bị chặn.
 3. Lấy đủ → Lấy xong, chờ kiểm tra.
-4. Vẫn `tk1.k01` thử bấm kiểm tra → bị từ chối (người kiểm tra phải khác người lấy).
-5. Đăng nhập `tk2.k01@kho.test` → mở lệnh → Đúng, chờ xác nhận.
+4. Chỉ ra: thủ kho không có nút kiểm tra; bước này của quản lý kho, và người kiểm phải khác người lấy (một quản lý kho tự lấy hàng thì cũng không tự kiểm được).
+5. `ql.k01` mở lệnh → Đúng, chờ xác nhận (hoặc Sai, trả lại lấy hàng kèm ghi chú dòng sai).
 6. `ql.k01` → Xác nhận xuất kho. Sinh phiếu xuất Hoàn tất, đơn đặt chuyển Hoàn thành; nhân viên bán hàng thấy trạng thái mới.
 
 Xuất khác (không qua đơn): Xuất kho → Phiếu xuất → Xuất khác, trả nhà cung cấp, chọn lô, ô từ tồn khả dụng, có thể chọn đơn vị thùng.
