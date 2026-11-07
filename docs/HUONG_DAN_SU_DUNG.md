@@ -129,7 +129,13 @@ Các tài khoản thủ kho khác: `tk2.k01@kho.test` (K01) và `tk.k02@kho.test
 
 **Là ai:** người trực tiếp nhận hàng, cất hàng, lấy hàng và đếm hàng trong kho. Thường cầm máy tính bảng và máy quét mã vạch.
 
-**Ô quét mã:** các màn hình làm việc đều có một ô quét mã tự nhận con trỏ. Máy quét USB hoặc Bluetooth gõ mã rồi nhấn Enter. Không có máy quét thì gõ mã bằng tay rồi nhấn Enter, kết quả như nhau.
+**Ô quét mã:** các màn hình làm việc đều có một ô quét mã tự nhận con trỏ. Có ba cách đưa mã vào:
+
+- **Máy quét USB hoặc Bluetooth:** bóp cò, máy tự gõ mã rồi nhấn Enter.
+- **Camera:** bấm nút **Camera** (biểu tượng máy ảnh) cạnh ô. Lần đầu trình duyệt hỏi quyền dùng camera, bấm Cho phép. Đưa mã vạch vào giữa khung và giữ yên. Đọc được mã thì hộp tự đóng, kết quả như vừa quét bằng máy. Máy tính bảng và điện thoại tự dùng camera sau.
+- **Gõ tay:** gõ mã rồi nhấn Enter.
+
+Camera đọc được mã vạch trên hàng, mã vạch thùng, và nhãn ô, nhãn lô in từ hệ thống. Trình duyệt chỉ cho mở camera khi trang mở bằng `https://` hoặc `localhost`. Ví dụ, mở bằng `http://192.168.x.x` trên điện thoại thì nút Camera báo không dùng được.
 
 Trang **Tổng quan** trống, cảnh báo dành cho quản lý.
 

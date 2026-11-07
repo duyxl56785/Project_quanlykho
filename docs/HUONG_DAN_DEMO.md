@@ -64,7 +64,7 @@ Các mã chứng từ, mã lô ở trên chỉ đúng khi seed trên CSDL trốn
 
 1. `ql.k01`: Nhập kho → Đơn mua → mở DM000001 (trạng thái Chưa thực hiện, có đơn giá, thành tiền). Có thể demo thêm: Lập đơn mua mới, chọn đơn vị "thùng" ở ô đơn vị, Lưu đơn, Xác nhận đơn.
 2. Đăng nhập `tk1.k01@kho.test` (khung máy tính bảng): Hóa đơn nhập → Lập hóa đơn nhập → chọn đơn DM000001 → Lập và bắt đầu nhận hàng.
-3. Ô quét mã tự nhận con trỏ. Gõ (giả máy quét) `8930099000028` rồi Enter: hệ thống nhận ra nước suối, đơn vị thùng. Nhập số 4 → Thêm dòng. Dòng ghi "4 thùng = 96 chai".
+3. Ô quét mã tự nhận con trỏ. Gõ (giả máy quét) `8930099000028` rồi Enter, hoặc bấm nút Camera và đưa mã vạch (in ra hoặc hiện trên điện thoại khác) trước webcam: hệ thống nhận ra nước suối, đơn vị thùng. Nhập số 4 → Thêm dòng. Dòng ghi "4 thùng = 96 chai".
 4. Quét `8930000000047` (bút bi), số 250 → báo lỗi vượt số chưa nhận ("còn 200 cây"). Sửa 200 → Thêm dòng.
 5. Chỉ ra: thủ kho không thấy đơn giá. Thủ kho không có nút xác nhận.
 6. `ql.k01` mở hóa đơn vừa lập → Xác nhận. Hàng vào ô khu tiếp nhận, đơn mua chuyển Hoàn thành. Bấm In nhãn lô để xem nhãn có mã lô.

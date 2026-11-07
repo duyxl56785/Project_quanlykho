@@ -51,7 +51,7 @@ Mảng: `TaiKhoan`, `DanhMuc`, `Kho` (kho và vị trí), `NhapKho`, `XepHang`, 
 
 **A11. Test.** Logic thuần viết unit test. Mọi thứ đụng CSDL viết integration test bằng `Testcontainers.PostgreSql`: một container cho cả lượt chạy, mỗi lớp test tạo một database riêng rồi chạy migration. CI trên GitHub có sẵn Docker nên chạy được. Ca đồng thời (hai người lấy cùng lúc, hai người xếp cùng ô) dùng `Task.WhenAll` với hai DbContext riêng.
 
-**A12. Giao diện.** Bootstrap 5 có sẵn trong mẫu; biến CSS trong `wwwroot/css/site.css`; hiển thị ngày `dd/MM/yyyy`, số và tiền theo `vi-VN` qua helper (văn hóa request giữ InvariantCulture, xem nhiệm vụ Khung kiến trúc). Máy quét mã vạch USB hoạt động như bàn phím, gõ mã rồi Enter; ô quét mã là `<input autofocus>` bắt phím Enter. Không làm quét bằng camera.
+**A12. Giao diện.** Bootstrap 5 có sẵn trong mẫu; biến CSS trong `wwwroot/css/site.css`; hiển thị ngày `dd/MM/yyyy`, số và tiền theo `vi-VN` qua helper (văn hóa request giữ InvariantCulture, xem nhiệm vụ Khung kiến trúc). Máy quét mã vạch USB hoạt động như bàn phím, gõ mã rồi Enter; ô quét mã là `<input autofocus>` bắt phím Enter. Bổ sung sau nghiệm thu (người dùng yêu cầu, 07/11/2026): nút Camera cạnh ô quét mã đọc mã vạch bằng camera qua thư viện ZXing (`wwwroot/lib/zxing`, Apache 2.0, nạp khi bấm nút lần đầu), đọc được một mã thì đóng hộp và phát cùng sự kiện `quet-ma` như máy quét; camera chỉ mở trên HTTPS hoặc localhost.
 
 **A13. Excel và mã vạch.** Excel dùng ClosedXML (MIT). Mã vạch Code 128 trên nhãn sinh ở máy chủ dạng SVG bằng ZXing.Net (Apache 2.0), không cần mạng ở máy in.
 
@@ -292,6 +292,7 @@ Thứ tự trong giai đoạn: đơn đặt hàng, G1, duyệt và giữ hàng (
 6. Thông báo cho kho đến là số đếm trên menu, không đẩy thời gian thực.
 7. Hủy phiếu nhập đã hoàn tất chỉ khi hàng còn nguyên ở khu tiếp nhận hoặc cách ly.
 8. Giai đoạn 3 làm G1 trước duyệt và giữ hàng.
+9. Làm thêm quét bằng camera (báo cáo xếp vào mục không làm), xem A12.
 
 ## E. Rủi ro
 
