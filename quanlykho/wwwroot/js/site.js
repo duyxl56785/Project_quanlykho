@@ -50,6 +50,79 @@ const QuanLyKho = (() => {
         if (document.activeElement === o || document.activeElement === document.body) o.focus();
     });
 
+    // ---------- Quét bằng camera: nút data-quet-camera mở _HopCamera, đọc một mã rồi đóng ----------
+    const hopCamera = document.getElementById("hopCamera");
+    let thuVienCamera = null;
+    let docCamera = null;
+    let oChoCamera = null;
+    let maCamera = null;
+
+    function napThuVienCamera() {
+        thuVienCamera ??= new Promise((xong, loi) => {
+            const s = document.createElement("script");
+            s.src = hopCamera.dataset.thuVien;
+            s.onload = () => xong(window.ZXing);
+            s.onerror = () => { thuVienCamera = null; loi(new Error("tai")); };
+            document.head.append(s);
+        });
+        return thuVienCamera;
+    }
+
+    function dungCamera() {
+        docCamera?.reset();
+        docCamera = null;
+    }
+
+    document.addEventListener("click", (e) => {
+        const nut = e.target.closest("[data-quet-camera]");
+        if (!nut || !hopCamera) return;
+        const o = nut.closest(".o-quet-ma").querySelector("[data-quet-ma]");
+        // Trình duyệt chỉ cho mở camera trên HTTPS hoặc localhost.
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+            baoQuet(o, "Camera chỉ dùng được khi mở trang bằng HTTPS hoặc localhost.", false);
+            return;
+        }
+        oChoCamera = o;
+        maCamera = null;
+        hopCamera.querySelector("[data-trang-thai]").textContent = "Đang mở camera…";
+        bootstrap.Modal.getOrCreateInstance(hopCamera).show();
+    });
+
+    hopCamera?.addEventListener("shown.bs.modal", async () => {
+        const trangThai = hopCamera.querySelector("[data-trang-thai]");
+        try {
+            const ZXing = await napThuVienCamera();
+            if (!hopCamera.classList.contains("show")) return;
+            docCamera = new ZXing.BrowserMultiFormatReader();
+            await docCamera.decodeFromConstraints({ video: { facingMode: "environment" } }, hopCamera.querySelector("video"), (kq) => {
+                if (!kq || maCamera !== null) return;
+                maCamera = kq.getText().trim();
+                bootstrap.Modal.getOrCreateInstance(hopCamera).hide();
+            });
+            // Đóng hộp trong lúc chờ quyền camera thì tắt luồng vừa mở.
+            if (!hopCamera.classList.contains("show")) return dungCamera();
+            trangThai.textContent = "Đưa mã vạch vào giữa khung, giữ yên một chút.";
+        } catch (loi) {
+            dungCamera();
+            trangThai.textContent = loi?.name === "NotAllowedError" ? "Chưa cho phép dùng camera: bấm biểu tượng camera trên thanh địa chỉ để cho phép."
+                : loi?.name === "NotFoundError" ? "Không tìm thấy camera trên máy này."
+                : loi?.name === "NotReadableError" ? "Camera đang bị ứng dụng khác dùng."
+                : loi?.message === "tai" ? "Không tải được thư viện quét, thử lại."
+                : "Không mở được camera.";
+        }
+    });
+
+    // Phát "quet-ma" sau khi hộp đóng hẳn: lúc hộp còn mở Bootstrap giữ con trỏ trong hộp, màn hình không chuyển con trỏ sang ô số lượng được.
+    hopCamera?.addEventListener("hidden.bs.modal", () => {
+        dungCamera();
+        const o = oChoCamera;
+        oChoCamera = null;
+        if (!o) return;
+        o.focus();
+        if (maCamera) o.dispatchEvent(new CustomEvent("quet-ma", { detail: maCamera, bubbles: true }));
+        maCamera = null;
+    });
+
     let amThanh = null;
     function bip(tanSo) {
         try {

@@ -1,0 +1,15 @@
+@* Hộp quét bằng camera dùng chung cho nút data-quet-camera của _OQuetMa. site.js nạp ZXing lần đầu mở hộp, đọc được mã thì đóng hộp và phát "quet-ma" trên ô. *@
+<div class="modal fade" id="hopCamera" tabindex="-1" aria-labelledby="hopCameraTieuDe" aria-hidden="true" data-thu-vien="@Url.Content("~/lib/zxing/zxing.min.js")">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="hopCameraTieuDe">Quét bằng camera</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <video class="khung-camera" muted playsinline></video>
+                <p class="mt-2 mb-0 fw-semibold" data-trang-thai role="status" aria-live="polite"></p>
+            </div>
+        </div>
+    </div>
+</div>

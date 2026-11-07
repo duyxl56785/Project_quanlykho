@@ -1,11 +1,17 @@
 @model OQuetMa
 @*
-    Ô quét mã: máy quét USB gõ mã rồi Enter. site.js bắt Enter, phát sự kiện "quet-ma" (event.detail = mã) trên ô,
-    xóa ô và giữ con trỏ trong ô. Báo kết quả: QuanLyKho.baoQuet(o, "Thông báo", true/false).
+    Ô quét mã: máy quét USB gõ mã rồi Enter, hoặc nút Camera quét bằng camera (_HopCamera). site.js phát sự kiện "quet-ma"
+    (event.detail = mã) trên ô, xóa ô và giữ con trỏ trong ô. Báo kết quả: QuanLyKho.baoQuet(o, "Thông báo", true/false).
 *@
 <div class="o-quet-ma">
     <label class="form-label fw-semibold" for="@Model.Id">@Model.Nhan</label>
-    <input id="@Model.Id" class="form-control" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-           autofocus data-quet-ma placeholder="@Model.GoiY" aria-describedby="@(Model.Id)-thong-bao" />
+    <div class="input-group">
+        <input id="@Model.Id" class="form-control" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               autofocus data-quet-ma placeholder="@Model.GoiY" aria-describedby="@(Model.Id)-thong-bao" />
+        <button type="button" class="btn btn-outline-primary nut-camera" data-quet-camera aria-label="Quét bằng camera">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="4" /></svg>
+            <span class="d-none d-sm-inline">Camera</span>
+        </button>
+    </div>
     <div id="@(Model.Id)-thong-bao" class="thong-bao-quet" role="status" aria-live="polite"></div>
 </div>

@@ -170,6 +170,8 @@ td.so, th.so { text-align: right; white-space: nowrap; font-variant-numeric: tab
 .o-quet-ma.dang-loi .form-control { border-color: var(--tt-do); background: var(--tt-do-nen); }
 .o-quet-ma.thanh-cong .form-control { border-color: var(--tt-luc); background: var(--tt-luc-nen); }
 .o-quet-ma .thong-bao-quet { min-height: 1.5rem; margin-top: var(--khoang-1); font-weight: 600; }
+.o-quet-ma .nut-camera { display: inline-flex; align-items: center; gap: var(--khoang-1); }
+.khung-camera { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #000; border-radius: var(--bs-border-radius); }
 .o-quet-ma.dang-loi .thong-bao-quet { color: var(--tt-do); }
 .o-quet-ma.thanh-cong .thong-bao-quet { color: var(--tt-luc); }
 
