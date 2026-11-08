@@ -85,7 +85,7 @@ Chuyển vị trí trong kho: Kho → Chuyển vị trí, quét ô đang chứa 
 
 Đăng nhập `banhang@kho.test` ở khung điện thoại.
 
-1. Xuất kho → Tồn khả dụng, tìm `SUATUOI`: K01 hiện số khả dụng đã trừ lô hết hạn L000011 (12 hộp) và hàng đang giữ; có cột quy ra thùng ("3 thùng 12 hộp"). Bảng xếp thành thẻ trên màn hình hẹp.
+1. Xuất kho → Tồn khả dụng, tìm `SUATUOI`: K01 hiện 166 hộp khả dụng, đã trừ lô hết hạn L000011 (12 hộp) và hàng đang giữ; có cột quy ra thùng ("3 thùng 22 hộp"). Bảng xếp thành thẻ trên màn hình hẹp.
 2. Đơn đặt hàng: thấy DD000003, DD000004 ở trạng thái Chờ duyệt (chỉ thấy đơn mình tạo).
 3. Tạo đơn mới: kho K01, nơi nhận NN01, dòng AOTHUN-01 số 2000 → gửi duyệt báo thiếu hàng dạng "Cần 2.000, còn ...". Sửa 3 → gửi duyệt.
 4. Chỉ ra: menu không có nhập kho, kiểm kê, báo cáo; gõ thẳng `/PhieuNhap` trên thanh địa chỉ → bị chặn (403).
@@ -95,7 +95,7 @@ Chuyển vị trí trong kho: Kho → Chuyển vị trí, quét ô đang chứa 
 `ql.k01`: Đơn đặt hàng → DD000003 → Duyệt và giữ hàng → Đồng ý.
 
 1. Bảng "Hàng đã giữ": sữa giữ 48 hộp ở lô L000010 (hết hạn sớm nhất còn dùng được); lô L000011 đã hết hạn bị bỏ qua. Dòng chú thích nói lô, ô do G1 chọn (FEFO, rồi FIFO, ít kệ).
-2. Mở lại Tồn khả dụng: số khả dụng của sữa giảm 48.
+2. Mở lại Tồn khả dụng: số khả dụng của sữa giảm 48, từ 166 còn 118.
 3. Chọn thủ kho `Thủ kho Hà Nội 1` → Lập lệnh xuất.
 
 ## 6. Lấy hàng bằng quét mã, kiểm tra chéo (thủ kho lấy, quản lý kho kiểm)
@@ -129,9 +129,10 @@ Xuất khác (không qua đơn): Xuất kho → Phiếu xuất → Xuất khác,
 
 `ql.k01`: Nhập kho → Đề xuất nhập bổ sung.
 
-1. Bảng theo kho K01 với các cột tồn khả dụng A, nhu cầu trung bình/ngày d (từ 3 tháng lịch sử xuất), thời gian chờ L, tối thiểu m, số đang chờ nhập và số đề xuất. Sữa và giấy dưới điểm đặt hàng nên có đề xuất; hàng không đủ 14 ngày lịch sử hiện "thiếu dữ liệu".
-2. Tích dòng sữa, giấy → Tạo đơn mua nháp từ dòng đã chọn: sinh đơn mua Nháp theo từng nhà cung cấp; AI không tự xác nhận. Bấm Bỏ qua ở một dòng khác.
-3. Bấm Tính lại: dòng vừa tạo đơn không còn được đề xuất vì số trên đơn nháp đã tính vào số đang chờ nhập.
+1. Kho K01, phần "Cần nhập" có 1 dòng: GIAYA4-01, đề xuất 36 ram. Dòng lý do ghi đủ cơ sở tính: A = 7, d = 109/90 ngày ≈ 1,2 ram/ngày, L = 5, m = 10, điểm đặt hàng ≈ 16. Số đề xuất = d × (5 + 30) − 7 − 0, làm tròn lên.
+2. Phần "Không đề xuất": sữa (166 hộp, trên điểm đặt hàng ≈ 75 nhờ các lô demo vừa nhập), áo thun AOTHUN-01 đủ hàng; AOTHUN-03, DTA-01 "chưa có lịch sử xuất bán" nên không đề xuất dù dưới tối thiểu. Đổi sang K02: giấy, mì đều đủ hàng.
+3. Tích dòng giấy, chọn nhà cung cấp NCC03, có thể sửa số (ví dụ 40) → Tạo đơn mua nháp từ dòng đã chọn: sinh đơn mua Nháp; AI không tự xác nhận. Cách khác: tích dòng, ghi lý do → Bỏ qua (không tạo đơn, vẫn lưu để thống kê).
+4. Bấm Tính lại: giấy chuyển xuống phần "Không đề xuất" với lý do "đã có 40 đang chờ nhập", vì số trên đơn nháp đã tính vào số đang chờ nhập.
 
 ## 10. Báo cáo (quản lý kho)
 
