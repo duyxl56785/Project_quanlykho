@@ -48,7 +48,7 @@ Dữ liệu thử gồm 2 kho `K01` (Hà Nội), `K02` (Bắc Ninh), 50 biến t
 | `tk.k02@kho.test` | Thủ kho | K02 |
 | `banhang@kho.test` | Nhân viên bán hàng | Tất cả (chỉ xem tồn khả dụng, đặt hàng) |
 
-Seed còn dựng sẵn tình huống demo (đơn vị thùng, lô sắp và đã hết hạn, đơn chờ duyệt, phiếu chuyển kho chờ nhận). Kịch bản demo từng tính năng: [docs/HUONG_DAN_DEMO.md](docs/HUONG_DAN_DEMO.md).
+Seed còn dựng sẵn tình huống demo (đơn vị thùng, lô sắp và đã hết hạn, đơn chờ duyệt, phiếu chuyển kho chờ nhận). Kịch bản demo từng tính năng: [docs/HUONG_DAN_DEMO.md](docs/HUONG_DAN_DEMO.md). Hướng dẫn sử dụng theo từng tài khoản, từng mục menu: [docs/HUONG_DAN_SU_DUNG.md](docs/HUONG_DAN_SU_DUNG.md).
 
 Muốn CSDL sạch (xóa hết dữ liệu): `docker compose down -v`, `docker compose up -d`, rồi seed lại.
 

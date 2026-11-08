@@ -64,7 +64,7 @@ Các mã chứng từ, mã lô ở trên chỉ đúng khi seed trên CSDL trốn
 
 1. `ql.k01`: Nhập kho → Đơn mua → mở DM000001 (trạng thái Chưa thực hiện, có đơn giá, thành tiền). Có thể demo thêm: Lập đơn mua mới, chọn đơn vị "thùng" ở ô đơn vị, Lưu đơn, Xác nhận đơn.
 2. Đăng nhập `tk1.k01@kho.test` (khung máy tính bảng): Hóa đơn nhập → Lập hóa đơn nhập → chọn đơn DM000001 → Lập và bắt đầu nhận hàng.
-3. Ô quét mã tự nhận con trỏ. Gõ (giả máy quét) `8930099000028` rồi Enter: hệ thống nhận ra nước suối, đơn vị thùng. Nhập số 4 → Thêm dòng. Dòng ghi "4 thùng = 96 chai".
+3. Ô quét mã tự nhận con trỏ. Gõ (giả máy quét) `8930099000028` rồi Enter, hoặc bấm nút Camera và đưa mã vạch (in ra hoặc hiện trên điện thoại khác) trước webcam: hệ thống nhận ra nước suối, đơn vị thùng. Nhập số 4 → Thêm dòng. Dòng ghi "4 thùng = 96 chai".
 4. Quét `8930000000047` (bút bi), số 250 → báo lỗi vượt số chưa nhận ("còn 200 cây"). Sửa 200 → Thêm dòng.
 5. Chỉ ra: thủ kho không thấy đơn giá. Thủ kho không có nút xác nhận.
 6. `ql.k01` mở hóa đơn vừa lập → Xác nhận. Hàng vào ô khu tiếp nhận, đơn mua chuyển Hoàn thành. Bấm In nhãn lô để xem nhãn có mã lô.
@@ -98,13 +98,13 @@ Chuyển vị trí trong kho: Kho → Chuyển vị trí, quét ô đang chứa 
 2. Mở lại Tồn khả dụng: số khả dụng của sữa giảm 48.
 3. Chọn thủ kho `Thủ kho Hà Nội 1` → Lập lệnh xuất.
 
-## 6. Lấy hàng bằng quét mã, kiểm tra chéo (hai thủ kho)
+## 6. Lấy hàng bằng quét mã, kiểm tra chéo (thủ kho lấy, quản lý kho kiểm)
 
 1. `tk1.k01` (máy tính bảng): Xuất kho → Lệnh xuất → mở lệnh vừa lập. Danh sách lấy hàng sắp theo thứ tự ghé ô.
 2. Quét mã ô rồi mã lô theo từng dòng (gõ mã như trên danh sách rồi Enter). Demo lỗi: quét lô L000011 (hết hạn) → bị chặn; quét sai hàng → bị chặn; nhập số vượt yêu cầu → bị chặn.
 3. Lấy đủ → Lấy xong, chờ kiểm tra.
-4. Vẫn `tk1.k01` thử bấm kiểm tra → bị từ chối (người kiểm tra phải khác người lấy).
-5. Đăng nhập `tk2.k01@kho.test` → mở lệnh → Đúng, chờ xác nhận.
+4. Chỉ ra: thủ kho không có nút kiểm tra; bước này của quản lý kho, và người kiểm phải khác người lấy (một quản lý kho tự lấy hàng thì cũng không tự kiểm được).
+5. `ql.k01` mở lệnh → Đúng, chờ xác nhận (hoặc Sai, trả lại lấy hàng kèm ghi chú dòng sai).
 6. `ql.k01` → Xác nhận xuất kho. Sinh phiếu xuất Hoàn tất, đơn đặt chuyển Hoàn thành; nhân viên bán hàng thấy trạng thái mới.
 
 Xuất khác (không qua đơn): Xuất kho → Phiếu xuất → Xuất khác, trả nhà cung cấp, chọn lô, ô từ tồn khả dụng, có thể chọn đơn vị thùng.

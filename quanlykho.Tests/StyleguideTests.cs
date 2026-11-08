@@ -55,6 +55,20 @@ public class StyleguideTests(UngDungFactory factory) : IClassFixture<UngDungFact
     }
 
     [Fact]
+    public async Task OQuetMa_CoNutCamera_VaThuVienQuetDuocPhucVu()
+    {
+        var client = factory.TaoClient();
+        var html = await client.GetStringAsync("/Styleguide/Quet");
+
+        Assert.Contains("data-quet-camera", html);
+        var thuVien = Regex.Match(html, "id=\"hopCamera\"[^>]*data-thu-vien=\"([^\"]+)\"").Groups[1].Value;
+        Assert.Equal("/lib/zxing/zxing.min.js", thuVien);
+        var js = await client.GetAsync(thuVien);
+        Assert.Equal(HttpStatusCode.OK, js.StatusCode);
+        Assert.Contains("BrowserMultiFormatReader", await js.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public async Task Post_KhongCoTokenChongCsrf_BiTuChoi()
     {
         var response = await factory.TaoClient().PostAsync("/Styleguide/BieuMau",

@@ -119,7 +119,7 @@ Trạng thái do hệ thống tính, không đánh dấu tay.
 - Thành phần dùng lại bằng partial view hoặc View Component: bảng dữ liệu có lọc và phân trang, ô quét mã (tự nhận con trỏ), huy hiệu trạng thái (mỗi trạng thái một màu cố định), hộp xác nhận, thông báo, ô chọn kho, ô chọn đơn vị. Có trang `/Styleguide` hiện mọi thành phần.
 - Thành phần đã có (xem `/Styleguide`, chỉ mở ở Development):
   - Bảng: `<bang-du-lieu trang="Model" thong-bao-rong="...">` với model `TrangDuLieu<T>` (`TrangDuLieu<T>.TaoAsync(query, trang)`); thanh lọc là `<form class="thanh-loc" method="get">`. Màn hình người dùng xem trên điện thoại thêm `xep-dong="true"` (bảng thường: lớp `bang-xep-dong` trên khung `table-responsive`): dưới 576 px mỗi dòng thành thẻ, ô cần nhãn gắn `data-nhan`, ô tiêu đề thẻ gắn `cot-chinh`.
-  - Partial: `_HuyHieuTrangThai` (model enum; tên, màu khai ở `Common/GiaoDien/TrangThaiHienThi`, enum trạng thái mới phải thêm vào đó), `_OQuetMa` (model `OQuetMa`; JS nghe sự kiện `quet-ma`, báo bằng `QuanLyKho.baoQuet`), `_TrangRong`, `_DangTai`, `_ThongBao` (TempData `ThongBao`, `Loi`), `_HopXacNhan` (thuộc tính `data-xac-nhan` trên form, nút, liên kết).
+  - Partial: `_HuyHieuTrangThai` (model enum; tên, màu khai ở `Common/GiaoDien/TrangThaiHienThi`, enum trạng thái mới phải thêm vào đó), `_OQuetMa` (model `OQuetMa`; JS nghe sự kiện `quet-ma`, báo bằng `QuanLyKho.baoQuet`; nút Camera mở `_HopCamera` đọc mã bằng ZXing rồi phát cùng sự kiện, chỉ chạy trên HTTPS hoặc localhost), `_TrangRong`, `_DangTai`, `_ThongBao` (TempData `ThongBao`, `Loi`), `_HopXacNhan` (thuộc tính `data-xac-nhan` trên form, nút, liên kết).
   - View Component `OChonKho`: `@await Component.InvokeAsync("OChonKho", new { ten = "MaKho", chon = ... })`.
   - Ô chọn đơn vị: `<partial name="_OChonDonVi" model="new OChonDonVi(ten, chon, donVi)" />` với `donVi` từ `QuyDoiDonVi.DonViAsync/BangAsync` (phần tử 0 là đơn vị chính, mỗi option có `data-he-so`). Quy đổi ở Service bằng `QuyDoiDonVi.QuyVeChinhAsync`, hiển thị bằng `QuyDoiDonVi.HienThi` ("9 thùng 19 chai"), quét mã vạch đơn vị bằng `TraMaVachAsync`.
   - Phiếu có dòng hàng: `<tbody data-dong-hang>` + `<template>` với tên `Dong[__i__].X`, nút `data-them-dong`, `data-xoa-dong` (site.js đánh số lại).
@@ -138,7 +138,7 @@ Thứ tự làm: hóa đơn nhập (đơn mua → phiếu nhập → khu tiếp 
 - **Must:** FR01–FR12 (nhập kho, giữ hàng, quét mã khi lấy, kiểm tra chéo, tồn khả dụng, đơn đặt hàng, chuyển kho, kiểm kê, tài khoản, danh mục và biến thể, vị trí 7 cấp, kiểm tra sức chứa).
 - **Should:** FR13 cảnh báo, FR14 báo cáo tồn, FR16 chuyển vị trí trong kho, FR17 nhập Excel, FR18 nhật ký, FR20 G1, FR21 G3, FR28 quy đổi đơn vị.
 - **Could:** FR19 bàn làm việc; xuất Excel báo cáo tồn; sao lưu hằng ngày.
-- **Không làm:** gợi ý xếp vị trí (G2), luân chuyển giữa kho (G4), nhập hàng trả lại, sơ đồ mặt bằng kho, phân loại ABC, lắp ráp, tháo dỡ, combo, quét camera, serial, quy đổi nhiều tầng, kết nối kế toán hoặc CRM, dự báo bằng học máy.
+- **Không làm:** gợi ý xếp vị trí (G2), luân chuyển giữa kho (G4), nhập hàng trả lại, sơ đồ mặt bằng kho, phân loại ABC, lắp ráp, tháo dỡ, combo, serial, quy đổi nhiều tầng, kết nối kế toán hoặc CRM, dự báo bằng học máy.
 
 ## Git
 
