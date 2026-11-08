@@ -54,7 +54,8 @@ public class LichSuXuat(AppDbContext db, IHttpContextAccessor http, NguoiDungHie
         var homNay = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(gio.GetUtcNow(), DinhDang.GioVietNam).DateTime);
         var gioNap = new GioNap(LucGio(homNay.AddDays(-SoNgay - 5), 8));
         var cong = new CongGhiTon(db, nguoiDung, gioNap);
-        var rnd = new Random(maKho.GetHashCode(StringComparison.Ordinal) & 0xFFFF);
+        // Hạt giống cố định theo mã kho: string.GetHashCode đổi theo từng lần chạy, seed sẽ ra số khác nhau mỗi máy.
+        var rnd = new Random(maKho.Sum(c => c));
 
         var maHang = hang.Select(h => h.MaBienThe).ToList();
         var dvt = await db.BienThe.Where(b => maHang.Contains(b.MaBienThe)).Select(b => new { b.MaBienThe, b.SanPham.DonViTinh }).ToDictionaryAsync(b => b.MaBienThe, b => b.DonViTinh);
