@@ -88,7 +88,7 @@ Sau khi đăng nhập, trang **Tổng quan** chỉ có dòng "Chọn chức năn
   - hàng đang chở giữa hai kho,
   - hàng đã giữ cho đơn khác.
 - **Cách dùng:** gõ mã hoặc tên hàng (ví dụ `SUATUOI`), chọn kho hoặc để tất cả.
-- Số lượng hiện kèm cách quy ra thùng, ví dụ "156 hộp = 3 thùng 12 hộp".
+- Số lượng hiện kèm cách quy ra thùng, ví dụ "166 hộp = 3 thùng 22 hộp".
 - **Tình huống:** Cửa hàng Cầu Giấy gọi hỏi "Mai giao được 2 thùng sữa tươi không?". Nhân viên tra `SUATUOI-01` thấy K01 còn hơn 3 thùng khả dụng, trả lời được ngay. Trong kho thực tế có thêm 12 hộp đã hết hạn, nhưng phần đó không được tính.
 
 ### Đơn đặt hàng
@@ -281,8 +281,9 @@ Tài khoản quản lý kho còn lại: `ql.k02@kho.test` (K02).
 - **Cách dùng:** tích các dòng muốn đặt rồi bấm "Tạo đơn mua nháp từ dòng đã chọn". Hệ thống tạo mỗi nhà cung cấp một đơn nháp.
 - Hệ thống chỉ gợi ý; quản lý vẫn phải tự xác nhận đơn. Dòng không muốn đặt thì bấm Bỏ qua.
 - **Tình huống:**
-  - Màn hình đề xuất mua giấy A4 và sữa tươi. Giấy bán trung bình hơn 1 ram/ngày, chờ hàng 5 ngày, mà kho chỉ còn vài ram.
-  - Quản lý tích dòng giấy để tạo đơn nháp, sửa số lượng cho tròn rồi xác nhận gửi nhà cung cấp.
+  - Màn hình K01 đề xuất mua 36 ram giấy A4. Giấy bán trung bình hơn 1 ram/ngày, chờ hàng 5 ngày, tối thiểu 10 ram, mà kho chỉ còn 7 ram.
+  - Sữa tươi còn 166 hộp, đủ bán qua thời gian chờ hàng, nên nằm ở phần "Không đề xuất".
+  - Quản lý tích dòng giấy, chọn nhà cung cấp, sửa số cho tròn 40 ram rồi tạo đơn nháp. Mở đơn nháp, kiểm tra rồi xác nhận gửi nhà cung cấp.
 
 ### Nhập tồn đầu kỳ
 
