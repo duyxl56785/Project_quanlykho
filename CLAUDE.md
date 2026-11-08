@@ -145,4 +145,4 @@ Thứ tự làm: hóa đơn nhập (đơn mua → phiếu nhập → khu tiếp 
 - `main`: bản ổn định, nhánh mặc định. `develop`: tích hợp. Làm mỗi việc trên một nhánh `feature/...` tách từ `develop`, gộp lại vào `develop`.
 - Không push thẳng lên `main`, không force push.
 - Commit message tiếng Việt, ngắn, dạng "Mảng: việc đã làm" (ví dụ "Thiết lập: docs/ và .gitignore").
-- Repo: `github.com/duyxl56785/Project_quanlykho` (Private).
+- Repo: `github.com/duyxl56785/Project_quanlykho` (Public).
