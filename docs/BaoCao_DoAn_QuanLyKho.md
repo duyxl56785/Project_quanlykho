@@ -1,8 +1,91 @@
-BỘ GIÁO DỤC VÀ ĐÀO TẠOTRƯỜNG ĐẠI HỌC CMC[Logo Trường]ĐỒ ÁN CHUYÊN NGÀNHTên đề tài: Nhóm sinh viên:  Hà Nội, tháng    - 2025
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+
+TRƯỜNG ĐẠI HỌC CMC
+
+[Logo Trường]
+
+ĐỒ ÁN CHUYÊN NGÀNH
+
+Tên đề tài: Xây dựng ứng dụng web quản lý kho tổng (nhiều kho) tích hợp gợi ý bằng AI
+
+Nhóm sinh viên: Lê Đức Anh (BIT240021), Nguyễn Văn Duy (BIT240081), Phạm Thế Cường (BIT240049)
+
+Hà Nội, tháng 11 - 2026
 
 # MỤC LỤC
 
+- MỞ ĐẦU
+    - Lý do chọn đề tài
+    - Mục tiêu
+    - Đối tượng và phạm vi
+    - Phương pháp thực hiện
+    - Bố cục báo cáo
+- CHƯƠNG 1. GIỚI THIỆU BÀI TOÁN
+    - 1.1. Giới thiệu tổng quan
+    - 1.2. Bài toán đề xuất
+    - 1.3. Kế hoạch thực hiện
+- CHƯƠNG 2. GIẢI PHÁP THỰC HIỆN
+    - 2.1. Phân hệ Nhập kho
+    - 2.2. Phân hệ Xuất kho
+    - 2.3. Phân hệ Lắp ráp, tháo dỡ (hoãn)
+    - 2.4. Phân hệ Kiểm tra hàng hoá (kiểm kê)
+    - 2.5. Phân hệ Điều chuyển kho
+    - 2.6. Bàn làm việc
+    - 2.7. Tổng quan
+    - 2.8. Danh mục vật tư hàng hóa
+    - 2.9. Báo cáo
+    - 2.10. Danh mục kho
+    - 2.11. Quản lý người dùng
+    - 2.12. Sơ đồ kho và vị trí
+    - 2.13. Liên kết giữa các phân hệ
+    - 2.14. Khảo sát người dùng để xác nhận chức năng
+    - 2.15. Phân loại yêu cầu chức năng, phi chức năng và mức ưu tiên MoSCoW
+    - 2.16. Thiết kế hệ thống
+- CHƯƠNG 3. KẾT QUẢ THỰC NGHIỆM
+    - 3.1. Môi trường và công nghệ
+    - 3.2. Kết quả cài đặt các chức năng
+    - 3.3. Kiểm thử
+    - 3.4. Nghiệm thu theo tiêu chí ở Bảng 1.6
+    - 3.5. Thời gian tải trang
+    - 3.6. Quy mô mã nguồn
+- CHƯƠNG 4. KẾT LUẬN
+    - 4.1 Những kết quả đã thực hiện
+    - 4.2 Hướng phát triển tiếp theo
+- TÀI LIỆU THAM KHẢO
+- PHỤ LỤC
+
 # MỞ ĐẦU
+
+## Lý do chọn đề tài
+
+Nhiều doanh nghiệp vừa và nhỏ ở Việt Nam có từ hai kho trở lên nhưng vẫn quản lý tồn bằng sổ tay, file Excel riêng của từng kho và tin nhắn giữa thủ kho, quản lý kho và nhân viên bán hàng. Cách làm này dẫn tới ba lỗi lặp lại: số tồn trên sổ lệch với hàng thật trên kệ, hai đơn cùng hứa một số hàng, và hàng sắp hết hạn bị bỏ quên ở góc kho. Các nghiên cứu về độ chính xác của số liệu tồn kho (DeHoratius và Raman, 2008) cho thấy sai lệch tồn là phổ biến và làm mất doanh thu ngay cả ở các chuỗi bán lẻ lớn. Phần mềm kho thương mại thường đắt, nặng và gắn với bán hàng, kế toán, trong khi doanh nghiệp chỉ cần một công cụ gọn để nhập, xuất, kiểm kê và chuyển hàng giữa các kho.
+
+Từ đó nhóm chọn đề tài xây dựng ứng dụng web quản lý kho tổng, quản lý tập trung nhiều kho của cùng một doanh nghiệp, có hai gợi ý bằng AI hỗ trợ người dùng ở hai điểm hay sai nhất: lấy lô nào, ở kệ nào khi xuất (G1) và khi nào cần nhập bổ sung, nhập bao nhiêu (G3).
+
+## Mục tiêu
+
+- Một hệ thống ghi tồn đúng: tồn theo kho, lô và vị trí; mọi thay đổi tồn đi qua một cổng duy nhất, trong một transaction, không tồn âm, bấm lặp không ghi hai lần.
+- Đủ các nghiệp vụ kho chính: hóa đơn nhập từ đơn mua, xếp hàng vào vị trí có kiểm tra sức chứa, đơn đặt hàng và giữ hàng, lệnh xuất có quét mã và kiểm tra chéo, chuyển kho hai bước, kiểm kê theo vị trí.
+- Phân quyền theo vai (quản trị viên, quản lý kho, thủ kho, nhân viên bán hàng) và theo kho được giao, kiểm tra ở máy chủ.
+- Hai gợi ý AI chỉ gợi ý, không tự ghi tồn: G1 gợi ý lấy hàng theo hạn dùng và số kệ phải ghé; G3 đề xuất nhập bổ sung theo tồn khả dụng và nhu cầu của từng kho.
+- Giao diện tiếng Việt, dùng được trên máy tính bảng và điện thoại, trang tải dưới 3 giây.
+
+## Đối tượng và phạm vi
+
+Đối tượng là hoạt động kho của một doanh nghiệp có nhiều kho, với bốn vai người dùng nêu trên. Phạm vi gồm nhập kho, xuất kho, kiểm kê, chuyển kho, danh mục hàng hóa có biến thể và đơn vị quy đổi một tầng, vị trí 7 cấp, cảnh báo, báo cáo tồn, nhật ký thao tác và nhập Excel. Không làm bán hàng, thanh toán, kế toán, website; các phần đã phân tích nhưng hoãn được ghi ở mục 1.2.5, mục 4.2 và Phụ lục A. Dữ liệu thử gồm 2 kho, 50 biến thể hàng và 3 tháng lịch sử xuất.
+
+## Phương pháp thực hiện
+
+Nhóm khảo sát người dùng theo từng vai (mục 2.14), phân loại yêu cầu theo MoSCoW (mục 2.15), rồi làm theo Scrum trong 7 sprint, 8 tuần (mục 1.3). Hệ thống dùng ASP.NET Core MVC trên .NET 10, Entity Framework Core và PostgreSQL. Mỗi quy tắc nghiệp vụ ở Bảng 1.5 có test tự động; test tích hợp chạy trên PostgreSQL thật và chạy lại trên GitHub Actions mỗi lần đẩy mã.
+
+## Bố cục báo cáo
+
+Ngoài phần mở đầu, kết luận, tài liệu tham khảo và phụ lục, báo cáo gồm bốn chương:
+
+- Chương 1. Giới thiệu bài toán: hiện trạng, các vai người dùng, bài toán đề xuất, hai gợi ý AI, phạm vi, tiêu chí đánh giá và kế hoạch thực hiện.
+- Chương 2. Giải pháp thực hiện: chức năng từng phân hệ, khảo sát người dùng, phân loại yêu cầu và thiết kế hệ thống (kiến trúc, cơ sở dữ liệu, API, giao diện).
+- Chương 3. Kết quả thực nghiệm: môi trường, các màn hình đã cài đặt, kiểm thử, nghiệm thu theo Bảng 1.6 và đo thời gian tải.
+- Chương 4. Kết luận: kết quả đạt được và hướng phát triển.
 
 # CHƯƠNG 1. GIỚI THIỆU BÀI TOÁN
 
@@ -910,13 +993,228 @@ Bảng 2.35. Màn hình và API cho hai phần làm đầu tiên
 
 # CHƯƠNG 3. KẾT QUẢ THỰC NGHIỆM
 
+Chương này trình bày môi trường cài đặt, các màn hình chính của hệ thống đã làm theo thiết kế ở Chương 2, kết quả kiểm thử tự động, kết quả nghiệm thu theo tiêu chí ở Bảng 1.6 và kết quả đo thời gian tải trang. Mọi hình trong chương được chụp từ bản chạy thật trên dữ liệu thử đã nạp bằng lệnh `dotnet run --project quanlykho -- --seed`.
+
+## 3.1. Môi trường và công nghệ
+
+Bảng 3.1. Công nghệ sử dụng
+
+| Thành phần | Công nghệ, phiên bản | Vai trò |
+| --- | --- | --- |
+| Nền tảng | ASP.NET Core MVC trên .NET 10 | Controller trang, controller API REST, Razor view, đăng nhập bằng cookie |
+| Truy cập dữ liệu | Entity Framework Core 10, Npgsql 10 | Ánh xạ bảng bằng Fluent API, migration, transaction và khóa dòng khi ghi tồn |
+| Cơ sở dữ liệu | PostgreSQL 17 chạy bằng Docker Compose | Lưu dữ liệu; ràng buộc CHECK chống tồn âm; trigger chặn sửa, xóa nhật ký và sổ biến động; sequence sinh mã chứng từ |
+| Giao diện | Bootstrap 5.3, JavaScript thuần | Một tệp CSS dùng chung, một _Layout, partial view và View Component dùng lại |
+| Quét mã | Ô quét mã nhận máy quét cầm tay; ZXing đọc mã vạch, mã QR qua camera | Quét ô, lô, mã hàng, mã thùng khi nhập, xếp, lấy, kiểm kê |
+| Excel | ClosedXML 0.104 | Đọc tệp mẫu danh mục và tồn đầu kỳ, báo lỗi từng dòng |
+| Kiểm thử | xUnit 2.9, Microsoft.AspNetCore.Mvc.Testing, Testcontainers.PostgreSql 4.16, FakeTimeProvider | Test đơn vị, test tích hợp trên PostgreSQL thật, test màn hình và API |
+| Tích hợp liên tục | GitHub Actions | Build và chạy toàn bộ test khi đẩy nhánh develop, main và khi có pull request |
+| Quản lý mã nguồn | Git, GitHub (nhánh main, develop, feature) | Mỗi việc một nhánh feature, gộp vào develop, bản ổn định ở main |
+
+Môi trường chạy thử: máy Windows 11, Docker Desktop, .NET SDK 10. Dữ liệu thử gồm 2 kho K01 (Hà Nội) và K02, mỗi kho 19 ô (có khu tiếp nhận, khu lưu trữ, khu cách ly, khu xuất), 4 nhóm hàng, 50 biến thể, 3 nhà cung cấp, 2 nơi nhận, 7 tài khoản đủ bốn vai. Lệnh `--seed` nạp thêm 3 tháng lịch sử xuất bán (182 phiếu xuất) để G3 có số liệu nhu cầu, và dữ liệu demo: hàng đóng theo thùng, lô sắp hết hạn và đã hết hạn, hàng ở khu cách ly, đơn mua, đơn đặt hàng chờ duyệt, phiếu chuyển kho chờ nhận.
+
+## 3.2. Kết quả cài đặt các chức năng
+
+### 3.2.1. Đăng nhập và tổng quan
+
+Người dùng đăng nhập bằng email và mật khẩu (Hình 3.1). Menu bên trái chỉ hiện các mục đúng với vai của người dùng; mọi trang và API đều kiểm tra lại quyền theo vai và theo kho ở máy chủ. Tài khoản bị khóa hoặc bị đổi vai, đổi kho mất phiên ngay ở lần gửi yêu cầu kế tiếp.
+
+![hinh-3-01.png](images/hinh-3-01.png)
+
+Hình 3.1. Màn hình đăng nhập
+
+Trang Tổng quan (Hình 3.2) là trang đầu tiên sau khi đăng nhập, gồm bốn thẻ cảnh báo: tồn dưới mức tối thiểu, tồn vượt mức tối đa, hàng sắp hết hạn (số ngày chọn được) và hàng quá hạn, tính riêng cho các kho người dùng được giao (FR13).
+
+![hinh-3-02.png](images/hinh-3-02.png)
+
+Hình 3.2. Trang Tổng quan của quản lý kho K01 với các thẻ cảnh báo
+
+### 3.2.2. Nhập kho
+
+Quản lý kho lập đơn mua (lệnh nhập) theo nhà cung cấp. Thủ kho lập hóa đơn nhập từ đơn mua, ghi số thực nhận, số lô, hạn dùng (bắt buộc với hàng có theo dõi hạn dùng) và kết quả kiểm tra chất lượng; có thể nhập theo thùng hoặc quét mã thùng, hệ thống tự quy về đơn vị chính. Khi quản lý kho xác nhận, hóa đơn chuyển sang Hoàn tất và cổng ghi tồn ghi hàng vào ô khu tiếp nhận (hàng đạt) hoặc khu cách ly (hàng không đạt). Đơn giá, thành tiền và tổng tiền chỉ hiện cho quản lý kho và quản trị viên; API không trả các trường này cho thủ kho (FR01, FR28).
+
+![hinh-3-03.png](images/hinh-3-03.png)
+
+Hình 3.3. Chi tiết hóa đơn nhập đã hoàn tất
+
+### 3.2.3. Vị trí và xếp hàng
+
+Màn hình Xếp hàng (Hình 3.4) liệt kê các lô đang ở khu tiếp nhận. Thủ kho quét mã lô rồi quét mã ô, hoặc chọn từ danh sách ô phù hợp. Trước khi ghi, hệ thống kiểm tra theo Bảng 2.33: hàng vừa kích thước trong của ô (có xoay), số kiện xếp được theo lưới 6 cách xoay khi ô chỉ chứa một biến thể, thể tích nhân hệ số lấp đầy 0,85 khi ô chứa nhiều biến thể, và tải trọng tối đa của ô. Khi bị chặn, hệ thống báo lý do và số lượng tối đa còn xếp được (FR12). Màn hình chạy được trên máy tính bảng; nút Camera dùng camera của thiết bị để đọc mã khi không có máy quét.
+
+![hinh-3-04.png](images/hinh-3-04.png)
+
+Hình 3.4. Màn hình Xếp hàng trên máy tính bảng (thủ kho)
+
+Vị trí được khai báo dạng cây 7 cấp: kho, tòa, tầng, phòng – dãy, hàng, kệ, ô (Hình 3.5). Loại khu (tiếp nhận, lưu trữ, cách ly, xuất) và điều kiện bảo quản khai ở cấp phòng – dãy; mỗi ô có kích thước trong và tải trọng tối đa. Khi tạo kho mới, hệ thống tự tạo sẵn bốn khu mặc định để kho dùng được ngay (FR11).
+
+![hinh-3-05.png](images/hinh-3-05.png)
+
+Hình 3.5. Cây vị trí 7 cấp của kho K01
+
+### 3.2.4. Tồn khả dụng, đơn đặt hàng và giữ hàng
+
+Nhân viên bán hàng tra tồn khả dụng của từng kho trên điện thoại (Hình 3.6). Tồn khả dụng đã loại trừ hàng ở khu tiếp nhận, khu cách ly, lô hết hạn, hàng đang vận chuyển và hàng đã giữ cho đơn khác; số lượng hiện kèm cách quy ra đơn vị lớn nhất, ví dụ 118 hộp = 2 thùng 22 hộp (FR05, FR28).
+
+![hinh-3-06.png](images/hinh-3-06.png)
+
+Hình 3.6. Tra tồn khả dụng trên điện thoại (nhân viên bán hàng)
+
+Nhân viên bán hàng tạo đơn đặt hàng và gửi duyệt. Khi quản lý kho duyệt, hệ thống giữ hàng theo lô và ô do gợi ý G1 chọn, trong cùng transaction có khóa dòng tồn, nên hai đơn duyệt cùng lúc không giữ trùng một số hàng (FR02, FR06). Hình 3.7 là đơn DD000003 đặt 5 áo thun và 1 thùng sữa (48 hộp): phần Hàng đã giữ cho thấy sữa được giữ ở lô L000010 hạn dùng 01/12/2026, lô sữa còn hạn gần nhất trong kho.
+
+![hinh-3-07.png](images/hinh-3-07.png)
+
+Hình 3.7. Đơn đặt hàng đã duyệt và hàng đã giữ theo gợi ý G1
+
+### 3.2.5. Lệnh xuất và gợi ý lấy hàng G1
+
+Quản lý kho lập lệnh xuất từ đơn đã duyệt và giao cho một thủ kho của kho đó. Thủ kho thấy danh sách gợi ý lấy theo thứ tự ghé ô (Hình 3.8), quét mã ô rồi quét mã lô; hệ thống chặn khi quét sai hàng, lô hết hạn, ô không có hàng hoặc lấy vượt số yêu cầu (FR03). Sau khi lấy đủ, một quản lý kho khác người lấy kiểm tra hàng đã lấy, rồi xác nhận xuất; lúc đó phiếu xuất được lập ở trạng thái Hoàn tất và cổng ghi tồn trừ tồn (FR04).
+
+![hinh-3-08.png](images/hinh-3-08.png)
+
+Hình 3.8. Lệnh xuất với gợi ý lấy hàng theo thứ tự ghé (thủ kho, máy tính bảng)
+
+G1 chỉ chọn lô đạt chất lượng, chưa hết hạn, nằm ở khu lưu trữ và không bị khóa kiểm kê; tổng lấy đúng bằng số cần và không vượt tồn khả dụng của từng (lô, ô). Thứ tự ưu tiên là hết hạn trước xuất trước (FEFO) với hàng có hạn dùng, nhập trước xuất trước (FIFO) với hàng không có hạn dùng, rồi ít kệ phải ghé; các ô được sắp theo mã vị trí để đi một lượt. Mỗi lần gợi ý được lưu lại cùng kết quả người dùng có làm theo hay không, để thống kê tỷ lệ chấp nhận ở báo cáo `/BaoCao/GoiY`.
+
+### 3.2.6. Đề xuất nhập bổ sung G3
+
+Màn hình Đề xuất nhập bổ sung (Hình 3.9) tính riêng cho từng kho. Với mỗi biến thể có ít nhất 14 ngày lịch sử xuất và nhu cầu d > 0, hệ thống đề xuất nhập khi A ≤ d × L + m, với số lượng ceil(d × (L + 30) − A − số đang chờ nhập). Trên dữ liệu thử, giấy A4 ở K01 có tồn khả dụng A = 7 ram, nhu cầu d = 109 / 90 ≈ 1,21 ram mỗi ngày, thời gian chờ hàng L = 5 ngày, tồn tối thiểu m = 10 ram. Điểm đặt hàng là 1,21 × 5 + 10 ≈ 16,1 ram, lớn hơn A nên hệ thống đề xuất nhập ceil(1,21 × 35 − 7 − 0) = 36 ram. Quản lý kho chọn nhà cung cấp để tạo đơn mua nháp, hoặc bỏ qua kèm lý do; G3 không tự tạo hay tự duyệt đơn (FR21).
+
+![hinh-3-09.png](images/hinh-3-09.png)
+
+Hình 3.9. Đề xuất nhập bổ sung (G3) của kho K01
+
+### 3.2.7. Chuyển kho, chuyển vị trí và kiểm kê
+
+Chuyển kho làm theo hai bước (Hình 3.10). Kho đi lưu phiếu thì cổng ghi tồn trừ hàng ở ô của kho đi và ghi vào hàng đang vận chuyển, phiếu ở trạng thái Chờ nhập kho. Kho đến quét nhận từng dòng; hàng nhận được vào khu tiếp nhận của kho đến rồi xếp như hàng nhập. Nhận thiếu thì phiếu ở trạng thái Nhận một phần và phần chênh lệch phải được quản lý kho phân loại, duyệt. Tổng tồn toàn hệ thống cộng hàng đang vận chuyển không đổi trước và sau khi chuyển (FR07).
+
+![hinh-3-10.png](images/hinh-3-10.png)
+
+Hình 3.10. Phiếu chuyển kho chờ nhập ở kho đến (thủ kho K02)
+
+Chuyển vị trí trong cùng kho dùng lại màn hình quét của xếp hàng và cùng kiểm tra sức chứa (FR16). Kiểm kê theo vị trí: khi phiếu kiểm kê bắt đầu, các ô được kiểm bị khóa, không nhập, xuất, chuyển hay xếp vào được. Thủ kho đếm và ghi số thực tế; mỗi chênh lệch phải được phân loại (thiếu, thừa, hư hỏng, hết hạn, sai vị trí, sai biến thể), có lý do và người duyệt, rồi hệ thống sinh chứng từ điều chỉnh qua cổng ghi tồn, không sửa thẳng số tồn (FR08).
+
+### 3.2.8. Báo cáo, nhật ký, danh mục và nhập Excel
+
+Báo cáo tồn tổng hợp (Hình 3.11) cho từng kho tách rõ tồn khả dụng, hàng ở khu tiếp nhận, khu cách ly và hàng đang vận chuyển; còn có báo cáo theo lô, theo vị trí, nhập – xuất – tồn theo kỳ, thẻ kho từng biến thể và thống kê tỷ lệ chấp nhận gợi ý AI (FR14).
+
+![hinh-3-11.png](images/hinh-3-11.png)
+
+Hình 3.11. Báo cáo tồn kho tổng hợp
+
+Nhật ký thao tác (Hình 3.12) ghi các thao tác duyệt, hủy, hoàn thành, điều chỉnh tồn, phân quyền và khóa tài khoản, cùng transaction với thao tác đó. Trigger trong CSDL chặn UPDATE, DELETE và TRUNCATE trên bảng nhật ký và sổ biến động; quản trị viên tra cứu theo người, kho, loại thao tác và thời gian (FR18).
+
+![hinh-3-12.png](images/hinh-3-12.png)
+
+Hình 3.12. Tra cứu nhật ký thao tác (quản trị viên)
+
+Quản trị viên thêm nhóm hàng, thuộc tính và giá trị thuộc tính trên giao diện; biến thể sinh từ tổ hợp thuộc tính, mỗi biến thể có kích thước, khối lượng, cờ hạn dùng, điều kiện bảo quản và đơn vị quy đổi một tầng (FR10). Danh mục, nhà cung cấp và tồn đầu kỳ nhập được từ tệp Excel theo mẫu; hệ thống kiểm tra toàn bộ tệp và báo lỗi theo từng dòng trước khi ghi, nhập lại cùng tệp bị chặn (FR17).
+
+### 3.2.9. Mức hoàn thành yêu cầu
+
+Bảng 3.2. Mức hoàn thành các yêu cầu ở mục 2.15
+
+| Nhóm yêu cầu | Đã làm | Chưa làm |
+| --- | --- | --- |
+| Must (FR01 đến FR12, NFR01 đến NFR06) | Tất cả | — |
+| Should (FR13, FR14, FR16, FR17, FR18, FR20, FR21, FR28, NFR07) | Tất cả | — |
+| Could (FR19, NFR08, NFR09) | — | Bàn làm việc (FR19), xuất Excel báo cáo tồn (NFR08), sao lưu hằng ngày (NFR09) |
+| Won’t | Quét mã bằng camera điện thoại (FR26), làm thêm vì chỉ cần thư viện đọc mã phía trình duyệt | Các mục còn lại, xem mục 4.2 |
+
+## 3.3. Kiểm thử
+
+Mỗi quy tắc ở Bảng 1.5 và mỗi tiêu chí ở Bảng 1.6 có ít nhất một test tự động. Bộ test gồm 239 test xUnit, chia ba loại:
+
+- Test đơn vị cho phần tính toán thuần: kiểm tra sức chứa ô (vừa kích thước có xoay, xếp lưới, hệ số lấp đầy, tải trọng), gợi ý G1, công thức G3, quy đổi đơn vị.
+- Test tích hợp chạy trên PostgreSQL thật: mỗi lớp test tạo một database riêng đã migrate trên container của Testcontainers, nên ràng buộc CHECK, trigger, khóa dòng và transaction được kiểm tra đúng như khi chạy thật. Có các ca ghi đồng thời: hai người cùng trừ tồn vượt tổng, hai lần duyệt cùng lúc, bấm lặp cùng khóa chống ghi lặp.
+- Test màn hình và API dựng toàn bộ ứng dụng trong bộ nhớ, đăng nhập theo từng vai, kiểm tra mã HTTP 401, 403, 409, 422 và việc API không trả đơn giá cho thủ kho.
+
+Toàn bộ 239 test đạt, chạy hết khoảng 6 phút trên máy phát triển. GitHub Actions chạy lại build và toàn bộ test mỗi lần đẩy nhánh develop, main và mỗi pull request; nhánh main chỉ nhận mã đã qua CI.
+
+## 3.4. Nghiệm thu theo tiêu chí ở Bảng 1.6
+
+Bảng 3.3 tóm tắt kết quả nghiệm thu; bằng chứng chi tiết (tên từng test, kịch bản thử tay) ghi ở tệp docs/NGHIEM_THU.md trong kho mã nguồn.
+
+Bảng 3.3. Kết quả nghiệm thu theo vai trò
+
+| Vai trò | Tiêu chí | Kết quả | Bằng chứng chính |
+| --- | --- | --- | --- |
+| Thủ kho | Chạy trọn nhập hàng, lấy hàng, nhận hàng chuyển đến bằng ô quét mã trên máy tính bảng | Đạt | Thử tay trên khung 768 × 1024; test luồng phiếu nhập, xếp hàng, lệnh xuất, điều chuyển |
+| Thủ kho | G1 không vi phạm ràng buộc, không gợi ý lô hết hạn, ưu tiên hết hạn trước | Đạt | Nhóm test GoiYLayHangTests, GiuHangTests |
+| Thủ kho | Quét sai bị chặn | Đạt | Test lệnh xuất: sai hàng, lô hết hạn, vượt số, ô không có hàng |
+| Quản lý kho | Tổng biến động trên thẻ kho bằng tồn từng kho | Đạt | Test cổng ghi tồn, báo cáo; đối chiếu trên CSDL dev |
+| Quản lý kho | Chuyển kho không mất, không nhân đôi hàng | Đạt | Test điều chuyển: nhận đủ, nhận thiếu, hủy khi chưa nhận |
+| Quản lý kho | Hai phiếu không giữ trùng hàng | Đạt | Test duyệt song song và giữ hàng song song |
+| Quản lý kho | Mọi chênh lệch có người duyệt | Đạt | Test điều chỉnh tồn: 6 loại chênh lệch kiểm kê, 3 cách xử lý chênh lệch chuyển kho |
+| Quản lý kho | Nhập 10 thùng (1 thùng = 24 chai), xuất 5 chai còn 235 chai | Đạt | Test quy đổi ở phiếu nhập, xuất, kiểm kê; hiển thị 9 thùng 19 chai |
+| Quản lý kho | G3 không bỏ sót mặt hàng dưới điểm đặt hàng | Đạt | Test so với tính tay, kể cả ca đúng bằng điểm đặt hàng |
+| Nhân viên bán hàng | Tồn khả dụng từng kho khớp số xuất được | Đạt | Test loại trừ khu tiếp nhận, cách ly, hết hạn, đã giữ, khóa kiểm kê |
+| Nhân viên bán hàng | Luôn xem được trạng thái đơn | Đạt | Test đơn đặt; thử tay trên khung điện thoại 375 × 812 |
+| Quản trị viên | Thêm ngành hàng mới không sửa mã rồi nhập, xuất được | Đạt | Kịch bản ngành Đồ gia dụng: thêm thuộc tính, sinh 2 biến thể, nhập 10, xếp, xuất 4, còn 6 |
+| Quản trị viên | Phân quyền theo vai và kho đúng | Đạt | Ma trận vai, chặn kho không được giao, khóa tài khoản mất quyền ngay, luôn còn một quản trị viên |
+| Quản trị viên | Nhật ký đủ | Đạt | CSDL chặn sửa, xóa nhật ký; mỗi thao tác quan trọng ghi đủ dòng |
+| Quản trị viên | Nhập Excel khoảng 300 dòng báo lỗi đúng dòng, nhập lại không nhân đôi | Đạt | Tệp mẫu 300 dòng có 5 dòng lỗi: báo đúng dòng, không ghi gì; sửa xong ghi đủ, nhập lại bị chặn |
+| Chung | Không có tồn âm | Đạt | Ràng buộc CHECK trong CSDL; khóa dòng khi ghi; test trừ tồn đồng thời |
+| Chung | Trang tải dưới 3 giây | Đạt | Mục 3.5 |
+| Chung | Thống kê được tỷ lệ gợi ý AI được chấp nhận | Đạt | Báo cáo /BaoCao/GoiY theo G1, G3, kho và kỳ |
+
+## 3.5. Thời gian tải trang
+
+Đo trên bản Release, PostgreSQL 17 chạy trong Docker cùng máy, CSDL đã nạp đủ dữ liệu thử (182 phiếu xuất, 450 dòng sổ biến động). Mỗi trang được đo từ lúc gửi yêu cầu tới khi trình duyệt tải xong HTML, CSS và JavaScript, hai lần liên tiếp. Bảng 3.4 là một số trang tiêu biểu; toàn bộ 27 trang đã đo đều dưới 0,2 giây, đạt yêu cầu dưới 3 giây (NFR04).
+
+Bảng 3.4. Thời gian tải một số trang (mili giây)
+
+| Trang | Lần đầu | Lần sau |
+| --- | ---: | ---: |
+| Tổng quan | 43 | 46 |
+| Danh sách đơn mua | 198 | 49 |
+| Xếp hàng | 89 | 51 |
+| Đề xuất nhập bổ sung (G3) | 138 | 48 |
+| Tồn khả dụng | 76 | 50 |
+| Báo cáo tồn tổng hợp | 122 | 51 |
+| Thẻ kho (91 dòng) | 88 | 67 |
+| Kho và vị trí | 124 | 43 |
+| Nhật ký | 77 | 48 |
+
+Giới hạn: dữ liệu thử nhỏ và đo trên máy phát triển. Báo cáo nhập – xuất – tồn và G3 gom số liệu sau vài truy vấn nên thời gian tăng theo số dòng sổ biến động trong kỳ; khi dữ liệu thật lớn cần đo lại hai trang này trước. Trên máy tính bảng qua Wi-Fi cần cộng thêm độ trễ mạng.
+
+## 3.6. Quy mô mã nguồn
+
+Bảng 3.5. Một số số liệu của mã nguồn
+
+| Chỉ số | Giá trị |
+| --- | --- |
+| Mã C# của ứng dụng (không tính migration) | khoảng 10.500 dòng |
+| Razor view (.cshtml) | 95 tệp |
+| Mã test | khoảng 5.800 dòng, 239 test |
+| Migration EF Core | 27 tệp |
+| Số commit | 146 |
+
+Mã nguồn công khai tại github.com/duyxl56785/Project_quanlykho. Tệp README và docs/HUONG_DAN_DEMO.md hướng dẫn chạy hệ thống và kịch bản trình diễn theo từng vai.
+
 # CHƯƠNG 4. KẾT LUẬN
 
 ## 4.1 Những kết quả đã thực hiện
 
+Đồ án đã xây dựng xong ứng dụng web quản lý kho tổng cho nhiều kho của một doanh nghiệp, làm đủ mọi yêu cầu Must và Should ở mục 2.15 trong 8 tuần, và đạt toàn bộ tiêu chí nghiệm thu ở Bảng 1.6 (mục 3.4). Cụ thể:
+
+- Nghiệp vụ kho: đơn mua, hóa đơn nhập qua khu tiếp nhận, xếp hàng vào ô có kiểm tra kích thước, thể tích và tải trọng; đơn đặt hàng có giữ hàng; lệnh xuất có quét mã ô, mã lô và kiểm tra chéo bởi người khác người lấy; chuyển kho hai bước theo dõi hàng đang vận chuyển; chuyển vị trí trong kho; kiểm kê theo vị trí có khóa ô và duyệt từng chênh lệch.
+- Tính đúng của số tồn: một cổng ghi tồn duy nhất cập nhật tồn và sổ biến động trong cùng transaction, khóa dòng khi ghi, khóa chống ghi lặp cho mỗi lần ghi, ràng buộc CSDL chống tồn âm, chứng từ đã hoàn tất chỉ hủy bằng bút toán đảo. Tổng biến động trên thẻ kho luôn bằng tồn của từng kho.
+- Phân quyền theo bốn vai và theo kho được giao, kiểm tra ở máy chủ; tài khoản bị khóa mất quyền ngay; nhật ký thao tác chỉ thêm, được CSDL bảo vệ.
+- Danh mục cấu hình trên giao diện: nhóm hàng, thuộc tính, biến thể sinh từ tổ hợp thuộc tính, hạn dùng, điều kiện bảo quản, đơn vị quy đổi một tầng (nhập theo thùng, xuất theo hộp, hiển thị 235 chai = 9 thùng 19 chai); kho mới và vị trí 7 cấp thêm được mà không sửa mã nguồn.
+- Hai gợi ý AI: G1 gợi ý lấy hàng theo hết hạn trước, nhập trước, ít kệ phải ghé; G3 đề xuất nhập bổ sung theo tồn khả dụng, nhu cầu và thời gian chờ hàng của từng kho. Cả hai chỉ gợi ý, người dùng vẫn thao tác tay được, và có thống kê tỷ lệ chấp nhận.
+- Cảnh báo, báo cáo tồn tổng hợp và chi tiết (theo lô, vị trí, nhập – xuất – tồn, thẻ kho), nhập Excel danh mục và tồn đầu kỳ có báo lỗi từng dòng.
+- Giao diện tiếng Việt dùng được trên máy tính bảng và điện thoại; quét mã bằng máy quét hoặc camera của thiết bị; mọi trang tải dưới 0,2 giây trên dữ liệu thử.
+- Chất lượng mã: 239 test tự động (có test tích hợp trên PostgreSQL thật và các ca ghi đồng thời), CI trên GitHub Actions, quy trình nhánh main, develop, feature.
+
+Hạn chế: chưa làm bàn làm việc liệt kê việc cần làm (FR19), xuất Excel báo cáo tồn (NFR08) và sao lưu hằng ngày (NFR09), đều ở mức Could. Dữ liệu thử còn nhỏ (2 kho, 50 biến thể), chưa đo hiệu năng ở quy mô khoảng 1.500 mã hàng như Bảng 2.25 và chưa thử với người dùng thật tại kho. G1 chưa tính khoảng cách thật tới cửa xuất vì chưa có sơ đồ mặt bằng kho.
+
 ## 4.2 Hướng phát triển tiếp theo
 
-Đồ án được thu hẹp cho vừa sức nhóm 3 người trong 8 tuần. Các phần dưới đây đã được phân tích nhưng hoãn sang giai đoạn sau; đặc tả được giữ ở các mục đã chỉ ra và ở Phụ lục A: (1) gợi ý xếp hàng vào vị trí (G2, FR24, UC31) và báo cáo phân loại hàng tồn kho theo tần suất xuất đi kèm; (2) gợi ý luân chuyển hàng giữa các kho với chi phí thấp nhất (G4, FR25, UC32) cùng khai báo chi phí vận chuyển giữa các kho; (3) sơ đồ mặt bằng kho và hộp “Chọn trong sơ đồ kho” (FR22, mục 2.12 dòng 2, 4, 6), từ đó G1 mới tính được khoảng cách tới cửa xuất; (4) nhập hàng trả lại do nhân viên bán hàng đề nghị (FR15, UC05); (5) xuất Excel cho các danh sách và báo cáo (NFR08; phần nhập Excel đã làm ở FR17); (6) lắp ráp, tháo dỡ và đóng combo (mục 2.3, FR23, UC20); (7) mở rộng dữ liệu thử từ 2 lên 3 kho để kiểm chứng G4. Quét mã bằng camera điện thoại, kết nối phần mềm kế toán và CRM, theo dõi số serial (FR26, FR27), đơn vị quy đổi nhiều tầng hoặc hệ số thay đổi theo lô vẫn ở mức Won’t như ban đầu.
+Các phần Could chưa làm kịp sẽ làm trước: bàn làm việc liệt kê việc cần làm theo trạng thái cho thủ kho và quản lý kho (FR19, mục 2.6), xuất Excel cho báo cáo tồn và các danh sách (NFR08), sao lưu CSDL hằng ngày và khôi phục bản gần nhất (NFR09).
+
+Đồ án được thu hẹp cho vừa sức nhóm 3 người trong 8 tuần. Các phần dưới đây đã được phân tích nhưng hoãn sang giai đoạn sau; đặc tả được giữ ở các mục đã chỉ ra và ở Phụ lục A: (1) gợi ý xếp hàng vào vị trí (G2, FR24, UC31) và báo cáo phân loại hàng tồn kho theo tần suất xuất đi kèm; (2) gợi ý luân chuyển hàng giữa các kho với chi phí thấp nhất (G4, FR25, UC32) cùng khai báo chi phí vận chuyển giữa các kho; (3) sơ đồ mặt bằng kho và hộp “Chọn trong sơ đồ kho” (FR22, mục 2.12 dòng 2, 4, 6), từ đó G1 mới tính được khoảng cách tới cửa xuất; (4) nhập hàng trả lại do nhân viên bán hàng đề nghị (FR15, UC05); (5) lắp ráp, tháo dỡ và đóng combo (mục 2.3, FR23, UC20); (6) mở rộng dữ liệu thử từ 2 lên 3 kho để kiểm chứng G4. Kết nối phần mềm kế toán và CRM, theo dõi số serial (FR27), đơn vị quy đổi nhiều tầng hoặc hệ số thay đổi theo lô vẫn ở mức Won’t như ban đầu. Riêng quét mã bằng camera điện thoại (FR26), ban đầu xếp Won’t, đã làm được trong đồ án (mục 3.2.3).
+
+Để dùng được cho nhiều doanh nghiệp có kho khác nhau, hệ thống có thể mở rộng thêm: cho cấu hình số cấp vị trí và tên từng cấp theo từng kho thay vì cố định 7 cấp; cho khai báo thêm điều kiện bảo quản ngoài thường và lạnh (đông lạnh, hàng dễ cháy) trên giao diện thay vì cố định trong mã; tách dữ liệu theo từng doanh nghiệp để chạy một bản phục vụ nhiều khách hàng; in tem mã vạch cho lô và ô ngay trên hệ thống; và thử nghiệm với người dùng thật ở kho trên dữ liệu khoảng 1.500 mã hàng để đo lại hiệu năng và tỷ lệ chấp nhận gợi ý AI.
 
 # TÀI LIỆU THAM KHẢO
 
